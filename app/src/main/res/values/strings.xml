@@ -106,6 +106,10 @@
     <string name="radio_publish_sftp">Publish via SFTP</string>
     <string name="radio_publish_none">Don\'t publish (local only)</string>
     <string name="label_rest_upload_url">REST upload URL (WordPress)</string>
+    <!-- A URL example, not translated; same across every language (also matches the README's
+         own wording, verbatim). Not the site's own homepage or the logbook page: that redirects
+         to a login page instead of uploading, see the README. -->
+    <string name="hint_rest_upload_url">https://your-site.example/wp-json/nmea2log/v1/logbook</string>
     <string name="label_rest_upload_user">WordPress username</string>
     <string name="label_rest_upload_password">WordPress application password</string>
     <string name="label_sftp_host">SFTP host</string>

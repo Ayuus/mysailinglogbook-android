@@ -46,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
             initialValue: String,
             isPassword: Boolean = false,
             container: LinearLayout = layout,
+            hint: String? = null,
         ): EditText {
             container.addView(
                 TextView(this).apply {
@@ -58,6 +59,7 @@ class SettingsActivity : AppCompatActivity() {
                 if (isPassword) {
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
                 }
+                if (hint != null) this.hint = hint
             }
             container.addView(editText)
             return editText
@@ -169,7 +171,12 @@ class SettingsActivity : AppCompatActivity() {
         // Needs no SSH key/password on this device at all, just a WordPress Application Password
         // (Users > Profile > Application Passwords on the account's own profile page, not the
         // account's real login password) for an account in the logboek_editor role.
-        val restUploadUrlField = field(getString(R.string.label_rest_upload_url), store.restUploadUrl, container = wordpressFields)
+        val restUploadUrlField = field(
+            getString(R.string.label_rest_upload_url),
+            store.restUploadUrl,
+            container = wordpressFields,
+            hint = getString(R.string.hint_rest_upload_url),
+        )
         val restUploadUserField = field(getString(R.string.label_rest_upload_user), store.restUploadUser, container = wordpressFields)
         val restUploadPasswordField = field(
             getString(R.string.label_rest_upload_password), store.restUploadPassword, isPassword = true, container = wordpressFields,

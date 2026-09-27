@@ -98,6 +98,7 @@
     <string name="radio_publish_sftp">Publier via SFTP</string>
     <string name="radio_publish_none">Ne pas publier (local uniquement)</string>
     <string name="label_rest_upload_url">URL d\'envoi REST (WordPress)</string>
+    <string name="hint_rest_upload_url">https://your-site.example/wp-json/nmea2log/v1/logbook</string>
     <string name="label_rest_upload_user">Nom d\'utilisateur WordPress</string>
     <string name="label_rest_upload_password">Mot de passe d\'application WordPress</string>
     <string name="label_sftp_host">Hôte SFTP</string>
