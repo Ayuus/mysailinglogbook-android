@@ -1912,7 +1912,13 @@ class MainActivity : AppCompatActivity() {
         emojiSize: Float = 26f,
         onClick: () -> Unit,
     ): Button {
-        val size = (16 * resources.displayMetrics.density).toInt()
+        // Horizontal padding narrower than vertical (12dp vs 16dp, was 16dp both ways) -- asked
+        // for explicitly, to match the iOS app's own tighter icon spacing: less whitespace
+        // between adjacent toolbar icons. Still 24dp (icon) + 2*12dp = 48dp wide, the Material
+        // minimum touch target size, so this doesn't shrink the actual tappable area below
+        // Android's own accessibility guideline -- only the visual gap between icons shrinks.
+        val horizontalPadding = (12 * resources.displayMetrics.density).toInt()
+        val verticalPadding = (8 * resources.displayMetrics.density).toInt()
         // Borderless + no minimum size: a plain Button here still carries the default Material
         // button chrome (background box, shadow/elevation, a fairly large minimum touch target)
         // even with just an icon as its content, which reads as a boxed button rather than a
@@ -1937,7 +1943,7 @@ class MainActivity : AppCompatActivity() {
                 // at the same nominal size) -- brings it closer to their visual weight.
                 textSize = emojiSize
             }
-            setPadding(size, size / 2, size, size / 2)
+            setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
             setBackgroundResource(backgroundValue.resourceId)
             minWidth = 0
             minimumWidth = 0
