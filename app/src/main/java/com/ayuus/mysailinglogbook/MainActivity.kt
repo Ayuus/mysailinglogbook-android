@@ -633,7 +633,7 @@ class MainActivity : AppCompatActivity() {
             // line -- always visible, no interaction needed -- is what most people actually see.
             syncButton.isEnabled = false
             ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_hotspot_not_on))
-            handleLogLine("[hotspot] " + getString(R.string.log_sync_hotspot_not_on))
+            handleLogLine("[info] " + getString(R.string.log_sync_hotspot_not_on))
             return
         }
         if (SyncState.discoverScanInProgress) return
@@ -754,7 +754,7 @@ class MainActivity : AppCompatActivity() {
                 if (existing.exists()) {
                     loadLogbookIntoWebView(existing.absolutePath)
                 }
-                handleLogLine("[hotspot] " + getString(R.string.log_hotspot_precheck_skipped))
+                handleLogLine("[info] " + getString(R.string.log_hotspot_precheck_skipped))
                 // A real Android notification too, not just the in-app log (asked for explicitly)
                 // -- this can fire well before the owner ever looks at the app again (e.g. the
                 // very first check after a fresh launch), so it's the only way to learn about it
@@ -863,7 +863,7 @@ class MainActivity : AppCompatActivity() {
                 // further down in this same Thread -- that one already gets a log line for free,
                 // from discover_w2k2()'s own log() calls in Python. This one didn't have an
                 // equivalent until now, so it's added explicitly here to match.
-                handleLogLine("[hotspot] $message")
+                handleLogLine("[info] $message")
                 withActiveActivity {
                     stopService(Intent(this, SyncNotificationService::class.java))
                     SyncState.notificationForegrounded = false
@@ -1254,22 +1254,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** [text] (the log's own accumulated lines) with every "[error]" line shown bold and in red,
-     * and every "[warning]"/"[hotspot]"/"[anomaly]"/"[geocode]" line shown bold and in amber --
-     * asked for explicitly, found in practice: a single line like this easily got lost among
-     * dozens of plain "[info]" ones around it, especially once the log stays expanded rather than
-     * being read right as it happens. "[hotspot]" (hotspot off) is its own tag, not literally
-     * "[warning]", even though it reads identically here -- that one already means something
-     * specific elsewhere (handleLogLine()'s own "connection lost, retrying" branch, which would
-     * misfire and overwrite the notification text with the wrong message if this carried it too).
-     * W2K-2 not found stays plain "[info]" (asked for explicitly): not a warning. A whole line at
-     * a time (from the newline before the tag to the one after, not just the tag itself), so the
-     * timestamp and the rest of the message stand out too, not just the tag word itself. */
+     * and every "[warning]"/"[anomaly]"/"[geocode]" line shown bold and in amber -- asked for
+     * explicitly, found in practice: a single line like this easily got lost among dozens of
+     * plain "[info]" ones around it, especially once the log stays expanded rather than being
+     * read right as it happens. Hotspot-not-on and W2K-2-not-found both stay plain "[info]" (also
+     * asked for explicitly): neither is a warning, just an expected state -- the hotspot doesn't
+     * even need to be on at all, any private network shared with the W2K-2 works just as well
+     * (see the README's own note on this). A whole line at a time (from the newline before the
+     * tag to the one after, not just the tag itself), so the timestamp and the rest of the
+     * message stand out too, not just the tag word itself. */
     private fun styledLogText(text: String): CharSequence {
         val builder = SpannableStringBuilder(text)
         val tagColors = listOf(
             "[error]" to LOG_ERROR_COLOR,
             "[warning]" to LOG_WARNING_COLOR,
-            "[hotspot]" to LOG_WARNING_COLOR,
             "[anomaly]" to LOG_WARNING_COLOR,
             // Every "[geocode]" line Python's own geocode.py ever logs is a failed lookup
             // (Overpass or Nominatim) -- there's no separate success line to accidentally also

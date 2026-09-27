@@ -54,20 +54,24 @@ Open Settings (the gear icon, top right of the toolbar) and fill in:
   SFTP host/user/password/remote path, if you want the built logbook sent to your own website.
   Leave both blank to keep everything on the phone.
 
-The phone needs to be on the boat's own WiFi -- i.e. the phone runs its own hotspot and the
-W2K-2 joins it as a client, the same setup the W2K-2's own app expects. There is no other way to
-reach it; the app never talks to it over the internet.
+The phone needs to share a private network with the W2K-2 -- normally that means the phone runs
+its own hotspot and the W2K-2 joins it as a client (the setup the W2K-2's own app expects), but
+any shared network works just as well, e.g. phone and W2K-2 both joined to the same marina/router
+WiFi instead. Either way there's no other way to reach it: the app only scans whatever private
+subnet the phone itself is currently on, never the internet. Boat mode's own auto-start (below)
+is the one exception -- it specifically needs the phone's own hotspot switched on, since that's
+the signal it uses to tell "I'm on the boat" from any other network the phone might be on.
 
 ### The toolbar
 
-Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **rebuild**
+Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **build**
 (build the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
 the current logbook to the website configured in Settings), **view logbook** (show the
 already-built logbook full-screen, toggles back to the log), **boat mode** (see below), and
 **settings**.
 
-A long-running action (download/rebuild/publish) shows a pulsing version of its own button --
+A long-running action (download/build/publish) shows a pulsing version of its own button --
 tap it again to cancel. The notification shade shows the same thing while the app isn't on
 screen, with a real progress bar.
 
@@ -77,15 +81,16 @@ Turned on/off via the sailboat button (or the matching checkbox in Settings, whi
 start it automatically whenever the app opens with the boat's hotspot up). Once on, it keeps
 running in the background -- the app doesn't need to stay open -- and:
 
-1. **Searches** for the W2K-2 every few minutes (configurable in Settings, "Zoekinterval"),
-   without downloading anything yet.
-2. Once found, runs a **round**: downloads new data and rebuilds the logbook, then waits for the
+1. **Searches** for the W2K-2 every 5 minutes (`search_interval_minutes` in the Python
+   `BootModeConfig` default -- not yet exposed as its own Settings field), without downloading
+   anything yet.
+2. Once found, runs a **round**: downloads new data and builds the logbook, then waits for the
    configured interval ("A round (download + build) every ...") before the next one.
 3. Recognises being **in harbour** (stationary + engine off, both for a configurable number of
    minutes) and **having left the boat** (the W2K-2 stops answering for a configurable number of
    minutes) as two different "the voyage is over for now" signals, each independently switchable
    to trigger a **final round** (and, if publishing is configured, an actual publish) --
-   see the checkboxes under "Boot-modus" in Settings.
+   see the checkboxes under "Boat mode" in Settings.
 4. Can optionally switch itself back off after that final round ("Switch boat mode off after the
    final round"), or keep running and simply start searching again.
 
@@ -154,15 +159,15 @@ it.)
    ```
    or just open the project in Android Studio and run it.
 
-There is no CI here and no automated test suite for the Kotlin code (see "Not yet built" below) --
-the Python side's own extensive test suite lives in the nmea2log repo and covers everything this
-app calls into.
+There is no CI here. A small Kotlin unit test suite exists (see "Not yet built" below for its
+current scope) -- run it with `./gradlew test`. The Python side's own extensive test suite lives
+in the nmea2log repo and covers everything this app calls into.
 
 ## How it fits together
 
 ```
 MainActivity (manual "sync now" + auto-start on launch)
-  -> HotspotDetector           finds this phone's own hotspot subnet (NetworkInterface enumeration)
+  -> HotspotDetector           finds the phone's own private-network subnet (NetworkInterface enumeration)
   -> android_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
        -> w2k2_download.discover_w2k2()   scans that subnet for the W2K-2's HTTP API
        -> w2k2_download.download_file()   downloads new/changed .ebl files
@@ -186,14 +191,22 @@ MainActivity (manual "sync now" + auto-start on launch)
 
 ## Design choices worth knowing before changing this code
 
-**Hotspot detection is about *this phone's own* hotspot, not an external network join.**
-`HotspotDetector` looks for this phone's own AP-bridge network interface (`ap_br_swlan0` on the
-test Samsung Galaxy S23; Android's docs mention `ap0`/`wlan1` as other common OEM names) having a
-private IPv4 address up -- i.e. whether *this phone's* tethering/hotspot feature is switched on.
-The boat setup is: the phone runs its own hotspot, and the W2K-2 joins it as a client. This matters
-because it rules out `ConnectivityManager.NetworkCallback` (which observes networks *this device*
-joins as a client, not its own AP state) as an event source for "is the hotspot back" -- see the
-reconnect logic below.
+**`HotspotDetector` has two different checks, deliberately not interchangeable.**
+`detectSubnetPrefix()` -- used everywhere the app actually reaches the W2K-2 (manual sync, boat
+mode's own search/probe) -- takes *any* interface with a private IPv4 address up, preferring an
+AP-named one if more than one is up at once but falling back to whatever matched otherwise. That's
+what makes phone-and-W2K-2-on-the-same-external-WiFi work exactly as well as the phone's own
+hotspot: neither this function nor the Python `discover_w2k2()` scan it feeds cares which one it
+is, only that the phone is on *some* private subnet the W2K-2 might also be on.
+`isHotspotUp()` is the stricter one, and has exactly one caller: `shouldAutoStartBootMode()`. It
+only counts an AP-named interface (`ap_br_swlan0` on the test Samsung Galaxy S23; Android's docs
+mention `ap0`/`wlan1` as other common OEM names), i.e. specifically whether *this phone's own*
+tethering/hotspot feature is switched on -- deliberately narrower, since auto-starting boat mode
+needs a reliable "I'm on the boat" signal, and "joined to some WiFi network" (which could just as
+easily be a cafe or the owner's own home) isn't specific enough for that, the way "my own hotspot
+is on" is. This also rules out `ConnectivityManager.NetworkCallback` (which observes networks
+*this device* joins as a client, not its own AP state) as an event source for "is the hotspot
+back" -- see the reconnect logic below.
 
 **No SFTP anywhere was the original hard rule for the first milestone**, so that nothing on the
 live site could break while the sync pipeline itself was still being built and tested against the
@@ -283,6 +296,10 @@ target) so they still read as plain icons rather than boxed buttons; tint applie
   backed up via OneDrive), but that reasoning doesn't hold on a phone's own storage.
 - **A cellular-data toggle** for geocoding/weather/marine lookups, for someone who'd rather spend
   the data than see `NoGeocoder()`'s bare coordinates.
-- **Any automated Kotlin test suite.** The Python side this app calls into is covered by
-  nmea2log's own extensive pytest suite; the Kotlin/Android-specific code (notification handling,
-  settings storage, the SFTP client, the reconnect flow) currently has none of its own.
+
+There is a small Kotlin unit test suite (`app/src/test/`, run via `./gradlew test`), but it's
+deliberately scoped to pure logic only (currently: `HotspotDetectorTest`, covering the private-IPv4
+range checks) -- notification handling, settings storage, the SFTP client, and the reconnect flow
+all need real Android framework classes or real network I/O to exercise meaningfully, and aren't
+covered by anything automated yet. The Python side this app calls into is covered separately by
+nmea2log's own extensive pytest suite.

@@ -16,9 +16,12 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.chaquo.python.Python
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputLayout
 import java.io.File
 
 /**
@@ -61,7 +64,20 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 if (hint != null) this.hint = hint
             }
-            container.addView(editText)
+            if (isPassword) {
+                // Material's own standard reveal-password eye icon (asked for explicitly, also
+                // done for iOS's own password fields, via a "Show password" switch there --
+                // there's no equivalent built-in toggle on a plain toga.PasswordInput) -- wrapping
+                // in a bare TextInputLayout (no box/outline style requested) gets this for free,
+                // no custom click handling or icon needed.
+                val inputLayout = TextInputLayout(this).apply {
+                    endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                }
+                inputLayout.addView(editText)
+                container.addView(inputLayout)
+            } else {
+                container.addView(editText)
+            }
             return editText
         }
 
@@ -261,6 +277,31 @@ class SettingsActivity : AppCompatActivity() {
         val bootStopAfterFinalBox = checkbox(getString(R.string.checkbox_boat_stop_after_final), store.bootStopAfterFinal)
         val bootAutoStartBox = checkbox(getString(R.string.checkbox_boat_auto_start), store.bootAutoStart)
 
+        // Licht/Donker/Apparaat -- asked for explicitly (Android always forced dark until now,
+        // see LogbookApplication's own comment; iOS's launch screen never followed the phone's
+        // theme at all). Applied immediately below (not just on next launch) via
+        // AppCompatDelegate.setDefaultNightMode(), which recreates every active AppCompatActivity
+        // on its own -- this screen is about to finish() anyway, but MainActivity underneath
+        // picks up the change without needing a manual recreate() call here.
+        sectionHeader(getString(R.string.section_appearance))
+        val themeGroup = RadioGroup(this).apply { orientation = LinearLayout.VERTICAL }
+        val themeLightRadio = RadioButton(this).apply { text = getString(R.string.radio_theme_light) }
+        val themeDarkRadio = RadioButton(this).apply { text = getString(R.string.radio_theme_dark) }
+        val themeSystemRadio = RadioButton(this).apply { text = getString(R.string.radio_theme_system) }
+        themeGroup.addView(themeLightRadio)
+        themeGroup.addView(themeDarkRadio)
+        themeGroup.addView(themeSystemRadio)
+        layout.addView(
+            themeGroup,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = padding },
+        )
+        when (store.themeMode) {
+            "light" -> themeLightRadio.isChecked = true
+            "system" -> themeSystemRadio.isChecked = true
+            else -> themeDarkRadio.isChecked = true
+        }
+
         // Cache-legen: two separate buttons rather than one "clear everything" -- the two caches
         // are cleared for different reasons (a decode/trip-build bug vs. a wrong/stale place
         // name or weather value) and clearing the wrong one is real, avoidable extra network/CPU
@@ -362,6 +403,18 @@ class SettingsActivity : AppCompatActivity() {
                 store.bootLeftBoatMinutes = bootLeftMinutesField.text.toString().toIntOrNull()?.coerceAtLeast(1) ?: 20
                 store.bootStopAfterFinal = bootStopAfterFinalBox.isChecked
                 store.bootAutoStart = bootAutoStartBox.isChecked
+                store.themeMode = when {
+                    themeLightRadio.isChecked -> "light"
+                    themeSystemRadio.isChecked -> "system"
+                    else -> "dark"
+                }
+                AppCompatDelegate.setDefaultNightMode(
+                    when (store.themeMode) {
+                        "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                        "system" -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                        else -> AppCompatDelegate.MODE_NIGHT_YES
+                    }
+                )
                 // Only the picked method's fields are actually saved -- the other route(s) are
                 // cleared instead of just left untouched, so the radio choice is a real,
                 // unambiguous either-or-or-neither rather than just a display filter (see
@@ -370,7 +423,17 @@ class SettingsActivity : AppCompatActivity() {
                 // choice without saving in between doesn't lose it, it's just not what gets
                 // stored once Opslaan is actually tapped.
                 if (wordpressRadio.isChecked) {
-                    store.restUploadUrl = restUploadUrlField.text.toString().trim()
+                    // Same nmea2log.upload.normalize_rest_upload_url() the iOS app calls too --
+                    // one canonical implementation, not a separately-maintained Kotlin copy (see
+                    // that function's own doc comment for what it does and why: filling in the
+                    // plugin's fixed REST route and the https:// scheme when this field holds just
+                    // the site's own bare address, asked for explicitly, found in practice: typing
+                    // the full https://your-site.example/wp-json/nmea2log/v1/logbook by hand was
+                    // exactly the kind of fiddly, easy-to-get-wrong step this project avoids
+                    // elsewhere).
+                    store.restUploadUrl = Python.getInstance().getModule("nmea2log.upload")
+                        .callAttr("normalize_rest_upload_url", restUploadUrlField.text.toString())
+                        .toString()
                     store.restUploadUser = restUploadUserField.text.toString().trim()
                     store.restUploadPassword = restUploadPasswordField.text.toString()
                     store.sftpHost = ""

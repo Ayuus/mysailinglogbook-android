@@ -127,6 +127,18 @@ class SettingsStore(context: Context) {
     val isSftpConfigComplete: Boolean
         get() = sftpHost.isNotBlank() && sftpUser.isNotBlank() && sftpPassword.isNotBlank() && sftpRemotePath.isNotBlank()
 
+    // "light" / "dark" / "system" -- read by LogbookApplication.onCreate() (before any Activity,
+    // so the app's DayNight resolution, including the launch splash screen's own background, is
+    // already correct on the very first frame) and re-applied by SettingsActivity's Save button.
+    // Defaults to "system" -- asked for explicitly, matching iOS's own default (its equivalent
+    // setting was never forced any other way to begin with) rather than each platform starting
+    // fresh installs looking different for no reason. The Android 8.1 tablet with no system
+    // dark-mode toggle at all (see LogbookApplication's own comment) simply resolves "system" to
+    // light there -- "dark" is still available as an explicit choice in Settings for it.
+    var themeMode: String
+        get() = prefs.getString(KEY_THEME_MODE, "system") ?: "system"
+        set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
+
     // Optionally user-editable (see SettingsActivity): filled in, the very first SFTP connection
     // is verified against it instead of blindly trusted; empty (the default), it's pinned
     // automatically on that first connection (trust-on-first-use) instead. Either way, a later
@@ -208,6 +220,7 @@ class SettingsStore(context: Context) {
         private const val KEY_SFTP_PASSWORD = "sftp_password"
         private const val KEY_SFTP_REMOTE_PATH = "sftp_remote_path"
         private const val KEY_SFTP_HOST_KEY_FINGERPRINT = "sftp_host_key_fingerprint"
+        private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_BOOT_ROUND_INTERVAL_MINUTES = "boot_round_interval_minutes"
         private const val KEY_BOOT_PUBLISH_EVERY_ROUND = "boot_publish_every_round"
         private const val KEY_BOOT_FINAL_ON_HARBOUR = "boot_final_on_harbour"

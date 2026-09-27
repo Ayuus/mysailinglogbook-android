@@ -5,7 +5,7 @@
 
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Downloaden</string>
-    <string name="tooltip_hotspot_not_on">Hotspot van dit toestel staat niet aan</string>
+    <string name="tooltip_hotspot_not_on">Geen privénetwerk gevonden</string>
     <string name="tooltip_w2k2_not_found">Geen Actisense W2K-2 gevonden</string>
     <string name="tooltip_w2k2_checking">Actisense W2K-2 zoeken…</string>
     <string name="tooltip_publish">Publiceren naar ayuus.com</string>
@@ -19,13 +19,13 @@
     <string name="error_settings_load_failed">Instellingen konden niet worden geladen:\n%1$s\n\nProbeer de app opnieuw te openen.</string>
 
     <!-- Sync flow -->
-    <string name="log_hotspot_precheck_skipped">Hotspot niet aan (snelle controle) -- automatisch downloaden overgeslagen.</string>
-    <string name="log_sync_hotspot_not_on">Hotspot niet aan -- downloadknop uitgeschakeld.</string>
+    <string name="log_hotspot_precheck_skipped">Geen privénetwerk gevonden (snelle controle) -- automatisch downloaden overgeslagen.</string>
+    <string name="log_sync_hotspot_not_on">Geen privénetwerk gevonden -- downloadknop uitgeschakeld.</string>
     <string name="log_sync_w2k2_not_found">Geen Actisense W2K-2 gevonden -- downloadknop uitgeschakeld.</string>
     <string name="notif_w2k2_not_found">W2K-2 niet gevonden.</string>
     <string name="log_fill_w2k2_credentials">Vul eerst de W2K-2 gebruikersnaam en het wachtwoord in via Instellingen.</string>
     <string name="status_checking_hotspot">Hotspot controleren...</string>
-    <string name="status_hotspot_off">Hotspot staat uit (of de W2K-2 is er niet mee verbonden). Zet \'m aan om te downloaden.</string>
+    <string name="status_hotspot_off">Geen privénetwerk gevonden (of de W2K-2 zit er niet op) -- zet je hotspot aan, of verbind met hetzelfde netwerk als de W2K-2, om te downloaden.</string>
     <string name="status_listing_files">Bestandenlijst ophalen (subnet %1$s0/24)...</string>
     <string name="log_sync_done_at">Voltooid: %1$s</string>
     <string name="notif_sync_done_at">Voltooid %1$s</string>
@@ -64,11 +64,11 @@
     <string name="status_uploading_wordpress">Uploaden naar ayuus.com (naar WordPress)...</string>
     <string name="status_uploading_sftp">Uploaden naar ayuus.com (via SFTP)...</string>
     <string name="notif_uploading">Uploaden naar ayuus.com...</string>
-    <string name="log_upload_ok_wordpress">Uploaded to WordPress: %1$s</string>
-    <string name="log_upload_ok_sftp">Uploaded via SFTP to %1$s@%2$s:%3$s</string>
-    <string name="log_upload_failed_wordpress">upload to WordPress failed: %1$s</string>
-    <string name="log_upload_failed_sftp">upload via SFTP failed: %1$s</string>
-    <string name="log_upload_not_configured">Upload not configured</string>
+    <string name="log_upload_ok_wordpress">Geüpload naar WordPress: %1$s</string>
+    <string name="log_upload_ok_sftp">Geüpload via SFTP naar %1$s@%2$s:%3$s</string>
+    <string name="log_upload_failed_wordpress">upload naar WordPress mislukt: %1$s</string>
+    <string name="log_upload_failed_sftp">upload via SFTP mislukt: %1$s</string>
+    <string name="log_upload_not_configured">Upload niet ingesteld</string>
     <string name="error_sftp_connect_failed">Kan geen SFTP-verbinding maken: %1$s</string>
     <string name="error_upload_failed">Uploaden van logboek mislukt: %1$s</string>
 
@@ -101,8 +101,8 @@
     <string name="radio_publish_wordpress">Publiceren via WordPress</string>
     <string name="radio_publish_sftp">Publiceren via SFTP</string>
     <string name="radio_publish_none">Niet publiceren (alleen lokaal)</string>
-    <string name="label_rest_upload_url">REST upload-URL (WordPress)</string>
-    <string name="hint_rest_upload_url">https://your-site.example/wp-json/nmea2log/v1/logbook</string>
+    <string name="label_rest_upload_url">WordPress-siteadres</string>
+    <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">WordPress gebruikersnaam</string>
     <string name="label_rest_upload_password">WordPress application password</string>
     <string name="label_sftp_host">SFTP host</string>
@@ -111,6 +111,10 @@
     <string name="label_sftp_password">SFTP wachtwoord</string>
     <string name="label_sftp_remote_path">SFTP pad op de server</string>
     <string name="label_sftp_host_key_fingerprint">SFTP host-key fingerprint (optioneel; leeg = automatisch vertrouwen bij eerste verbinding)</string>
+    <string name="section_appearance">Weergave</string>
+    <string name="radio_theme_light">Licht</string>
+    <string name="radio_theme_dark">Donker</string>
+    <string name="radio_theme_system">Apparaat volgen</string>
     <string name="section_cache">Cache legen</string>
     <string name="button_clear">Legen</string>
     <string name="toast_cache_cleared">Cache geleegd</string>

@@ -1,7 +1,7 @@
 <resources>
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Télécharger</string>
-    <string name="tooltip_hotspot_not_on">Le point d\'accès de cet appareil n\'est pas activé</string>
+    <string name="tooltip_hotspot_not_on">Aucun réseau privé détecté</string>
     <string name="tooltip_w2k2_not_found">Aucun Actisense W2K-2 trouvé</string>
     <string name="tooltip_w2k2_checking">Recherche d\'un Actisense W2K-2…</string>
     <string name="tooltip_publish">Publier sur ayuus.com</string>
@@ -15,13 +15,13 @@
     <string name="error_settings_load_failed">Impossible de charger les paramètres :\n%1$s\n\nEssayez de rouvrir l\'application.</string>
 
     <!-- Sync flow -->
-    <string name="log_hotspot_precheck_skipped">Point d\'accès désactivé (vérification rapide) -- téléchargement automatique ignoré.</string>
-    <string name="log_sync_hotspot_not_on">Point d\'accès désactivé -- bouton de téléchargement désactivé.</string>
+    <string name="log_hotspot_precheck_skipped">Aucun réseau privé détecté (vérification rapide) -- téléchargement automatique ignoré.</string>
+    <string name="log_sync_hotspot_not_on">Aucun réseau privé détecté -- bouton de téléchargement désactivé.</string>
     <string name="log_sync_w2k2_not_found">Aucun Actisense W2K-2 trouvé -- bouton de téléchargement désactivé.</string>
     <string name="notif_w2k2_not_found">W2K-2 introuvable.</string>
     <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe W2K-2 dans les Paramètres.</string>
     <string name="status_checking_hotspot">Vérification du point d\'accès...</string>
-    <string name="status_hotspot_off">Le point d\'accès est désactivé (ou le W2K-2 n\'y est pas connecté). Activez-le pour télécharger.</string>
+    <string name="status_hotspot_off">Aucun réseau privé détecté (ou le W2K-2 n\'y est pas connecté) -- activez votre point d\'accès, ou rejoignez le même réseau que le W2K-2, pour télécharger.</string>
     <string name="status_listing_files">Récupération de la liste des fichiers (sous-réseau %1$s0/24)...</string>
     <string name="log_sync_done_at">Terminé : %1$s</string>
     <string name="notif_sync_done_at">Terminé %1$s</string>
@@ -97,8 +97,8 @@
     <string name="radio_publish_wordpress">Publier via WordPress</string>
     <string name="radio_publish_sftp">Publier via SFTP</string>
     <string name="radio_publish_none">Ne pas publier (local uniquement)</string>
-    <string name="label_rest_upload_url">URL d\'envoi REST (WordPress)</string>
-    <string name="hint_rest_upload_url">https://your-site.example/wp-json/nmea2log/v1/logbook</string>
+    <string name="label_rest_upload_url">Adresse du site WordPress</string>
+    <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">Nom d\'utilisateur WordPress</string>
     <string name="label_rest_upload_password">Mot de passe d\'application WordPress</string>
     <string name="label_sftp_host">Hôte SFTP</string>
@@ -107,6 +107,10 @@
     <string name="label_sftp_password">Mot de passe SFTP</string>
     <string name="label_sftp_remote_path">Chemin SFTP sur le serveur</string>
     <string name="label_sftp_host_key_fingerprint">Empreinte de clé hôte SFTP (facultatif ; vide = faire confiance automatiquement à la première connexion)</string>
+    <string name="section_appearance">Apparence</string>
+    <string name="radio_theme_light">Clair</string>
+    <string name="radio_theme_dark">Sombre</string>
+    <string name="radio_theme_system">Suivre l\'appareil</string>
     <string name="section_cache">Vider le cache</string>
     <string name="button_clear">Vider</string>
     <string name="toast_cache_cleared">Cache vidé</string>

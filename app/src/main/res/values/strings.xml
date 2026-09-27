@@ -6,7 +6,7 @@
 
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Download</string>
-    <string name="tooltip_hotspot_not_on">This device\'s hotspot isn\'t on</string>
+    <string name="tooltip_hotspot_not_on">No private network detected</string>
     <string name="tooltip_w2k2_not_found">No Actisense W2K-2 found</string>
     <string name="tooltip_w2k2_checking">Looking for an Actisense W2K-2…</string>
     <string name="tooltip_publish">Publish to ayuus.com</string>
@@ -23,13 +23,13 @@
          "[skip]" tags are prepended in code, not baked into the resource, so they stay literal
          English in every language, matching the untranslated tags log.py's own Python-side log
          lines always use (see translations.py's module docstring on CSV/GPX staying English). -->
-    <string name="log_hotspot_precheck_skipped">Hotspot not on (cheap pre-check) -- automatic download skipped.</string>
-    <string name="log_sync_hotspot_not_on">Hotspot not on -- download button disabled.</string>
+    <string name="log_hotspot_precheck_skipped">No private network detected (cheap pre-check) -- automatic download skipped.</string>
+    <string name="log_sync_hotspot_not_on">No private network detected -- download button disabled.</string>
     <string name="log_sync_w2k2_not_found">No Actisense W2K-2 found -- download button disabled.</string>
     <string name="notif_w2k2_not_found">W2K-2 not found.</string>
     <string name="log_fill_w2k2_credentials">Fill in the W2K-2 username and password via Settings first.</string>
     <string name="status_checking_hotspot">Checking hotspot...</string>
-    <string name="status_hotspot_off">Hotspot is off (or the W2K-2 isn\'t connected to it). Turn it on to download.</string>
+    <string name="status_hotspot_off">No private network detected (or the W2K-2 isn\'t on it) -- turn on your hotspot, or join the same network as the W2K-2, to download.</string>
     <string name="status_listing_files">Fetching file list (subnet %1$s0/24)...</string>
     <string name="log_sync_done_at">Done: %1$s</string>
     <string name="notif_sync_done_at">Done %1$s</string>
@@ -105,11 +105,11 @@
     <string name="radio_publish_wordpress">Publish via WordPress</string>
     <string name="radio_publish_sftp">Publish via SFTP</string>
     <string name="radio_publish_none">Don\'t publish (local only)</string>
-    <string name="label_rest_upload_url">REST upload URL (WordPress)</string>
+    <string name="label_rest_upload_url">WordPress site address</string>
     <!-- A URL example, not translated; same across every language (also matches the README's
          own wording, verbatim). Not the site's own homepage or the logbook page: that redirects
          to a login page instead of uploading, see the README. -->
-    <string name="hint_rest_upload_url">https://your-site.example/wp-json/nmea2log/v1/logbook</string>
+    <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">WordPress username</string>
     <string name="label_rest_upload_password">WordPress application password</string>
     <string name="label_sftp_host">SFTP host</string>
@@ -118,6 +118,10 @@
     <string name="label_sftp_password">SFTP password</string>
     <string name="label_sftp_remote_path">SFTP path on the server</string>
     <string name="label_sftp_host_key_fingerprint">SFTP host key fingerprint (optional; empty = trust automatically on first connection)</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="radio_theme_light">Light</string>
+    <string name="radio_theme_dark">Dark</string>
+    <string name="radio_theme_system">Follow device</string>
     <string name="section_cache">Clear cache</string>
     <string name="button_clear">Clear</string>
     <string name="toast_cache_cleared">Cache cleared</string>
@@ -147,7 +151,7 @@
     <string name="checkbox_boat_auto_start">Start automatically when the app is opened at the W2K-2 (hotspot on)</string>
     <string name="tooltip_boat_mode">Start boat mode</string>
     <string name="tooltip_boat_mode_on">Stop boat mode</string>
-    <string name="boat_log_enabled">Boat mode is on (started via the clock button or Instellingen).</string>
+    <string name="boat_log_enabled">Boat mode is on (started via the clock button or Settings).</string>
     <string name="boat_log_simulation">Boat mode (simulation): time runs 30x faster and nothing is really downloaded or published.</string>
     <string name="boat_status_searching">Boat mode: looking for the W2K-2...</string>
     <!-- Quiet notification-only addition (no log line) while the search above keeps retrying with

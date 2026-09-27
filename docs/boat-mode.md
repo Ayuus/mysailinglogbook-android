@@ -25,8 +25,10 @@ OFF --Start--> SEARCHING --W2K-2 found--> ABOARD --harbour / left the boat--> ID
 ```
 
 - **OFF** -- the mode is off. Nothing happens.
-- **SEARCHING** -- looking for the W2K-2 on the phone's own hotspot, every `search_interval_minutes`
-  (default 5). As soon as it answers, the first round starts right away.
+- **SEARCHING** -- looking for the W2K-2 on whatever private network the phone is currently on
+  (normally the phone's own hotspot, but any shared network the W2K-2 is also on works -- see the
+  main README's own note on this), every `search_interval_minutes` (default 5). As soon as it
+  answers, the first round starts right away.
 - **ABOARD** -- a round (download + build) every `round_interval_minutes` (default 60). After each
   round the boat's state at the end of the data (`BoatState`, from the trip-building pipeline: under
   way or not, stationary since when, engine off since when) decides what happens next.
@@ -50,7 +52,7 @@ round of a stay -- one last download + build, then a publish if there is anywher
   from the last success -- one missed round after a long gap does not by itself count as leaving.
 
 Publishing on the final round only happens if a destination (WordPress or SFTP) is filled in in
-Instellingen. If nothing changed since the last publish and the trigger was "left the boat" (not
+Settings. If nothing changed since the last publish and the trigger was "left the boat" (not
 "reached harbour", which always just rebuilt fresh data), nothing is sent and the mode says so
 instead. A failed publish is retried every `publish_retry_minutes` (default 15) until it works.
 
@@ -61,7 +63,7 @@ it running for the whole season.
 
 ### Settings
 
-All in Instellingen, under "Boot-modus":
+All in Settings, under "Boat mode":
 
 | Setting | Default |
 | --- | --- |
@@ -83,24 +85,24 @@ the same log lines, notification progress text (`Downloading: x/y (...)`, `Build
 `Building trips: x/4`) and string resources a manual download uses (see `W2kBootExecutor.kt`). It is
 not a separate, differently-worded implementation. What *is* boat-mode-specific is the framing around
 it -- when a round starts, how long until the next one, and the harbour/left-the-boat/publish
-decisions above -- which the Python machine reports as its own status lines (`Boot-modus: ronde
-gestart...`, `...ronde klaar, volgende ronde om HH:MM`, `...de boot ligt in de haven, laatste
-ronde.`, etc., see `BootStatusText.kt`).
+decisions above -- which the Python machine reports as its own status lines (`Boat mode: round
+started (download and build)...`, `...round done, next round at HH:MM.`, `...the boat is in
+harbour, final round.`, etc., see `BootStatusText.kt`).
 
 ## Notifications and logging
 
 Two separate notifications exist, and they behave differently on purpose:
 
 - **Download/build/publish** (`SyncNotificationService`, channel "Download"): tied to one run.
-  Appears when the run starts, updates as it goes, then either turns into a dismissible "Klaar: ..."
-  notification (with "Bekijk live site" if it published) or disappears, depending on how the run
+  Appears when the run starts, updates as it goes, then either turns into a dismissible "Done: ..."
+  notification (with "View live site" if it published) or disappears, depending on how the run
   ended. Closing the app while a download or build is running cancels it (it resumes cleanly next
   time, over HTTP Range for the download and from the sample cache for decode/build) and posts
-  "Onderbroken door sluiten" instead -- except an upload in progress, which is left to finish first
-  (not safely resumable mid-request) and only then reports the close.
-- **Boat mode** (`BootModeService`, channel "Boot-modus"): tied to the whole time the mode is on, not
+  "Interrupted by closing -- will resume next time." instead -- except an upload in progress, which
+  is left to finish first (not safely resumable mid-request) and only then reports the close.
+- **Boat mode** (`BootModeService`, channel "Boat mode"): tied to the whole time the mode is on, not
   to one round. It appears the moment the mode starts and stays up continuously -- through searching,
-  every round, harbour, publish, waiting in port -- with "Nu" (run a round right now) and "Stop"
+  every round, harbour, publish, waiting in port -- with "Round now" (run a round right now) and "Stop"
   actions, until the mode is switched off (by hand, by "Stop", or by `stop_after_final`). **Closing
   the app never affects it** -- deliberately: while sailing there is no one watching, so a manual
   download's "closing means you left, don't bother continuing" reasoning does not apply, and a phone
@@ -110,7 +112,7 @@ Two separate notifications exist, and they behave differently on purpose:
   a download's notification (appear only while a round/publish is actively running, gone in between),
   that is a real, considered option for later, not something ruled out technically.
 
-A `[info]` line "Boot-modus staat aan (gestart via het klokje of Instellingen)." is logged every time
+A `[info]` line "Boat mode is on (started via the clock button or Settings)." is logged every time
 the app is freshly opened while the mode is on, so it is never in doubt from the log alone whether it
 is still running.
 
@@ -141,7 +143,7 @@ Concretely, in `BootModeService.kt`:
   or the phone rebooting into a fresh process. `START_STICKY` gets a killed service restarted by
   Android; a fresh process (`fresh` in `onStartCommand()`) resumes from that persisted state
   (`ctl.resume()`) rather than starting over, redoing whatever round or publish was interrupted.
-  Force-stopping the app (Instellingen → Apps, not just closing it) does kill the service and its
+  Force-stopping the app (Settings → Apps, not just closing it) does kill the service and its
   alarm, and Android does not restart it on its own -- opening the app again sends it an explicit
   resume action, so the mode picks back up then, rather than silently doing nothing forever.
 - The **simulation** (`FakeBootModeExecutor`, a developer-only `SharedPreferences` flag, off by
