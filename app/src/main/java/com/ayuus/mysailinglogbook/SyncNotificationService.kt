@@ -88,13 +88,6 @@ class SyncNotificationService : Service() {
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(contentIntent)
-            // Without this, every single content/progress update re-alerts (sound + vibration),
-            // not just the first post -- found in practice: onStartCommand() runs repeatedly
-            // during one download (an initial "checking hotspot" status, then "listing files",
-            // then a progress update per file), each one re-triggering the notification's alert
-            // -- reported as two (or more) soft tones in quick succession where there should be
-            // just one, right at the very start.
-            .setOnlyAlertOnce(true)
             .apply {
                 if (progressMax > 0 && progressCurrent >= 0) setProgress(progressMax, progressCurrent, false)
             }

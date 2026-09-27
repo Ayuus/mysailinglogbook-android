@@ -58,7 +58,10 @@ object HotspotDetector {
         return Collections.list(raw).filterIsInstance<Inet4Address>()
     }
 
-    private fun isPrivateIpv4(address: Inet4Address): Boolean {
+    // internal, not private: unit-tested directly (HotspotDetectorTest) rather than only through
+    // detectSubnetPrefix()/isHotspotUp(), which need real NetworkInterfaces and so aren't
+    // meaningfully testable as pure logic.
+    internal fun isPrivateIpv4(address: Inet4Address): Boolean {
         val bytes = address.address
         val first = bytes[0].toInt() and 0xFF
         val second = bytes[1].toInt() and 0xFF
