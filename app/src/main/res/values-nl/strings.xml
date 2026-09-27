@@ -111,7 +111,7 @@
     <string name="label_sftp_password">SFTP wachtwoord</string>
     <string name="label_sftp_remote_path">SFTP pad op de server</string>
     <string name="label_sftp_host_key_fingerprint">SFTP host-key fingerprint (optioneel; leeg = automatisch vertrouwen bij eerste verbinding)</string>
-    <string name="section_cache">Cache</string>
+    <string name="section_cache">Cache legen</string>
     <string name="button_clear">Legen</string>
     <string name="toast_cache_cleared">Cache geleegd</string>
     <string name="button_cancel">Annuleren</string>

@@ -107,7 +107,7 @@
     <string name="label_sftp_password">Mot de passe SFTP</string>
     <string name="label_sftp_remote_path">Chemin SFTP sur le serveur</string>
     <string name="label_sftp_host_key_fingerprint">Empreinte de clé hôte SFTP (facultatif ; vide = faire confiance automatiquement à la première connexion)</string>
-    <string name="section_cache">Cache</string>
+    <string name="section_cache">Vider le cache</string>
     <string name="button_clear">Vider</string>
     <string name="toast_cache_cleared">Cache vidé</string>
     <string name="button_cancel">Annuler</string>

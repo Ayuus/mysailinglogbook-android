@@ -118,7 +118,7 @@
     <string name="label_sftp_password">SFTP password</string>
     <string name="label_sftp_remote_path">SFTP path on the server</string>
     <string name="label_sftp_host_key_fingerprint">SFTP host key fingerprint (optional; empty = trust automatically on first connection)</string>
-    <string name="section_cache">Cache</string>
+    <string name="section_cache">Clear cache</string>
     <string name="button_clear">Clear</string>
     <string name="toast_cache_cleared">Cache cleared</string>
     <string name="button_cancel">Cancel</string>
