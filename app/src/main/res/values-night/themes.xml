@@ -1,13 +1,14 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.MySailingLogbook" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <!-- Same navy/cream pair as the app icon (asked for explicitly: no purple), using the
+             lighter navy tint for visibility against a dark background; see colors.xml's own
+             comment on app_navy_light. -->
+        <item name="colorPrimary">@color/app_navy_light</item>
+        <item name="colorPrimaryVariant">@color/app_navy</item>
         <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorSecondary">@color/app_navy_light</item>
+        <item name="colorSecondaryVariant">@color/app_navy</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- No android:statusBarColor here; see the light theme's own comment on why. -->
         <!-- Customize your theme here. -->

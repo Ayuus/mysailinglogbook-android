@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Same navy/cream pair as the app icon itself (ic_launcher_background.xml/
+         ic_launcher_foreground.xml); asked for explicitly, replacing the unrelated default
+         purple/teal Android Studio scaffolds every new project with. -->
+    <color name="app_navy">#0D3358</color>
+    <color name="app_navy_dark">#082540</color>
+    <!-- Lighter tint of the same navy, for the night theme's own colorPrimary; Material's own
+         dark-theme convention (a brand color needs to be brighter, not literally identical, to
+         stay visible against a dark background; see values-night/themes.xml). -->
+    <color name="app_navy_light">#4A7FB0</color>
+    <color name="app_cream">#F5F1E6</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

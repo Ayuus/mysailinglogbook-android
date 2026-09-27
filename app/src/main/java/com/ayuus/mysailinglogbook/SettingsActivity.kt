@@ -420,10 +420,18 @@ class SettingsActivity : AppCompatActivity() {
             addView(scrollArea)
             addView(saveButton)
         }
-        // Same edge-to-edge insets fix as MainActivity (found in practice during spike 2).
+        // Same edge-to-edge insets fix as MainActivity (found in practice during spike 2), plus
+        // the on-screen keyboard's own inset (asked for explicitly, found in practice on a real
+        // tablet: with edge-to-edge on, the OS no longer resizes/pans this screen for the
+        // keyboard on its own -- Opslaan, living below the ScrollView specifically so it's
+        // always reachable regardless of scroll position (see its own comment above), ended up
+        // hidden behind the keyboard instead, unreachable no matter how you scrolled). Bottom
+        // padding is whichever inset is taller -- the keyboard's own, while it's showing
+        // (usually taller than the nav bar it covers), or the plain system bars otherwise.
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            view.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
             insets
         }
         setContentView(root)
