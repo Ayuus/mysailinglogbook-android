@@ -20,7 +20,7 @@
     <string name="log_sync_w2k2_not_found">Aucun Actisense W2K-2 trouvé -- bouton de téléchargement désactivé.</string>
     <string name="notif_w2k2_not_found">W2K-2 introuvable.</string>
     <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe W2K-2 dans les Paramètres.</string>
-    <string name="status_checking_hotspot">Vérification du point d\'accès...</string>
+    <string name="status_checking_hotspot">Vérification du réseau...</string>
     <string name="status_hotspot_off">Aucun réseau privé détecté (ou le W2K-2 n\'y est pas connecté) -- activez votre point d\'accès, ou rejoignez le même réseau que le W2K-2, pour télécharger.</string>
     <string name="status_listing_files">Récupération de la liste des fichiers (sous-réseau %1$s0/24)...</string>
     <string name="log_sync_done_at">Terminé : %1$s</string>
@@ -136,7 +136,7 @@
     <string name="checkbox_boat_final_left">Dernière ronde quand j\'ai quitté le bateau</string>
     <string name="label_boat_left_minutes">Quitté le bateau : W2K-2 injoignable depuis (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Désactiver le mode bateau après la dernière ronde</string>
-    <string name="checkbox_boat_auto_start">Démarrer automatiquement quand l\'application est ouverte près du W2K-2 (point d\'accès activé)</string>
+    <string name="checkbox_boat_auto_start">Démarrage auto sur le WiFi du W2K-2</string>
     <string name="tooltip_boat_mode">Démarrer le mode bateau</string>
     <string name="tooltip_boat_mode_on">Arrêter le mode bateau</string>
     <string name="boat_log_enabled">Le mode bateau est activé (démarré via le bouton horloge ou les Paramètres).</string>

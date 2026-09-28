@@ -24,7 +24,7 @@
     <string name="log_sync_w2k2_not_found">Geen Actisense W2K-2 gevonden -- downloadknop uitgeschakeld.</string>
     <string name="notif_w2k2_not_found">W2K-2 niet gevonden.</string>
     <string name="log_fill_w2k2_credentials">Vul eerst de W2K-2 gebruikersnaam en het wachtwoord in via Instellingen.</string>
-    <string name="status_checking_hotspot">Hotspot controleren...</string>
+    <string name="status_checking_hotspot">Netwerk controleren...</string>
     <string name="status_hotspot_off">Geen privénetwerk gevonden (of de W2K-2 zit er niet op) -- zet je hotspot aan, of verbind met hetzelfde netwerk als de W2K-2, om te downloaden.</string>
     <string name="status_listing_files">Bestandenlijst ophalen (subnet %1$s0/24)...</string>
     <string name="log_sync_done_at">Voltooid: %1$s</string>
@@ -140,7 +140,7 @@
     <string name="checkbox_boat_final_left">Laatste ronde als ik van boord ben</string>
     <string name="label_boat_left_minutes">Van boord: W2K-2 niet bereikbaar gedurende (minuten)</string>
     <string name="checkbox_boat_stop_after_final">Boot-modus zelf uitzetten na de laatste ronde</string>
-    <string name="checkbox_boat_auto_start">Automatisch beginnen als de app wordt geopend bij de W2K-2 (hotspot aan)</string>
+    <string name="checkbox_boat_auto_start">Automatisch starten op W2K-2-wifi</string>
     <string name="tooltip_boat_mode">Boot-modus starten</string>
     <string name="tooltip_boat_mode_on">Boot-modus stoppen</string>
     <string name="boat_log_enabled">Boot-modus staat aan (gestart via het klokje of Instellingen).</string>

@@ -20,7 +20,7 @@
     <string name="log_sync_w2k2_not_found">Kein Actisense W2K-2 gefunden -- Download-Schaltfläche deaktiviert.</string>
     <string name="notif_w2k2_not_found">W2K-2 nicht gefunden.</string>
     <string name="log_fill_w2k2_credentials">Trage zuerst den W2K-2-Benutzernamen und das Passwort in den Einstellungen ein.</string>
-    <string name="status_checking_hotspot">Hotspot wird geprüft...</string>
+    <string name="status_checking_hotspot">Netzwerk wird geprüft...</string>
     <string name="status_hotspot_off">Kein privates Netzwerk gefunden (oder der W2K-2 ist nicht darauf) -- schalte deinen Hotspot ein oder verbinde dich mit demselben Netzwerk wie der W2K-2, um herunterzuladen.</string>
     <string name="status_listing_files">Dateiliste wird abgerufen (Subnetz %1$s0/24)...</string>
     <string name="log_sync_done_at">Fertig: %1$s</string>
@@ -136,7 +136,7 @@
     <string name="checkbox_boat_final_left">Letzte Runde, wenn ich das Boot verlassen habe</string>
     <string name="label_boat_left_minutes">Boot verlassen: W2K-2 nicht erreichbar seit (Minuten)</string>
     <string name="checkbox_boat_stop_after_final">Boot-Modus nach der letzten Runde selbst ausschalten</string>
-    <string name="checkbox_boat_auto_start">Automatisch starten, wenn die App am W2K-2 geöffnet wird (Hotspot an)</string>
+    <string name="checkbox_boat_auto_start">Autostart im WLAN des W2K-2</string>
     <string name="tooltip_boat_mode">Boot-Modus starten</string>
     <string name="tooltip_boat_mode_on">Boot-Modus beenden</string>
     <string name="boat_log_enabled">Der Boot-Modus ist eingeschaltet (gestartet über die Uhr-Schaltfläche oder die Einstellungen).</string>

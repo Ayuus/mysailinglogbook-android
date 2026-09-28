@@ -28,7 +28,7 @@
     <string name="log_sync_w2k2_not_found">No Actisense W2K-2 found -- download button disabled.</string>
     <string name="notif_w2k2_not_found">W2K-2 not found.</string>
     <string name="log_fill_w2k2_credentials">Fill in the W2K-2 username and password via Settings first.</string>
-    <string name="status_checking_hotspot">Checking hotspot...</string>
+    <string name="status_checking_hotspot">Checking network...</string>
     <string name="status_hotspot_off">No private network detected (or the W2K-2 isn\'t on it) -- turn on your hotspot, or join the same network as the W2K-2, to download.</string>
     <string name="status_listing_files">Fetching file list (subnet %1$s0/24)...</string>
     <string name="log_sync_done_at">Done: %1$s</string>
@@ -147,7 +147,7 @@
     <string name="checkbox_boat_final_left">Final round when I have left the boat</string>
     <string name="label_boat_left_minutes">Left the boat: W2K-2 unreachable for (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Switch boat mode off after the final round</string>
-    <string name="checkbox_boat_auto_start">Start automatically when the app is opened at the W2K-2 (hotspot on)</string>
+    <string name="checkbox_boat_auto_start">Start automatically on the W2K-2 WiFi</string>
     <string name="tooltip_boat_mode">Start boat mode</string>
     <string name="tooltip_boat_mode_on">Stop boat mode</string>
     <string name="boat_log_enabled">Boat mode is on (started via the clock button or Settings).</string>
