@@ -91,6 +91,7 @@
 
     <!-- Settings screen -->
     <string name="settings_activity_title">Settings</string>
+    <string name="section_w2k2_boat">W2K-2 &amp; boat</string>
     <string name="label_w2k2_user">W2K-2 username</string>
     <string name="label_w2k2_password">W2K-2 password</string>
     <string name="label_boat_name">Boat name</string>

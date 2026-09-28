@@ -119,6 +119,7 @@ class SettingsActivity : AppCompatActivity() {
             return box
         }
 
+        sectionHeader(getString(R.string.section_w2k2_boat))
         val userField = field(getString(R.string.label_w2k2_user), store.w2k2User)
         val passwordField = field(getString(R.string.label_w2k2_password), store.w2k2Password, isPassword = true)
         val boatNameField = field(getString(R.string.label_boat_name), store.boatName)

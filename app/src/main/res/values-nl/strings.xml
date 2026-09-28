@@ -87,6 +87,7 @@
 
     <!-- Settings screen -->
     <string name="settings_activity_title">Instellingen</string>
+    <string name="section_w2k2_boat">W2K-2 &amp; boot</string>
     <string name="label_w2k2_user">W2K-2 gebruikersnaam</string>
     <string name="label_w2k2_password">W2K-2 wachtwoord</string>
     <string name="label_boat_name">Bootnaam</string>
