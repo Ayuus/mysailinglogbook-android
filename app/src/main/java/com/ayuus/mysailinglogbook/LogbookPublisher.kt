@@ -1,6 +1,7 @@
 package com.ayuus.mysailinglogbook
 
 import android.content.Context
+import com.chaquo.python.Python
 import java.io.File
 
 /** Uploads the built logbook, for MainActivity's ☁️ and syncs and for the boat-mode service. */
@@ -31,10 +32,15 @@ object LogbookPublisher {
         SyncState.uploading = true
         try {
             if (useRest) {
-                RestUploader.uploadLogbook(
-                    context, settings.restUploadUrl, settings.restUploadUser, settings.restUploadPassword, htmlFile,
-                )
-                log("[ok] " + context.getString(R.string.log_upload_ok_wordpress, settings.restUploadUrl))
+                // Expanded here, not stored expanded -- see SettingsActivity.kt's own comment on
+                // why the field holds exactly what was typed. This is the one place that value
+                // is actually used, so it's also the one place normalize_rest_upload_url() needs
+                // to run.
+                val url = Python.getInstance().getModule("nmea2log.upload")
+                    .callAttr("normalize_rest_upload_url", settings.restUploadUrl)
+                    .toString()
+                RestUploader.uploadLogbook(context, url, settings.restUploadUser, settings.restUploadPassword, htmlFile)
+                log("[ok] " + context.getString(R.string.log_upload_ok_wordpress, url))
             } else {
                 SftpUploader.uploadLogbookAtomic(context, settings, htmlFile)
                 log(

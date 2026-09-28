@@ -143,10 +143,18 @@ class SettingsActivity : AppCompatActivity() {
         // one publishing would actually use right now. java.net.URI, not a manual string split:
         // handles a URL with or without a path/port/query correctly; a malformed URL (still being
         // typed, not yet a real URL) just falls through to the "not configured" state instead of
-        // crashing this screen.
+        // crashing this screen. Normalized first (same call LogbookPublisher.kt's own publish()
+        // makes) -- restUploadUrl is stored as exactly what was typed now (see this file's own
+        // save-handler comment), and URI("ayuus.com").host is null without a scheme: this header
+        // would otherwise misread a validly-configured bare address as "not configured" too.
         val publishHost = when {
             store.restUploadUrl.isNotBlank() ->
-                runCatching { java.net.URI(store.restUploadUrl).host }.getOrNull()
+                runCatching {
+                    val normalized = Python.getInstance().getModule("nmea2log.upload")
+                        .callAttr("normalize_rest_upload_url", store.restUploadUrl)
+                        .toString()
+                    java.net.URI(normalized).host
+                }.getOrNull()
             store.sftpHost.isNotBlank() -> store.sftpHost
             else -> null
         }
@@ -423,17 +431,14 @@ class SettingsActivity : AppCompatActivity() {
                 // choice without saving in between doesn't lose it, it's just not what gets
                 // stored once Opslaan is actually tapped.
                 if (wordpressRadio.isChecked) {
-                    // Same nmea2log.upload.normalize_rest_upload_url() the iOS app calls too --
-                    // one canonical implementation, not a separately-maintained Kotlin copy (see
-                    // that function's own doc comment for what it does and why: filling in the
-                    // plugin's fixed REST route and the https:// scheme when this field holds just
-                    // the site's own bare address, asked for explicitly, found in practice: typing
-                    // the full https://your-site.example/wp-json/nmea2log/v1/logbook by hand was
-                    // exactly the kind of fiddly, easy-to-get-wrong step this project avoids
-                    // elsewhere).
-                    store.restUploadUrl = Python.getInstance().getModule("nmea2log.upload")
-                        .callAttr("normalize_rest_upload_url", restUploadUrlField.text.toString())
-                        .toString()
+                    // Stored exactly as typed, not expanded -- see RestUploader.kt's own
+                    // nmea2log.upload.normalize_rest_upload_url() call for where that happens
+                    // instead (only at actual upload time). Expanding it here would mean this
+                    // field shows something different from what was typed the next time Settings
+                    // opens -- confusing on its own, and found in practice on iOS (which had the
+                    // same save-time expansion until this was moved): the field, once holding a
+                    // full URL, got treated as a real saved website by autofill/suggestions.
+                    store.restUploadUrl = restUploadUrlField.text.toString().trim()
                     store.restUploadUser = restUploadUserField.text.toString().trim()
                     store.restUploadPassword = restUploadPasswordField.text.toString()
                     store.sftpHost = ""
