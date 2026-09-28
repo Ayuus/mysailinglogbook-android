@@ -255,15 +255,17 @@ class SettingsActivity : AppCompatActivity() {
         // below) -- the other route(s) are cleared, not just left untouched, so a leftover,
         // unpicked config from before can never silently win via uploadIfConfigured()'s own
         // REST-preferred order once "don't publish" (or the other method) has been chosen instead.
-        // "Elke ronde publiceren" is disabled the same way (asked for explicitly, found in
-        // practice: left enabled with "Niet publiceren" picked, it read as a real, live setting
-        // despite doing nothing at all in that state) -- the harbour/left-the-boat final-round
-        // checkboxes below it stay enabled either way, since that round still builds a fresh
-        // local logbook regardless of whether anywhere is configured to publish it.
+        // "Elke ronde publiceren" and "Automatisch publiceren na samenstellen" are disabled the
+        // same way (asked for explicitly, found in practice: left enabled with "Niet publiceren"
+        // picked, they read as real, live settings despite doing nothing at all in that state) --
+        // the harbour/left-the-boat final-round checkboxes below stay enabled either way, since
+        // that round still builds a fresh local logbook regardless of whether anywhere is
+        // configured to publish it.
         fun updatePublishMethodVisibility() {
             wordpressFields.visibility = if (wordpressRadio.isChecked) View.VISIBLE else View.GONE
             sftpFields.visibility = if (sftpRadio.isChecked) View.VISIBLE else View.GONE
             bootPublishEveryRoundBox.isEnabled = !noPublishRadio.isChecked
+            autoPublishAfterBuildBox.isEnabled = !noPublishRadio.isChecked
         }
         publishMethodGroup.setOnCheckedChangeListener { _, _ -> updatePublishMethodVisibility() }
         // Preselects whatever is already actually configured (isRestUploadConfigComplete/
