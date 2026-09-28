@@ -135,8 +135,8 @@
     <string name="label_boat_harbour_engine_off_minutes">Hafen: Motor aus seit (Minuten)</string>
     <string name="checkbox_boat_final_left">Letzte Runde, wenn ich das Boot verlassen habe</string>
     <string name="label_boat_left_minutes">Boot verlassen: W2K-2 nicht erreichbar seit (Minuten)</string>
-    <string name="checkbox_boat_stop_after_final">Boot-Modus nach der letzten Runde selbst ausschalten</string>
-    <string name="checkbox_boat_auto_start">Autostart im WLAN des W2K-2</string>
+    <string name="checkbox_boat_stop_after_final">Nach letzter Runde ausschalten</string>
+    <string name="checkbox_boat_auto_start">Boot-Modus beim Öffnen starten</string>
     <string name="tooltip_boat_mode">Boot-Modus starten</string>
     <string name="tooltip_boat_mode_on">Boot-Modus beenden</string>
     <string name="boat_log_enabled">Der Boot-Modus ist eingeschaltet (gestartet über die Uhr-Schaltfläche oder die Einstellungen).</string>

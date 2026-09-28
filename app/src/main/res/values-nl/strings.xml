@@ -139,8 +139,8 @@
     <string name="label_boat_harbour_engine_off_minutes">Haven: motor uit gedurende (minuten)</string>
     <string name="checkbox_boat_final_left">Laatste ronde als ik van boord ben</string>
     <string name="label_boat_left_minutes">Van boord: W2K-2 niet bereikbaar gedurende (minuten)</string>
-    <string name="checkbox_boat_stop_after_final">Boot-modus zelf uitzetten na de laatste ronde</string>
-    <string name="checkbox_boat_auto_start">Automatisch starten op W2K-2-wifi</string>
+    <string name="checkbox_boat_stop_after_final">Uitzetten na laatste ronde</string>
+    <string name="checkbox_boat_auto_start">Boot-modus starten bij openen</string>
     <string name="tooltip_boat_mode">Boot-modus starten</string>
     <string name="tooltip_boat_mode_on">Boot-modus stoppen</string>
     <string name="boat_log_enabled">Boot-modus staat aan (gestart via het klokje of Instellingen).</string>
