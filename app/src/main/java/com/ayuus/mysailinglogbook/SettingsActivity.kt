@@ -91,8 +91,8 @@ class SettingsActivity : AppCompatActivity() {
             layout.addView(
                 TextView(this).apply {
                     this.text = text
-                    setPadding(0, padding * 2, 0, 0)
-                    textSize = 16f
+                    setPadding(0, padding * 3, 0, 0)
+                    textSize = 19f
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
                 }
             )
