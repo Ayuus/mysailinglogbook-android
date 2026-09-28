@@ -91,8 +91,7 @@
     <string name="checkbox_auto_sync_on_launch">Beim Start automatisch herunterladen</string>
     <string name="section_trips">Fahrten</string>
     <string name="label_min_stop_minutes">Mindeststandzeit, um als Hafenbesuch zu zählen (Minuten)</string>
-    <string name="section_publish_to">Auf %1$s veröffentlichen</string>
-    <string name="section_publish_not_configured">Veröffentlichen</string>
+    <string name="section_publish">Veröffentlichen</string>
     <string name="checkbox_auto_publish_after_build">Nach dem Zusammenstellen automatisch veröffentlichen</string>
     <string name="radio_publish_wordpress">Über WordPress veröffentlichen</string>
     <string name="radio_publish_sftp">Über SFTP veröffentlichen</string>

@@ -99,8 +99,7 @@
     <string name="checkbox_auto_sync_on_launch">Automatically download on launch</string>
     <string name="section_trips">Trips</string>
     <string name="label_min_stop_minutes">Minimum stop duration to count as a port visit (minutes)</string>
-    <string name="section_publish_to">Publish to %1$s</string>
-    <string name="section_publish_not_configured">Publish</string>
+    <string name="section_publish">Publish</string>
     <string name="checkbox_auto_publish_after_build">Automatically publish after assembling</string>
     <string name="radio_publish_wordpress">Publish via WordPress</string>
     <string name="radio_publish_sftp">Publish via SFTP</string>

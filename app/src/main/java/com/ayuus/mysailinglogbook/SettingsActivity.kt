@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.chaquo.python.Python
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
@@ -81,18 +80,13 @@ class SettingsActivity : AppCompatActivity() {
             return editText
         }
 
-        fun sectionHeader(text: String, disabled: Boolean = false) {
+        fun sectionHeader(text: String) {
             layout.addView(
                 TextView(this).apply {
                     this.text = text
                     setPadding(0, padding * 2, 0, 0)
                     textSize = 16f
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
-                    // Dimmed, not hidden -- still names the section (asked for explicitly: the
-                    // header used to always claim "ayuus.com" even on a brand new install with
-                    // nothing configured at all yet, see publishHeaderText below), just visually
-                    // reads as "nothing here yet" rather than an active destination.
-                    if (disabled) alpha = 0.5f
                 }
             )
         }
@@ -134,35 +128,13 @@ class SettingsActivity : AppCompatActivity() {
             store.minStopMinutes.toString(),
         ).apply { inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL }
 
-        // Derived from whatever's actually configured, not hardcoded -- asked for explicitly,
-        // found in practice: this always read "Publish to ayuus.com" even on a fresh
-        // install with nothing filled in at all, misleadingly claiming a destination that wasn't
-        // really set up yet (the exact same concern that already keeps restUploadUrl/sftpHost
-        // themselves un-defaulted, see SettingsStore's own doc comments). REST preferred over
-        // SFTP here too, matching uploadIfConfigured()'s own choice -- the host shown is whichever
-        // one publishing would actually use right now. java.net.URI, not a manual string split:
-        // handles a URL with or without a path/port/query correctly; a malformed URL (still being
-        // typed, not yet a real URL) just falls through to the "not configured" state instead of
-        // crashing this screen. Normalized first (same call LogbookPublisher.kt's own publish()
-        // makes) -- restUploadUrl is stored as exactly what was typed now (see this file's own
-        // save-handler comment), and URI("ayuus.com").host is null without a scheme: this header
-        // would otherwise misread a validly-configured bare address as "not configured" too.
-        val publishHost = when {
-            store.restUploadUrl.isNotBlank() ->
-                runCatching {
-                    val normalized = Python.getInstance().getModule("nmea2log.upload")
-                        .callAttr("normalize_rest_upload_url", store.restUploadUrl)
-                        .toString()
-                    java.net.URI(normalized).host
-                }.getOrNull()
-            store.sftpHost.isNotBlank() -> store.sftpHost
-            else -> null
-        }
-        if (publishHost != null) {
-            sectionHeader(getString(R.string.section_publish_to, publishHost))
-        } else {
-            sectionHeader(getString(R.string.section_publish_not_configured), disabled = true)
-        }
+        // Plain static header -- used to read "Publish to {host}" derived from what's actually
+        // saved to disk, but that read as contradictory/stale the moment you picked a publish
+        // method in the radio group below without having saved yet: the radio said "WordPress"
+        // while this header still said "Publish" (disabled, implying "not configured") right
+        // above it (found in practice, asked for explicitly to simplify instead of making the
+        // header itself reactive; same fix applied to the iOS app's own settings screen).
+        sectionHeader(getString(R.string.section_publish))
         val autoPublishAfterBuildBox = checkbox(
             getString(R.string.checkbox_auto_publish_after_build),
             store.autoPublishAfterBuild,

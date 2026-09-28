@@ -95,8 +95,7 @@
     <string name="checkbox_auto_sync_on_launch">Automatisch downloaden bij starten</string>
     <string name="section_trips">Reizen</string>
     <string name="label_min_stop_minutes">Minimale stop-tijd om als havenbezoek te tellen (minuten)</string>
-    <string name="section_publish_to">Publiceren naar %1$s</string>
-    <string name="section_publish_not_configured">Publiceren</string>
+    <string name="section_publish">Publiceren</string>
     <string name="checkbox_auto_publish_after_build">Automatisch publiceren na samenstellen</string>
     <string name="radio_publish_wordpress">Publiceren via WordPress</string>
     <string name="radio_publish_sftp">Publiceren via SFTP</string>

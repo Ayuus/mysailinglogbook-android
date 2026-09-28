@@ -91,8 +91,7 @@
     <string name="checkbox_auto_sync_on_launch">Télécharger automatiquement au démarrage</string>
     <string name="section_trips">Trajets</string>
     <string name="label_min_stop_minutes">Durée d\'arrêt minimale pour compter comme escale (minutes)</string>
-    <string name="section_publish_to">Publier sur %1$s</string>
-    <string name="section_publish_not_configured">Publier</string>
+    <string name="section_publish">Publier</string>
     <string name="checkbox_auto_publish_after_build">Publier automatiquement après l\'assemblage</string>
     <string name="radio_publish_wordpress">Publier via WordPress</string>
     <string name="radio_publish_sftp">Publier via SFTP</string>
