@@ -3,6 +3,7 @@ package com.ayuus.mysailinglogbook
 import android.os.Bundle
 import android.text.InputType
 import android.view.View
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.EditText
@@ -496,5 +497,17 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
         setContentView(root)
+        // Fixed dp width, not a percentage -- Theme.MySailingLogbook.Settings's own
+        // windowMinWidthMajor/Minor (values-w600dp/themes.xml) used to set this instead, as a
+        // percentage of the screen's long/short axis, which meant a reasonable width in
+        // portrait but a much wider absolute value in landscape (found in practice, asked for
+        // explicitly to fix: "portrait ok, landscape too wide"). Guarded on screenWidthDp,
+        // matching the same >=600dp breakpoint that switches this Activity's own theme to the
+        // floating Dialog style in the first place -- setLayout() only actually affects a
+        // floating window's size, but the explicit guard keeps that dependency self-documenting
+        // here rather than relying on the phone theme silently ignoring it.
+        if (resources.configuration.screenWidthDp >= 600) {
+            window?.setLayout((500 * resources.displayMetrics.density).toInt(), WindowManager.LayoutParams.WRAP_CONTENT)
+        }
     }
 }

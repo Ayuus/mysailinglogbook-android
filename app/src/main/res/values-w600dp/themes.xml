@@ -14,7 +14,11 @@
         <item name="colorSecondaryVariant">@color/app_navy_dark</item>
         <item name="colorOnSecondary">@color/app_cream</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:windowMinWidthMajor">60%</item>
-        <item name="android:windowMinWidthMinor">60%</item>
+        <!-- No windowMinWidthMajor/Minor here (removed): those are percentages of the long/
+             short screen axis, so the same 60% meant a reasonable width in portrait but a much
+             wider absolute value in landscape (found in practice, asked for explicitly to fix:
+             "portrait ok, landscape too wide"). SettingsActivity.kt's own onCreate() sets a
+             fixed dp width directly on the window instead, so it stays the same regardless of
+             orientation. -->
     </style>
 </resources>
