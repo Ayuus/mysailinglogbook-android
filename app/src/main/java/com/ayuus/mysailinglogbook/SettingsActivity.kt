@@ -386,16 +386,31 @@ class SettingsActivity : AppCompatActivity() {
             )
         }
 
-        // Default filled MaterialButton style (unlike the outlined cache buttons above) -- the
-        // one clearly primary action on this screen, full width and with real margins on every
-        // side so it reads as a deliberate bar rather than a small button touching the screen edge.
+        // Outlined, secondary-emphasis style (see clearCacheRow()'s own comment on this same
+        // style choice) -- discards whatever's been changed on screen and leaves without saving,
+        // same as iOS's own Cancel button next to Save. Asked for explicitly: this screen had no
+        // explicit way to back out other than the system back gesture/button.
+        val cancelButton = MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+            text = getString(R.string.button_cancel)
+            isAllCaps = false
+            cornerRadius = (16 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                setMargins(padding, padding, padding / 2, padding)
+            }
+            setOnClickListener { finish() }
+        }
+
+        // Default filled MaterialButton style (unlike the outlined cache/Cancel buttons above) --
+        // the one clearly primary action on this screen. Shares a row with Cancel (equal weight,
+        // same as iOS's own Cancel/Save pair) rather than being alone and full width now that
+        // there's a second button next to it.
         val saveButton = MaterialButton(this).apply {
             text = getString(R.string.button_save)
-            isAllCaps = false // see clearCacheButton()'s own comment on this
-            cornerRadius = (16 * resources.displayMetrics.density).toInt() // see clearCacheButton()'s own comment on this
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
-            ).apply { setMargins(padding, padding, padding, padding) }
+            isAllCaps = false // see clearCacheRow()'s own comment on this
+            cornerRadius = (16 * resources.displayMetrics.density).toInt() // see clearCacheRow()'s own comment on this
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                setMargins(padding / 2, padding, padding, padding)
+            }
             setOnClickListener {
                 if (userField.text.isBlank() || passwordField.text.isBlank()) {
                     Toast.makeText(
@@ -495,10 +510,28 @@ class SettingsActivity : AppCompatActivity() {
             addView(layout)
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
         }
+        // Plain 1dp line, inset by `padding` on both sides -- separates the scrolling field list
+        // above from Cancel/Save below, same reasoning as the iOS app's own equivalent divider
+        // (asked for explicitly), just inset rather than edge-to-edge to match Material's own
+        // conventional dialog/list-footer divider styling. Low-alpha black (?attr/colorOnSurface
+        // would need a ColorStateList reference for the alpha; a literal ARGB int is simpler here
+        // and theme-agnostic either way, light or dark).
+        val buttonRowDivider = View(this).apply {
+            setBackgroundColor(0x1F000000)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (1 * resources.displayMetrics.density).toInt(),
+            ).apply { leftMargin = padding; rightMargin = padding }
+        }
+        val buttonRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(cancelButton)
+            addView(saveButton)
+        }
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             addView(scrollArea)
-            addView(saveButton)
+            addView(buttonRowDivider)
+            addView(buttonRow)
         }
         // Same edge-to-edge insets fix as MainActivity (found in practice during spike 2), plus
         // the on-screen keyboard's own inset (asked for explicitly, found in practice on a real
