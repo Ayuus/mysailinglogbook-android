@@ -330,6 +330,9 @@ class SettingsActivity : AppCompatActivity() {
                     // of the same name, found in practice: these still rendered as "CACHE: DATA"
                     // despite that theme override, until set explicitly here too.
                     isAllCaps = false
+                    // A bit more rounded than Material's own ~4dp default -- asked for
+                    // explicitly, to look nicer -- same radius as the Opslaan button below.
+                    cornerRadius = (16 * resources.displayMetrics.density).toInt()
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
                     ).apply { topMargin = padding }
@@ -370,6 +373,7 @@ class SettingsActivity : AppCompatActivity() {
         val saveButton = MaterialButton(this).apply {
             text = getString(R.string.button_save)
             isAllCaps = false // see clearCacheButton()'s own comment on this
+            cornerRadius = (16 * resources.displayMetrics.density).toInt() // see clearCacheButton()'s own comment on this
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
             ).apply { setMargins(padding, padding, padding, padding) }

@@ -119,9 +119,9 @@
     <string name="button_clear">Legen</string>
     <string name="toast_cache_cleared">Cache geleegd</string>
     <string name="button_cancel">Annuleren</string>
-    <string name="button_cache_data">Cache: Data</string>
+    <string name="button_cache_data">Data</string>
     <string name="dialog_clear_data_cache_message">Alle gedecodeerde en samengestelde reisdata wissen? Bij het eerstvolgende downloaden worden dan alle .ebl-bestanden opnieuw gedecodeerd en verwerkt vanaf het begin (duurt langer, maar er gaat niets verloren -- de .ebl-bestanden zelf blijven staan).</string>
-    <string name="button_cache_places">Cache: Plaatsnamen</string>
+    <string name="button_cache_places">Plaatsnamen</string>
     <string name="dialog_clear_places_cache_message">Alle opgezochte plaatsnamen, weer- en golfgegevens wissen? Bij het eerstvolgende downloaden worden deze dan opnieuw opgezocht (kost extra mobiele data).</string>
     <string name="button_save">Opslaan</string>
     <string name="toast_username_password_required">Gebruikersnaam en wachtwoord zijn verplicht</string>

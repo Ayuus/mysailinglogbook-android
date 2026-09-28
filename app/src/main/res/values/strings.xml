@@ -126,9 +126,9 @@
     <string name="button_clear">Clear</string>
     <string name="toast_cache_cleared">Cache cleared</string>
     <string name="button_cancel">Cancel</string>
-    <string name="button_cache_data">Cache: Data</string>
+    <string name="button_cache_data">Data</string>
     <string name="dialog_clear_data_cache_message">Clear all decoded and assembled trip data? The next download will decode and process every .ebl file again from scratch (takes longer, but nothing is lost -- the .ebl files themselves stay in place).</string>
-    <string name="button_cache_places">Cache: Place names</string>
+    <string name="button_cache_places">Place names</string>
     <string name="dialog_clear_places_cache_message">Clear all looked-up place names, weather and wave data? The next download will look these up again (uses extra mobile data).</string>
     <string name="button_save">Save</string>
     <string name="toast_username_password_required">Username and password are required</string>
