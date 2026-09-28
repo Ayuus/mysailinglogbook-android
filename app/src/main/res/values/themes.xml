@@ -25,4 +25,11 @@
         <item name="android:textAllCaps">false</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <!-- Plain alias on narrow screens (phones): Settings stays the same full-screen Activity it
+         always was. Overridden in values-w600dp/ to show as a centered dialog instead on wide
+         screens/tablets, where the same full-width phone layout otherwise stretched awkwardly
+         across the extra space (asked for explicitly, found in practice on a tablet in
+         landscape). -->
+    <style name="Theme.MySailingLogbook.Settings" parent="Theme.MySailingLogbook" />
 </resources>

@@ -1,0 +1,20 @@
+<resources>
+    <!-- Overrides Theme.MySailingLogbook.Settings (values/themes.xml's own base, see its
+         comment there) on screens at least 600dp wide (tablets, or a phone in landscape past
+         that width): Settings shows as a centered dialog with the main screen dimmed behind it,
+         instead of the same phone-width form stretched across the full screen. Redeclares the
+         base theme's own color/caps attributes directly (Android styles have single
+         inheritance, so extending the Dialog theme instead of Theme.MySailingLogbook means those
+         don't carry over automatically). -->
+    <style name="Theme.MySailingLogbook.Settings" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="colorPrimary">@color/app_navy</item>
+        <item name="colorPrimaryVariant">@color/app_navy_dark</item>
+        <item name="colorOnPrimary">@color/app_cream</item>
+        <item name="colorSecondary">@color/app_navy</item>
+        <item name="colorSecondaryVariant">@color/app_navy_dark</item>
+        <item name="colorOnSecondary">@color/app_cream</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:windowMinWidthMajor">60%</item>
+        <item name="android:windowMinWidthMinor">60%</item>
+    </style>
+</resources>
