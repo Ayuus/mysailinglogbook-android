@@ -6,7 +6,7 @@
     <string name="tooltip_w2k2_checking">Recherche d\'un Actisense W2K-2…</string>
     <string name="tooltip_publish">Publier sur ayuus.com</string>
     <string name="tooltip_publish_not_configured">Aucun hôte configuré</string>
-    <string name="tooltip_build_local">Construire le journal</string>
+    <string name="tooltip_build_local">Assembler le journal</string>
     <string name="tooltip_cancel">Annuler</string>
     <string name="tooltip_view_local">Consulter le journal localement (sans publier)</string>
     <string name="tooltip_settings">Paramètres</string>
@@ -27,7 +27,7 @@
     <string name="notif_sync_done_at">Terminé %1$s</string>
     <string name="error_unexpected_sync">Erreur inattendue pendant le téléchargement : %1$s</string>
     <string name="log_no_logbook_to_view">Aucun journal à consulter pour l\'instant -- téléchargez d\'abord.</string>
-    <string name="log_no_ebl_files_to_build">Aucun fichier .ebl sur cet appareil pour l\'instant -- rien à construire.</string>
+    <string name="log_no_ebl_files_to_build">Aucun fichier .ebl sur cet appareil pour l\'instant -- rien à assembler.</string>
     <string name="log_publish_not_configured">Aucune destination de publication configurée -- bouton de publication désactivé.</string>
     <string name="log_fill_publish_settings">Renseignez d\'abord les paramètres de publication (REST ou SFTP) dans les Paramètres.</string>
     <string name="log_ebl_files_location">Les fichiers .ebl se trouvent dans : %1$s</string>
@@ -35,25 +35,25 @@
     <string name="phase_downloading">Téléchargement</string>
     <string name="error_no_result">Aucun résultat reçu.</string>
     <string name="notif_connection_lost_retrying">Connexion perdue, nouvelle tentative...</string>
-    <string name="status_building_logbook">Construction du journal : %1$d/%2$d</string>
+    <string name="status_building_logbook">Assemblage du journal : %1$d/%2$d</string>
     <string name="phase_decoding">Décodage</string>
-    <string name="status_building_trips">Construction des trajets : %1$d/%2$d</string>
-    <string name="phase_building_trips">Construction des trajets</string>
+    <string name="status_building_trips">Assemblage des trajets : %1$d/%2$d</string>
+    <string name="phase_building_trips">Assemblage des trajets</string>
     <string name="progress_label_format">%1$s : %2$d/%3$d</string>
     <string name="status_ready_updated">Terminé (journal mis à jour).</string>
     <string name="status_ready_with_download">Terminé : %1$d trajet(s), %2$d fichier(s) téléchargé(s).</string>
     <string name="status_ready_no_download">Terminé : %1$d trajet(s) (données existantes, non retéléchargées).</string>
     <string name="status_sync_stopped">Téléchargement arrêté. Il reprendra où il s\'est arrêté la prochaine fois.</string>
-    <string name="status_build_stopped">Construction arrêtée. Elle reprendra où elle s\'est arrêtée la prochaine fois.</string>
+    <string name="status_build_stopped">Assemblage arrêté. Il reprendra où il s\'est arrêté la prochaine fois.</string>
     <string name="error_generic_prefix">Erreur : %1$s</string>
     <string name="error_unknown">erreur inconnue</string>
     <string name="error_logbook_display_failed">impossible d\'afficher le journal : %1$s</string>
-    <string name="dialog_build_logbook_button">Construire le journal...</string>
+    <string name="dialog_build_logbook_button">Assembler le journal...</string>
     <string name="dialog_close_app_button">Fermer l\'application</string>
     <string name="status_sync_cancelled">Téléchargement annulé.</string>
-    <string name="status_build_cancelled">Construction annulée.</string>
+    <string name="status_build_cancelled">Assemblage annulé.</string>
     <string name="status_cancel_still_stopping">Encore en train de s\'arrêter ; cela peut prendre encore quelques secondes.</string>
-    <string name="status_building_with_existing_data">Construction du journal avec les données existantes...</string>
+    <string name="status_building_with_existing_data">Assemblage du journal avec les données existantes...</string>
     <string name="error_unexpected">Erreur inattendue : %1$s</string>
 
     <!-- Publish -->
@@ -93,7 +93,7 @@
     <string name="label_min_stop_minutes">Durée d\'arrêt minimale pour compter comme escale (minutes)</string>
     <string name="section_publish_to">Publier sur %1$s</string>
     <string name="section_publish_not_configured">Publier</string>
-    <string name="checkbox_auto_publish_after_build">Publier automatiquement après la construction</string>
+    <string name="checkbox_auto_publish_after_build">Publier automatiquement après l\'assemblage</string>
     <string name="radio_publish_wordpress">Publier via WordPress</string>
     <string name="radio_publish_sftp">Publier via SFTP</string>
     <string name="radio_publish_none">Ne pas publier (local uniquement)</string>
@@ -116,7 +116,7 @@
     <string name="toast_cache_cleared">Cache vidé</string>
     <string name="button_cancel">Annuler</string>
     <string name="button_cache_data">Cache : Données</string>
-    <string name="dialog_clear_data_cache_message">Effacer toutes les données de trajets décodées et construites ? Le prochain téléchargement décodera et traitera à nouveau chaque fichier .ebl depuis le début (plus long, mais rien n\'est perdu -- les fichiers .ebl eux-mêmes restent en place).</string>
+    <string name="dialog_clear_data_cache_message">Effacer toutes les données de trajets décodées et assemblées ? Le prochain téléchargement décodera et traitera à nouveau chaque fichier .ebl depuis le début (plus long, mais rien n\'est perdu -- les fichiers .ebl eux-mêmes restent en place).</string>
     <string name="button_cache_places">Cache : Noms de lieux</string>
     <string name="dialog_clear_places_cache_message">Effacer tous les noms de lieux, données météo et de houle recherchés ? Le prochain téléchargement les recherchera à nouveau (consomme des données mobiles supplémentaires).</string>
     <string name="button_save">Enregistrer</string>
@@ -125,7 +125,7 @@
 
     <!-- Boat mode -->
     <string name="section_boat_mode">Mode bateau</string>
-    <string name="label_boat_interval">Une ronde (télécharger + construire) toutes les</string>
+    <string name="label_boat_interval">Une ronde (télécharger + assembler) toutes les</string>
     <string name="boat_interval_30">30 minutes</string>
     <string name="boat_interval_60">1 heure</string>
     <string name="boat_interval_120">2 heures</string>
@@ -145,7 +145,7 @@
     <string name="boat_status_searching">Mode bateau : recherche du W2K-2...</string>
     <string name="boat_notif_last_check_with_next">(dernier contrôle %1$s, prochain %2$s)</string>
     <string name="boat_notif_last_check">(dernier contrôle %1$s)</string>
-    <string name="boat_status_round_started">Mode bateau : ronde démarrée (téléchargement et construction)...</string>
+    <string name="boat_status_round_started">Mode bateau : ronde démarrée (téléchargement et assemblage)...</string>
     <string name="boat_status_round_done">Mode bateau : ronde terminée, prochaine ronde à %1$s.</string>
     <string name="boat_status_round_failed">Mode bateau : ronde échouée, nouvel essai.</string>
     <string name="boat_status_w2k2_not_found_retry">Mode bateau : W2K-2 injoignable, nouvel essai à %1$s.</string>

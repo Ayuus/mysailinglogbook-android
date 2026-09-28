@@ -6,7 +6,7 @@
     <string name="tooltip_w2k2_checking">Suche nach einem Actisense W2K-2…</string>
     <string name="tooltip_publish">Auf ayuus.com veröffentlichen</string>
     <string name="tooltip_publish_not_configured">Kein Host konfiguriert</string>
-    <string name="tooltip_build_local">Bordbuch erstellen</string>
+    <string name="tooltip_build_local">Bordbuch zusammenstellen</string>
     <string name="tooltip_cancel">Abbrechen</string>
     <string name="tooltip_view_local">Bordbuch lokal ansehen (nicht veröffentlichen)</string>
     <string name="tooltip_settings">Einstellungen</string>
@@ -27,7 +27,7 @@
     <string name="notif_sync_done_at">Fertig %1$s</string>
     <string name="error_unexpected_sync">Unerwarteter Fehler während des Downloads: %1$s</string>
     <string name="log_no_logbook_to_view">Noch kein Bordbuch zum Ansehen -- zuerst herunterladen.</string>
-    <string name="log_no_ebl_files_to_build">Noch keine .ebl-Dateien auf diesem Gerät -- nichts zu erstellen.</string>
+    <string name="log_no_ebl_files_to_build">Noch keine .ebl-Dateien auf diesem Gerät -- nichts zusammenzustellen.</string>
     <string name="log_publish_not_configured">Kein Veröffentlichungsziel eingerichtet -- Veröffentlichen-Schaltfläche deaktiviert.</string>
     <string name="log_fill_publish_settings">Trage zuerst die Veröffentlichungseinstellungen (REST oder SFTP) in den Einstellungen ein.</string>
     <string name="log_ebl_files_location">Die .ebl-Dateien befinden sich in: %1$s</string>
@@ -35,25 +35,25 @@
     <string name="phase_downloading">Herunterladen</string>
     <string name="error_no_result">Kein Ergebnis erhalten.</string>
     <string name="notif_connection_lost_retrying">Verbindung verloren, erneuter Versuch...</string>
-    <string name="status_building_logbook">Bordbuch wird erstellt: %1$d/%2$d</string>
+    <string name="status_building_logbook">Bordbuch wird zusammengestellt: %1$d/%2$d</string>
     <string name="phase_decoding">Wird dekodiert</string>
-    <string name="status_building_trips">Fahrten werden erstellt: %1$d/%2$d</string>
-    <string name="phase_building_trips">Fahrten werden erstellt</string>
+    <string name="status_building_trips">Fahrten werden zusammengestellt: %1$d/%2$d</string>
+    <string name="phase_building_trips">Fahrten werden zusammengestellt</string>
     <string name="progress_label_format">%1$s: %2$d/%3$d</string>
     <string name="status_ready_updated">Fertig (Bordbuch aktualisiert).</string>
     <string name="status_ready_with_download">Fertig: %1$d Fahrt(en), %2$d Datei(en) heruntergeladen.</string>
     <string name="status_ready_no_download">Fertig: %1$d Fahrt(en) (vorhandene Daten, nicht erneut heruntergeladen).</string>
     <string name="status_sync_stopped">Download gestoppt. Beim nächsten Mal wird dort fortgesetzt, wo er aufgehört hat.</string>
-    <string name="status_build_stopped">Erstellen gestoppt. Beim nächsten Mal wird dort fortgesetzt, wo es aufgehört hat.</string>
+    <string name="status_build_stopped">Zusammenstellen gestoppt. Beim nächsten Mal wird dort fortgesetzt, wo es aufgehört hat.</string>
     <string name="error_generic_prefix">Fehler: %1$s</string>
     <string name="error_unknown">unbekannter Fehler</string>
     <string name="error_logbook_display_failed">Bordbuch konnte nicht angezeigt werden: %1$s</string>
-    <string name="dialog_build_logbook_button">Bordbuch erstellen...</string>
+    <string name="dialog_build_logbook_button">Bordbuch zusammenstellen...</string>
     <string name="dialog_close_app_button">App schließen</string>
     <string name="status_sync_cancelled">Download abgebrochen.</string>
-    <string name="status_build_cancelled">Erstellen abgebrochen.</string>
+    <string name="status_build_cancelled">Zusammenstellen abgebrochen.</string>
     <string name="status_cancel_still_stopping">Wird noch beendet; das kann noch ein paar Sekunden dauern.</string>
-    <string name="status_building_with_existing_data">Bordbuch wird mit vorhandenen Daten erstellt...</string>
+    <string name="status_building_with_existing_data">Bordbuch wird mit vorhandenen Daten zusammengestellt...</string>
     <string name="error_unexpected">Unerwarteter Fehler: %1$s</string>
 
     <!-- Publish -->
@@ -93,7 +93,7 @@
     <string name="label_min_stop_minutes">Mindeststandzeit, um als Hafenbesuch zu zählen (Minuten)</string>
     <string name="section_publish_to">Auf %1$s veröffentlichen</string>
     <string name="section_publish_not_configured">Veröffentlichen</string>
-    <string name="checkbox_auto_publish_after_build">Nach dem Erstellen automatisch veröffentlichen</string>
+    <string name="checkbox_auto_publish_after_build">Nach dem Zusammenstellen automatisch veröffentlichen</string>
     <string name="radio_publish_wordpress">Über WordPress veröffentlichen</string>
     <string name="radio_publish_sftp">Über SFTP veröffentlichen</string>
     <string name="radio_publish_none">Nicht veröffentlichen (nur lokal)</string>
@@ -116,7 +116,7 @@
     <string name="toast_cache_cleared">Cache geleert</string>
     <string name="button_cancel">Abbrechen</string>
     <string name="button_cache_data">Cache: Daten</string>
-    <string name="dialog_clear_data_cache_message">Alle dekodierten und erstellten Fahrtdaten löschen? Der nächste Download dekodiert und verarbeitet dann alle .ebl-Dateien erneut von Anfang an (dauert länger, aber es geht nichts verloren -- die .ebl-Dateien selbst bleiben erhalten).</string>
+    <string name="dialog_clear_data_cache_message">Alle dekodierten und zusammengestellten Fahrtdaten löschen? Der nächste Download dekodiert und verarbeitet dann alle .ebl-Dateien erneut von Anfang an (dauert länger, aber es geht nichts verloren -- die .ebl-Dateien selbst bleiben erhalten).</string>
     <string name="button_cache_places">Cache: Ortsnamen</string>
     <string name="dialog_clear_places_cache_message">Alle abgerufenen Ortsnamen, Wetter- und Wellendaten löschen? Der nächste Download ruft diese dann erneut ab (kostet zusätzliche mobile Daten).</string>
     <string name="button_save">Speichern</string>
@@ -125,7 +125,7 @@
 
     <!-- Boat mode -->
     <string name="section_boat_mode">Boot-Modus</string>
-    <string name="label_boat_interval">Eine Runde (Herunterladen + Erstellen) alle</string>
+    <string name="label_boat_interval">Eine Runde (Herunterladen + Zusammenstellen) alle</string>
     <string name="boat_interval_30">30 Minuten</string>
     <string name="boat_interval_60">1 Stunde</string>
     <string name="boat_interval_120">2 Stunden</string>
@@ -145,7 +145,7 @@
     <string name="boat_status_searching">Boot-Modus: Suche nach dem W2K-2...</string>
     <string name="boat_notif_last_check_with_next">(letzte Prüfung %1$s, nächste %2$s)</string>
     <string name="boat_notif_last_check">(letzte Prüfung %1$s)</string>
-    <string name="boat_status_round_started">Boot-Modus: Runde gestartet (Herunterladen und Erstellen)...</string>
+    <string name="boat_status_round_started">Boot-Modus: Runde gestartet (Herunterladen und Zusammenstellen)...</string>
     <string name="boat_status_round_done">Boot-Modus: Runde abgeschlossen, nächste Runde um %1$s.</string>
     <string name="boat_status_round_failed">Boot-Modus: Runde fehlgeschlagen, neuer Versuch.</string>
     <string name="boat_status_w2k2_not_found_retry">Boot-Modus: W2K-2 nicht erreichbar, neuer Versuch um %1$s.</string>

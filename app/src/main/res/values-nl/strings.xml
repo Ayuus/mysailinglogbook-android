@@ -10,7 +10,7 @@
     <string name="tooltip_w2k2_checking">Actisense W2K-2 zoeken…</string>
     <string name="tooltip_publish">Publiceren naar ayuus.com</string>
     <string name="tooltip_publish_not_configured">Geen host geconfigureerd</string>
-    <string name="tooltip_build_local">Logboek bouwen</string>
+    <string name="tooltip_build_local">Logboek samenstellen</string>
     <string name="tooltip_cancel">Annuleren</string>
     <string name="tooltip_view_local">Logboek lokaal bekijken (niet publiceren)</string>
     <string name="tooltip_settings">Instellingen</string>
@@ -31,7 +31,7 @@
     <string name="notif_sync_done_at">Voltooid %1$s</string>
     <string name="error_unexpected_sync">Onverwachte fout tijdens downloaden: %1$s</string>
     <string name="log_no_logbook_to_view">Nog geen logboek om te bekijken -- download eerst.</string>
-    <string name="log_no_ebl_files_to_build">Nog geen .ebl-bestanden op dit toestel -- niets om te bouwen.</string>
+    <string name="log_no_ebl_files_to_build">Nog geen .ebl-bestanden op dit toestel -- niets om samen te stellen.</string>
     <string name="log_publish_not_configured">Geen publicatiebestemming ingesteld -- publiceerknop uitgeschakeld.</string>
     <string name="log_fill_publish_settings">Vul eerst de publiceer-instellingen (REST of SFTP) in via Instellingen.</string>
     <string name="log_ebl_files_location">.ebl-bestanden staan in: %1$s</string>
@@ -39,25 +39,25 @@
     <string name="phase_downloading">Downloaden</string>
     <string name="error_no_result">Geen resultaat ontvangen.</string>
     <string name="notif_connection_lost_retrying">Verbinding verloren, opnieuw proberen...</string>
-    <string name="status_building_logbook">Logboek opbouwen: %1$d/%2$d</string>
+    <string name="status_building_logbook">Logboek samenstellen: %1$d/%2$d</string>
     <string name="phase_decoding">Decoderen</string>
-    <string name="status_building_trips">Reizen opbouwen: %1$d/%2$d</string>
-    <string name="phase_building_trips">Reizen opbouwen</string>
+    <string name="status_building_trips">Reizen samenstellen: %1$d/%2$d</string>
+    <string name="phase_building_trips">Reizen samenstellen</string>
     <string name="progress_label_format">%1$s: %2$d/%3$d</string>
     <string name="status_ready_updated">Klaar (logboek bijgewerkt).</string>
     <string name="status_ready_with_download">Klaar: %1$d reis(en), %2$d bestand(en) gedownload.</string>
     <string name="status_ready_no_download">Klaar: %1$d reis(en) (bestaande gegevens, niet opnieuw gedownload).</string>
     <string name="status_sync_stopped">Downloaden gestopt. Volgende keer wordt verdergegaan waar het gebleven was.</string>
-    <string name="status_build_stopped">Bouwen gestopt. Volgende keer wordt verdergegaan waar het gebleven was.</string>
+    <string name="status_build_stopped">Samenstellen gestopt. Volgende keer wordt verdergegaan waar het gebleven was.</string>
     <string name="error_generic_prefix">Fout: %1$s</string>
     <string name="error_unknown">onbekende fout</string>
     <string name="error_logbook_display_failed">logboek kon niet worden getoond: %1$s</string>
-    <string name="dialog_build_logbook_button">Logboek bouwen...</string>
+    <string name="dialog_build_logbook_button">Logboek samenstellen...</string>
     <string name="dialog_close_app_button">App sluiten</string>
     <string name="status_sync_cancelled">Downloaden geannuleerd.</string>
-    <string name="status_build_cancelled">Bouwen geannuleerd.</string>
+    <string name="status_build_cancelled">Samenstellen geannuleerd.</string>
     <string name="status_cancel_still_stopping">Nog bezig met stoppen; dit kan nog een paar seconden duren.</string>
-    <string name="status_building_with_existing_data">Logboek opbouwen met bestaande gegevens...</string>
+    <string name="status_building_with_existing_data">Logboek samenstellen met bestaande gegevens...</string>
     <string name="error_unexpected">Onverwachte fout: %1$s</string>
 
     <!-- Publish -->
@@ -97,7 +97,7 @@
     <string name="label_min_stop_minutes">Minimale stop-tijd om als havenbezoek te tellen (minuten)</string>
     <string name="section_publish_to">Publiceren naar %1$s</string>
     <string name="section_publish_not_configured">Publiceren</string>
-    <string name="checkbox_auto_publish_after_build">Automatisch publiceren na bouwen</string>
+    <string name="checkbox_auto_publish_after_build">Automatisch publiceren na samenstellen</string>
     <string name="radio_publish_wordpress">Publiceren via WordPress</string>
     <string name="radio_publish_sftp">Publiceren via SFTP</string>
     <string name="radio_publish_none">Niet publiceren (alleen lokaal)</string>
@@ -120,7 +120,7 @@
     <string name="toast_cache_cleared">Cache geleegd</string>
     <string name="button_cancel">Annuleren</string>
     <string name="button_cache_data">Cache: Data</string>
-    <string name="dialog_clear_data_cache_message">Alle gedecodeerde en opgebouwde reisdata wissen? Bij het eerstvolgende downloaden worden dan alle .ebl-bestanden opnieuw gedecodeerd en verwerkt vanaf het begin (duurt langer, maar er gaat niets verloren -- de .ebl-bestanden zelf blijven staan).</string>
+    <string name="dialog_clear_data_cache_message">Alle gedecodeerde en samengestelde reisdata wissen? Bij het eerstvolgende downloaden worden dan alle .ebl-bestanden opnieuw gedecodeerd en verwerkt vanaf het begin (duurt langer, maar er gaat niets verloren -- de .ebl-bestanden zelf blijven staan).</string>
     <string name="button_cache_places">Cache: Plaatsnamen</string>
     <string name="dialog_clear_places_cache_message">Alle opgezochte plaatsnamen, weer- en golfgegevens wissen? Bij het eerstvolgende downloaden worden deze dan opnieuw opgezocht (kost extra mobiele data).</string>
     <string name="button_save">Opslaan</string>
@@ -129,7 +129,7 @@
 
     <!-- Boat mode -->
     <string name="section_boat_mode">Boot-modus</string>
-    <string name="label_boat_interval">Een ronde (downloaden + bouwen) elke</string>
+    <string name="label_boat_interval">Een ronde (downloaden + samenstellen) elke</string>
     <string name="boat_interval_30">30 minuten</string>
     <string name="boat_interval_60">1 uur</string>
     <string name="boat_interval_120">2 uur</string>
@@ -149,7 +149,7 @@
     <string name="boat_status_searching">Boot-modus: zoeken naar de W2K-2...</string>
     <string name="boat_notif_last_check_with_next">(laatste controle %1$s, volgende %2$s)</string>
     <string name="boat_notif_last_check">(laatste controle %1$s)</string>
-    <string name="boat_status_round_started">Boot-modus: ronde gestart (downloaden en bouwen)...</string>
+    <string name="boat_status_round_started">Boot-modus: ronde gestart (downloaden en samenstellen)...</string>
     <string name="boat_status_round_done">Boot-modus: ronde klaar, volgende ronde om %1$s.</string>
     <string name="boat_status_round_failed">Boot-modus: ronde mislukt, opnieuw proberen.</string>
     <string name="boat_status_w2k2_not_found_retry">Boot-modus: W2K-2 niet bereikbaar, opnieuw om %1$s.</string>
