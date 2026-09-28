@@ -147,7 +147,7 @@
     <string name="checkbox_boat_final_left">Final round when I have left the boat</string>
     <string name="label_boat_left_minutes">Left the boat: W2K-2 unreachable for (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Turn off after final round</string>
-    <string name="checkbox_boat_auto_start">Auto-start boat mode when opened</string>
+    <string name="checkbox_boat_auto_start">Auto-start when opened</string>
     <string name="tooltip_boat_mode">Start boat mode</string>
     <string name="tooltip_boat_mode_on">Stop boat mode</string>
     <string name="boat_log_enabled">Boat mode is on (started via the clock button or Settings).</string>
