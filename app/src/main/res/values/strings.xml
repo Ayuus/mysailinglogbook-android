@@ -97,11 +97,11 @@
     <string name="label_boat_name">Boat name</string>
     <string name="label_mmsi">MMSI</string>
     <string name="label_call_sign">Call sign</string>
-    <string name="checkbox_auto_sync_on_launch">Automatically download on launch</string>
+    <string name="checkbox_auto_sync_on_launch">Download automatically on launch</string>
     <string name="section_trips">Trips</string>
     <string name="label_min_stop_minutes">Minimum stop duration to count as a port visit (minutes)</string>
     <string name="section_publish">Publish</string>
-    <string name="checkbox_auto_publish_after_build">Automatically publish after assembling</string>
+    <string name="checkbox_auto_publish_after_build">Publish automatically after assembling</string>
     <string name="radio_publish_wordpress">Publish via WordPress</string>
     <string name="radio_publish_sftp">Publish via SFTP</string>
     <string name="radio_publish_none">Don\'t publish (local only)</string>
@@ -148,7 +148,7 @@
     <string name="checkbox_boat_final_left">Final round when I have left the boat</string>
     <string name="label_boat_left_minutes">Left the boat: W2K-2 unreachable for (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Turn off after final round</string>
-    <string name="checkbox_boat_auto_start">Auto-start when opened</string>
+    <string name="checkbox_boat_auto_start">Start automatically on launch</string>
     <string name="tooltip_boat_mode">Start boat mode</string>
     <string name="tooltip_boat_mode_on">Stop boat mode</string>
     <string name="boat_log_enabled">Boat mode is on (started via the clock button or Settings).</string>

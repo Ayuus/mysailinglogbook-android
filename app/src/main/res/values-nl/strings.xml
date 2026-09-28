@@ -141,7 +141,7 @@
     <string name="checkbox_boat_final_left">Laatste ronde als ik van boord ben</string>
     <string name="label_boat_left_minutes">Van boord: W2K-2 niet bereikbaar gedurende (minuten)</string>
     <string name="checkbox_boat_stop_after_final">Uitzetten na laatste ronde</string>
-    <string name="checkbox_boat_auto_start">Starten bij openen</string>
+    <string name="checkbox_boat_auto_start">Automatisch starten bij openen</string>
     <string name="tooltip_boat_mode">Boot-modus starten</string>
     <string name="tooltip_boat_mode_on">Boot-modus stoppen</string>
     <string name="boat_log_enabled">Boot-modus staat aan (gestart via het klokje of Instellingen).</string>
