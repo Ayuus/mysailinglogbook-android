@@ -142,7 +142,7 @@
     <string name="boat_interval_120">2 hours</string>
     <string name="boat_interval_180">3 hours</string>
     <string name="checkbox_boat_publish_every_round">Publish after every round</string>
-    <string name="checkbox_boat_final_harbour">Final round (publish) once the boat is in harbour</string>
+    <string name="checkbox_boat_final_harbour">Final round once the boat is in harbour</string>
     <string name="label_boat_harbour_stationary_minutes">Harbour: stationary for (minutes)</string>
     <string name="label_boat_harbour_engine_off_minutes">Harbour: engine off for (minutes)</string>
     <string name="checkbox_boat_final_left">Final round when I have left the boat</string>

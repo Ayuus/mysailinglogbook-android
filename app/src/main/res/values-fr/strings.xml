@@ -131,7 +131,7 @@
     <string name="boat_interval_120">2 heures</string>
     <string name="boat_interval_180">3 heures</string>
     <string name="checkbox_boat_publish_every_round">Publier après chaque ronde</string>
-    <string name="checkbox_boat_final_harbour">Dernière ronde (publication) dès que le bateau est au port</string>
+    <string name="checkbox_boat_final_harbour">Dernière ronde dès que le bateau est au port</string>
     <string name="label_boat_harbour_stationary_minutes">Port : à l\'arrêt depuis (minutes)</string>
     <string name="label_boat_harbour_engine_off_minutes">Port : moteur coupé depuis (minutes)</string>
     <string name="checkbox_boat_final_left">Dernière ronde quand j\'ai quitté le bateau</string>

@@ -135,7 +135,7 @@
     <string name="boat_interval_120">2 uur</string>
     <string name="boat_interval_180">3 uur</string>
     <string name="checkbox_boat_publish_every_round">Elke ronde publiceren</string>
-    <string name="checkbox_boat_final_harbour">Laatste ronde (publiceren) zodra de boot in de haven ligt</string>
+    <string name="checkbox_boat_final_harbour">Laatste ronde zodra de boot in de haven ligt</string>
     <string name="label_boat_harbour_stationary_minutes">Haven: stil gedurende (minuten)</string>
     <string name="label_boat_harbour_engine_off_minutes">Haven: motor uit gedurende (minuten)</string>
     <string name="checkbox_boat_final_left">Laatste ronde als ik van boord ben</string>
