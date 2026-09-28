@@ -226,29 +226,6 @@ class SettingsActivity : AppCompatActivity() {
             container = sftpFields,
         )
 
-        // Only the picked method's fields are shown -- GONE, not just visually hidden, so the
-        // collapsed block doesn't leave a blank gap ("don't publish" shows neither). Whichever
-        // one is picked here also decides what Opslaan actually saves (see its click listener
-        // below) -- the other route(s) are cleared, not just left untouched, so a leftover,
-        // unpicked config from before can never silently win via uploadIfConfigured()'s own
-        // REST-preferred order once "don't publish" (or the other method) has been chosen instead.
-        fun updatePublishMethodVisibility() {
-            wordpressFields.visibility = if (wordpressRadio.isChecked) View.VISIBLE else View.GONE
-            sftpFields.visibility = if (sftpRadio.isChecked) View.VISIBLE else View.GONE
-        }
-        publishMethodGroup.setOnCheckedChangeListener { _, _ -> updatePublishMethodVisibility() }
-        // Preselects whatever is already actually configured (isRestUploadConfigComplete/
-        // isSftpConfigComplete require every field of that route to be filled in, not just one),
-        // matching uploadIfConfigured()'s own REST-preferred order. "Don't publish" if neither is
-        // complete yet -- also the correct default on a brand new install, replacing what used to
-        // incorrectly default to WordPress even with nothing filled in at all.
-        when {
-            store.isRestUploadConfigComplete -> wordpressRadio.isChecked = true
-            store.isSftpConfigComplete -> sftpRadio.isChecked = true
-            else -> noPublishRadio.isChecked = true
-        }
-        updatePublishMethodVisibility()
-
         // Boat mode: rounds while the W2K-2 is reachable, a final round in the harbour or on
         // leaving the boat (see BootModeController / nmea2log/bootmode.py). The values only feed
         // BootModeConfig; the decisions themselves are made in Python.
@@ -271,6 +248,36 @@ class SettingsActivity : AppCompatActivity() {
         }
         layout.addView(bootIntervalSpinner)
         val bootPublishEveryRoundBox = checkbox(getString(R.string.checkbox_boat_publish_every_round), store.bootPublishEveryRound)
+
+        // Only the picked method's fields are shown -- GONE, not just visually hidden, so the
+        // collapsed block doesn't leave a blank gap ("don't publish" shows neither). Whichever
+        // one is picked here also decides what Opslaan actually saves (see its click listener
+        // below) -- the other route(s) are cleared, not just left untouched, so a leftover,
+        // unpicked config from before can never silently win via uploadIfConfigured()'s own
+        // REST-preferred order once "don't publish" (or the other method) has been chosen instead.
+        // "Elke ronde publiceren" is disabled the same way (asked for explicitly, found in
+        // practice: left enabled with "Niet publiceren" picked, it read as a real, live setting
+        // despite doing nothing at all in that state) -- the harbour/left-the-boat final-round
+        // checkboxes below it stay enabled either way, since that round still builds a fresh
+        // local logbook regardless of whether anywhere is configured to publish it.
+        fun updatePublishMethodVisibility() {
+            wordpressFields.visibility = if (wordpressRadio.isChecked) View.VISIBLE else View.GONE
+            sftpFields.visibility = if (sftpRadio.isChecked) View.VISIBLE else View.GONE
+            bootPublishEveryRoundBox.isEnabled = !noPublishRadio.isChecked
+        }
+        publishMethodGroup.setOnCheckedChangeListener { _, _ -> updatePublishMethodVisibility() }
+        // Preselects whatever is already actually configured (isRestUploadConfigComplete/
+        // isSftpConfigComplete require every field of that route to be filled in, not just one),
+        // matching uploadIfConfigured()'s own REST-preferred order. "Don't publish" if neither is
+        // complete yet -- also the correct default on a brand new install, replacing what used to
+        // incorrectly default to WordPress even with nothing filled in at all.
+        when {
+            store.isRestUploadConfigComplete -> wordpressRadio.isChecked = true
+            store.isSftpConfigComplete -> sftpRadio.isChecked = true
+            else -> noPublishRadio.isChecked = true
+        }
+        updatePublishMethodVisibility()
+
         val bootFinalHarbourBox = checkbox(getString(R.string.checkbox_boat_final_harbour), store.bootFinalOnHarbour)
         val bootStationaryField = field(
             getString(R.string.label_boat_harbour_stationary_minutes), store.bootHarbourStationaryMinutes.toString(),
