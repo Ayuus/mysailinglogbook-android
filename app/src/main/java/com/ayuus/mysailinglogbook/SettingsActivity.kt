@@ -71,6 +71,13 @@ class SettingsActivity : AppCompatActivity() {
                 // no custom click handling or icon needed.
                 val inputLayout = TextInputLayout(this).apply {
                     endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                    // Material's default box/underline styling around the field -- found in
+                    // practice, asked for explicitly to fix: it made password fields look
+                    // visibly different (an outline/underline) from every other plain EditText
+                    // on this screen, for no reason other than needing this wrapper at all to
+                    // get the built-in reveal icon. BOX_BACKGROUND_NONE keeps the icon but drops
+                    // the box/underline, matching the plain fields again.
+                    boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_NONE
                 }
                 inputLayout.addView(editText)
                 container.addView(inputLayout)
