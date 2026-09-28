@@ -115,9 +115,9 @@
     <string name="button_clear">Vider</string>
     <string name="toast_cache_cleared">Cache vidé</string>
     <string name="button_cancel">Annuler</string>
-    <string name="button_cache_data">Données</string>
+    <string name="button_cache_data">Données de trajets décodées/assemblées</string>
     <string name="dialog_clear_data_cache_message">Effacer toutes les données de trajets décodées et assemblées ? Le prochain téléchargement décodera et traitera à nouveau chaque fichier .ebl depuis le début (plus long, mais rien n\'est perdu -- les fichiers .ebl eux-mêmes restent en place).</string>
-    <string name="button_cache_places">Noms de lieux</string>
+    <string name="button_cache_places">Noms de lieux, météo et houle</string>
     <string name="dialog_clear_places_cache_message">Effacer tous les noms de lieux, données météo et de houle recherchés ? Le prochain téléchargement les recherchera à nouveau (consomme des données mobiles supplémentaires).</string>
     <string name="button_save">Enregistrer</string>
     <string name="toast_username_password_required">Le nom d\'utilisateur et le mot de passe sont obligatoires</string>

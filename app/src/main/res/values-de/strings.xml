@@ -115,9 +115,9 @@
     <string name="button_clear">Leeren</string>
     <string name="toast_cache_cleared">Cache geleert</string>
     <string name="button_cancel">Abbrechen</string>
-    <string name="button_cache_data">Daten</string>
+    <string name="button_cache_data">Dekodierte/zusammengestellte Fahrtdaten</string>
     <string name="dialog_clear_data_cache_message">Alle dekodierten und zusammengestellten Fahrtdaten löschen? Der nächste Download dekodiert und verarbeitet dann alle .ebl-Dateien erneut von Anfang an (dauert länger, aber es geht nichts verloren -- die .ebl-Dateien selbst bleiben erhalten).</string>
-    <string name="button_cache_places">Ortsnamen</string>
+    <string name="button_cache_places">Ortsnamen, Wetter- und Wellendaten</string>
     <string name="dialog_clear_places_cache_message">Alle abgerufenen Ortsnamen, Wetter- und Wellendaten löschen? Der nächste Download ruft diese dann erneut ab (kostet zusätzliche mobile Daten).</string>
     <string name="button_save">Speichern</string>
     <string name="toast_username_password_required">Benutzername und Passwort sind erforderlich</string>

@@ -314,16 +314,34 @@ class SettingsActivity : AppCompatActivity() {
         // directory. Harmless to call on a file that doesn't exist (or doesn't exist at all yet,
         // e.g. before the very first download) -- deleteRecursively() returns false either way and
         // there's nothing further to do.
-        fun clearCacheButton(label: String, confirmMessage: String, files: () -> List<File>) {
-            layout.addView(
-                // Outlined, not the default filled style -- these are secondary/occasional
-                // actions (asked for explicitly to look nicer, and outlined reads as lower-
-                // emphasis than the filled Opslaan button below without needing a whole separate
-                // color). Full width + a real top margin (not just internal padding, which the
-                // plain Button(this) this replaces was using) matches the full-width fields above
-                // instead of a small, left-aligned, edge-touching button.
-                MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+        // Same row shape as checkbox()'s own label+control pairing -- asked for explicitly,
+        // found in practice: a standalone MaterialButton per cache with its own long label
+        // ("Cache: Data") read as an odd, oversized action compared to every checkbox/field row
+        // around it. Now the descriptive text lives in a plain TextView on the left (like a
+        // checkbox's own label), and the button itself is a small, compact "Legen" on the right.
+        fun clearCacheRow(label: String, confirmMessage: String, files: () -> List<File>) {
+            val row = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = padding }
+            }
+            row.addView(
+                TextView(this).apply {
                     text = label
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                },
+            )
+            row.addView(
+                // Outlined, not the default filled style -- a secondary/occasional action,
+                // outlined reads as lower-emphasis than the filled Opslaan button below without
+                // needing a whole separate color. Fixed 90dp width -- asked for explicitly, found
+                // in practice: sized to just its own "Legen" text alone, the button read as too
+                // small/fiddly a tap target next to a checkbox's own much larger control on
+                // every other row.
+                MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                    text = getString(R.string.button_clear)
                     // MaterialButton's own default style forces all-caps regardless of the
                     // theme's android:textAllCaps=false (see themes.xml's own comment on why
                     // that's set app-wide) -- a style-level attribute wins over a theme-level one
@@ -334,8 +352,8 @@ class SettingsActivity : AppCompatActivity() {
                     // explicitly, to look nicer -- same radius as the Opslaan button below.
                     cornerRadius = (16 * resources.displayMetrics.density).toInt()
                     layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,
-                    ).apply { topMargin = padding }
+                        (90 * resources.displayMetrics.density).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT,
+                    )
                     setOnClickListener {
                         AlertDialog.Builder(this@SettingsActivity)
                             .setMessage(confirmMessage)
@@ -348,15 +366,16 @@ class SettingsActivity : AppCompatActivity() {
                     }
                 },
             )
+            layout.addView(row)
         }
 
-        clearCacheButton(
+        clearCacheRow(
             getString(R.string.button_cache_data),
             getString(R.string.dialog_clear_data_cache_message),
         ) {
             listOf(File(filesDir, "sample_cache.pkl"), File(filesDir, ".trip_cache.pkl"))
         }
-        clearCacheButton(
+        clearCacheRow(
             getString(R.string.button_cache_places),
             getString(R.string.dialog_clear_places_cache_message),
         ) {
