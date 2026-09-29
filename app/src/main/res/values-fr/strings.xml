@@ -9,6 +9,7 @@
     <string name="tooltip_build_local">Assembler le journal</string>
     <string name="tooltip_cancel">Annuler</string>
     <string name="tooltip_view_local">Consulter le journal localement (sans publier)</string>
+    <string name="tooltip_import">Importer des fichiers .ebl depuis SD/USB</string>
     <string name="tooltip_settings">Paramètres</string>
 
     <!-- Startup -->
@@ -55,6 +56,12 @@
     <string name="status_cancel_still_stopping">Encore en train de s\'arrêter ; cela peut prendre encore quelques secondes.</string>
     <string name="status_building_with_existing_data">Assemblage du journal avec les données existantes...</string>
     <string name="error_unexpected">Erreur inattendue : %1$s</string>
+
+    <!-- Importation depuis SD/USB -->
+    <string name="log_import_no_media">Aucune carte SD ni clé USB détectée.</string>
+    <string name="status_importing">Importation des fichiers .ebl...</string>
+    <string name="log_import_no_files">Aucun fichier .ebl trouvé.</string>
+    <string name="log_import_done">%1$d fichier(s) .ebl importé(s).</string>
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Envoi vers ayuus.com (vers WordPress)...</string>

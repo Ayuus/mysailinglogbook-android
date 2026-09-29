@@ -135,6 +135,9 @@ dependencies {
     // EncryptedSharedPreferences for SettingsStore -- W2K-2 credentials and boat identity,
     // replacing nmea2log.ini on Android (see docs/android-app-plan.md).
     implementation("androidx.security:security-crypto:1.1.0")
+    // DocumentFile: recursively walking a SAF folder tree (SD card/USB import) needs its
+    // isDirectory/listFiles(), which plain Uri/ContentResolver calls don't expose directly.
+    implementation("androidx.documentfile:documentfile:1.0.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

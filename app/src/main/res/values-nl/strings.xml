@@ -13,6 +13,7 @@
     <string name="tooltip_build_local">Logboek samenstellen</string>
     <string name="tooltip_cancel">Annuleren</string>
     <string name="tooltip_view_local">Logboek lokaal bekijken (niet publiceren)</string>
+    <string name="tooltip_import">.ebl-bestanden importeren van SD/USB</string>
     <string name="tooltip_settings">Instellingen</string>
 
     <!-- Startup -->
@@ -59,6 +60,12 @@
     <string name="status_cancel_still_stopping">Nog bezig met stoppen; dit kan nog een paar seconden duren.</string>
     <string name="status_building_with_existing_data">Logboek samenstellen met bestaande gegevens...</string>
     <string name="error_unexpected">Onverwachte fout: %1$s</string>
+
+    <!-- Import van SD/USB -->
+    <string name="log_import_no_media">Geen SD-kaart of USB-stick gevonden.</string>
+    <string name="status_importing">.ebl-bestanden importeren...</string>
+    <string name="log_import_no_files">Geen .ebl-bestanden gevonden.</string>
+    <string name="log_import_done">%1$d .ebl-bestand(en) geïmporteerd.</string>
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Uploaden naar ayuus.com (naar WordPress)...</string>

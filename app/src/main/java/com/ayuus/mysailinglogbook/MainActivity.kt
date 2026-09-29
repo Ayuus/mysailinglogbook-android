@@ -11,10 +11,13 @@ import android.provider.Settings
 import androidx.activity.enableEdgeToEdge
 import android.content.pm.PackageManager
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.storage.StorageManager
+import android.os.storage.StorageVolume
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -40,6 +43,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import com.chaquo.python.Python
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -60,6 +64,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var syncButton: Button
     private lateinit var buildButton: Button
+    private lateinit var importButton: Button
     private lateinit var publishButton: Button
     private lateinit var bootButton: Button
     private lateinit var settingsStore: SettingsStore
@@ -83,6 +88,20 @@ class MainActivity : AppCompatActivity() {
 
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op either way */ }
+
+    // The system's own folder picker (Storage Access Framework): surfaces internal storage, any
+    // mounted SD card and any mounted USB drive alike, whichever the OS itself exposes -- no
+    // separate "browse USB" path needed. A plain StartActivityForResult, not the narrower
+    // OpenDocumentTree contract (asked for explicitly): importButton's own onClick needs to hand
+    // in a StorageVolume's own createOpenDocumentTreeIntent() when exactly one is attached, to
+    // jump straight into it instead of the picker's usual "This device" starting point, which
+    // OpenDocumentTree's fixed launch(Uri?) input has no way to express. No result/a cancelled
+    // picker means the user backed out.
+    private val importFolderLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val treeUri = result.data?.data
+            if (result.resultCode == RESULT_OK && treeUri != null) importFromRemovableMedia(treeUri)
+        }
 
     private val decodeProgressRegex = SyncProgress.decodeRegex
     private val buildPhaseMarkers = SyncProgress.buildPhaseMarkers
@@ -150,6 +169,38 @@ class MainActivity : AppCompatActivity() {
         // own doc comment for why.
         syncButton = iconButton(getString(R.string.tooltip_sync), iconRes = R.drawable.ic_download_24) {
             if (SyncState.inProgress) cancelSyncStayInApp() else runSync()
+        }
+        // A second way to get .ebl files onto the device besides syncButton's own W2K-2 download
+        // (asked for explicitly): picks a folder from an SD card or USB drive via the system's own
+        // document picker, copies whatever .ebl files it finds anywhere in there (any nesting --
+        // SD/USB layouts don't have to match Actisense's own folder structure) into the app's own
+        // Actisense folder, then builds/publishes exactly like a normal download would. Placed
+        // right next to syncButton (asked for explicitly): this is a download too in the end, just
+        // from SD/USB instead of the W2K-2.
+        importButton = iconButton(getString(R.string.tooltip_import), iconRes = R.drawable.ic_folder_download_24) {
+            if (SyncState.inProgress) return@iconButton
+            if (bootModeBusy()) return@iconButton
+            // Checked before ever opening the system picker (asked for explicitly): with nothing
+            // removable attached, that picker only ever offers internal folders, which can never
+            // hold anything an import needs -- a log line here is more honest about why than
+            // making the owner navigate a picker just to find that out for themselves.
+            val volumes = removableStorageVolumes()
+            if (volumes.isEmpty()) {
+                handleLogLine("[info] " + getString(R.string.log_import_no_media))
+                return@iconButton
+            }
+            // With exactly one SD card or USB drive attached, jump the picker straight into its
+            // own root (asked for explicitly: "kun je die dan meteen openen?") instead of its
+            // usual "This device" starting point -- the owner still has to tap the system's own
+            // one-time "Allow access" confirmation (Android itself never skips that, no way around
+            // it), but no longer has to navigate there by hand first. Two or more attached at once
+            // falls back to the plain picker instead of guessing which one is meant.
+            val intent = if (volumes.size == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                volumes.single().createOpenDocumentTreeIntent()
+            } else {
+                Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            }
+            importFolderLauncher.launch(intent)
         }
         // Dedicated, always-enabled build button (ic_refresh_24 -- asked for explicitly, replacing
         // the earlier chip/processor glyph; a list-icon option was tried first but sat too close
@@ -252,6 +303,7 @@ class MainActivity : AppCompatActivity() {
             isBaselineAligned = false
             gravity = Gravity.CENTER_VERTICAL
             addView(syncButton)
+            addView(importButton)
             addView(buildButton)
             addView(publishButton)
             addView(viewLocalButton)
@@ -1727,6 +1779,92 @@ class MainActivity : AppCompatActivity() {
                     updateSyncButtonAvailability(logIfNotFound = false)
                     updatePublishButtonEnabled()
                     hideProgressBar()
+                }
+            }
+        }.start()
+    }
+
+    /** Every SD card or USB drive currently mounted -- checked before importButton ever opens the
+     * system folder picker (see its own onClick above), both to skip the picker entirely with
+     * nothing attached and to jump straight into the one that is. StorageManager's own volume
+     * list, not just Environment.getExternalStorageDirectory() (that one only ever covers
+     * internal/primary storage): every non-primary entry here is removable media the OS itself
+     * knows about, SD card or USB drive alike, regardless of how the picker will label it. */
+    private fun removableStorageVolumes(): List<StorageVolume> {
+        val storageManager = getSystemService(STORAGE_SERVICE) as? StorageManager ?: return emptyList()
+        return storageManager.storageVolumes.filter { !it.isPrimary }
+    }
+
+    /** Recursively collects every .ebl file under [dir], at any depth -- SD/USB media doesn't
+     * have to mirror Actisense's own folder structure (asked for explicitly), so this doesn't
+     * assume any particular layout, just walks everything the picked tree contains. */
+    private fun findEblFiles(dir: DocumentFile): List<DocumentFile> {
+        val result = mutableListOf<DocumentFile>()
+        for (child in dir.listFiles()) {
+            if (child.isDirectory) {
+                result += findEblFiles(child)
+            } else if (child.isFile && child.name?.endsWith(".ebl", ignoreCase = true) == true) {
+                result += child
+            }
+        }
+        return result
+    }
+
+    /** importButton's own handler (see importFolderLauncher): copies every .ebl file found
+     * anywhere under the picked tree into a fresh, timestamped subfolder of EblStorage's own
+     * downloadDir() -- never straight into it, so an import can never collide with a file already
+     * there or from an earlier import, whatever the source's own names or nesting look like.
+     * Within one import, a same-named file from two different source subfolders gets a "-1"/"-2"
+     * suffix instead of silently overwriting the first copy (see the destFile loop below).
+     * Once copied, hands off to the exact same buildFromLocalFilesAndMaybePublish() pipeline
+     * runSync()/runOfflineBuild() already use, so the freshly imported files get decoded,
+     * assembled and (per the usual "Automatisch publiceren na bouwen" setting) published like any
+     * other .ebl files already on the device would be. */
+    private fun importFromRemovableMedia(treeUri: Uri) {
+        if (SyncState.inProgress) return
+        if (bootModeBusy()) return
+        importButton.isEnabled = false
+        showingLocalLogbook = false
+        setLogExpanded(true)
+        handleLogLine("[info] " + getString(R.string.status_importing))
+        acquireManualRunWakeLock()
+        Thread {
+            var importedCount = 0
+            try {
+                val sourceRoot = DocumentFile.fromTreeUri(this, treeUri)
+                val sourceFiles = if (sourceRoot != null) findEblFiles(sourceRoot) else emptyList()
+                if (sourceFiles.isEmpty()) {
+                    handleLogLine("[info] " + getString(R.string.log_import_no_files))
+                } else {
+                    val importDir = File(EblStorage.downloadDir(this), "import-${System.currentTimeMillis()}")
+                    importDir.mkdirs()
+                    val importStart = System.currentTimeMillis()
+                    for (sourceFile in sourceFiles) {
+                        val name = sourceFile.name ?: continue
+                        var destFile = File(importDir, name)
+                        var suffix = 1
+                        while (destFile.exists()) {
+                            val dot = name.lastIndexOf('.')
+                            val base = if (dot >= 0) name.substring(0, dot) else name
+                            val ext = if (dot >= 0) name.substring(dot) else ""
+                            destFile = File(importDir, "$base-$suffix$ext")
+                            suffix++
+                        }
+                        contentResolver.openInputStream(sourceFile.uri)?.use { input ->
+                            destFile.outputStream().use { output -> input.copyTo(output) }
+                        }
+                        importedCount++
+                    }
+                    EblStorage.indexForPc(applicationContext, importDir, importStart)
+                    handleLogLine(getString(R.string.log_import_done, importedCount))
+                }
+            } catch (e: Exception) {
+                handleLogLine("[error] " + getString(R.string.error_unexpected, e.toString()))
+            } finally {
+                releaseManualRunWakeLock()
+                withActiveActivity { importButton.isEnabled = true }
+                if (importedCount > 0) {
+                    withActiveActivity { buildFromLocalFilesAndMaybePublish(forcePublish = false) }
                 }
             }
         }.start()

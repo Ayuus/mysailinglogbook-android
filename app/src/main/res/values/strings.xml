@@ -14,6 +14,7 @@
     <string name="tooltip_build_local">Assemble logbook</string>
     <string name="tooltip_cancel">Cancel</string>
     <string name="tooltip_view_local">View logbook locally (don\'t publish)</string>
+    <string name="tooltip_import">Import .ebl files from SD/USB</string>
     <string name="tooltip_settings">Settings</string>
 
     <!-- Startup -->
@@ -63,6 +64,12 @@
     <string name="status_cancel_still_stopping">Still stopping; this can take a few more seconds.</string>
     <string name="status_building_with_existing_data">Assembling logbook with existing data...</string>
     <string name="error_unexpected">Unexpected error: %1$s</string>
+
+    <!-- Import from SD/USB -->
+    <string name="log_import_no_media">No SD card or USB drive detected.</string>
+    <string name="status_importing">Importing .ebl files...</string>
+    <string name="log_import_no_files">No .ebl files found there.</string>
+    <string name="log_import_done">Imported %1$d .ebl file(s).</string>
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Uploading to ayuus.com (to WordPress)...</string>

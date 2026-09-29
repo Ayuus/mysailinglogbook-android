@@ -1,0 +1,17 @@
+<!-- "folder-download-outline" (Material Design Icons, 24dp grid): a folder traced as a thin
+     outline, not a solid block, so it reads at the same visual weight as syncButton/buildButton/
+     publishButton's own thin Material glyphs alongside it (asked for explicitly: an earlier,
+     solid-filled folder+arrow attempt sat too heavy next to them). The downward arrow inside
+     reads as "into this folder", fitting since this button also downloads into the very same
+     Actisense folder syncButton's own ic_download_24 does, just from an SD card or USB drive
+     instead of the W2K-2. fillColor is only a placeholder: iconButton() applies the tint at
+     runtime, like the other icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M20,18H4V8H20M20,6H12L10,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8A2,2 0 0,0 20,6M14,9H16V13H19L15,17L11,13H14Z"/>
+</vector>
