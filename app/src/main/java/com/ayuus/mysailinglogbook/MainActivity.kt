@@ -762,18 +762,20 @@ class MainActivity : AppCompatActivity() {
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
         } else {
-            // The "vul W2K2-gegevens in" line belongs here after all (reinstated -- found in
-            // practice, asked for explicitly: this whole function is only ever reached when
-            // settingsStore.autoSyncOnLaunch is already on -- see onCreate()'s own branching --
-            // meaning the owner explicitly asked for this. Someone who only ever imports from
-            // SD/USB and never touches W2K-2 credentials would have no reason to turn that
-            // setting on in the first place, so they'd never reach this branch either way, nag or
-            // not; the only person this line can ever reach already opted into auto-download and
-            // deserves to know why it isn't happening).
-            handleLogLine("[info] " + getString(R.string.log_fill_w2k2_credentials))
-            // No existing-logbook fallback here either, same reasoning as the hotspot-not-found
-            // branch above (asked for explicitly, "logboek alleen tonen als auto download uit
-            // staat").
+            // Just calls runSync() rather than duplicating its own isW2k2ConfigComplete check
+            // and log_fill_w2k2_credentials line here too (asked for explicitly, "1x is toch
+            // genoeg?") -- runSync() already starts with the exact same check, and produces the
+            // exact same message, for a manual tap on the download button. Retries above exist
+            // purely for the settings-store-still-loading race (see this function's own doc
+            // comment); once those are exhausted, settings are either genuinely complete (handled
+            // by runSync() itself) or genuinely incomplete (also handled by runSync() itself) --
+            // either way, runSync() is the single source of truth for what to do about it. Note
+            // this deliberately does NOT replace the branch above (settings complete, hotspot
+            // reachable): that one's own cheap HotspotDetector precheck before ever calling
+            // runSync() is a real, separate optimisation (asked for explicitly, see its own
+            // comment) to avoid a "Hotspot controleren..." cycle on every single launch away from
+            // the boat -- only this settings-incomplete branch was pure duplication.
+            runSync()
         }
     }
 
