@@ -17,10 +17,10 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Kein privates Netzwerk gefunden (schnelle Vorabprüfung) -- automatischer Download übersprungen.</string>
-    <string name="log_sync_hotspot_not_on">Kein privates Netzwerk gefunden -- Download-Schaltfläche deaktiviert.</string>
-    <string name="log_sync_w2k2_not_found">Kein Actisense W2K-2 gefunden -- Download-Schaltfläche deaktiviert.</string>
     <string name="notif_w2k2_not_found">W2K-2 nicht gefunden.</string>
     <string name="log_fill_w2k2_credentials">Trage zuerst den W2K-2-Benutzernamen und das Passwort in den Einstellungen ein.</string>
+    <string name="log_sync_hotspot_not_on">Kein privates Netzwerk gefunden -- Download-Schaltfläche deaktiviert.</string>
+    <string name="log_sync_w2k2_not_found">Kein Actisense W2K-2 gefunden -- Download-Schaltfläche deaktiviert.</string>
     <string name="status_checking_hotspot">Netzwerk wird geprüft...</string>
     <string name="status_hotspot_off">Kein privates Netzwerk gefunden (oder der W2K-2 ist nicht darauf) -- schalte deinen Hotspot ein oder verbinde dich mit demselben Netzwerk wie der W2K-2, um herunterzuladen.</string>
     <string name="status_listing_files">Dateiliste wird abgerufen (Subnetz %1$s0/24)...</string>
@@ -60,8 +60,18 @@
     <!-- Import von SD/USB -->
     <string name="log_import_no_media">Keine SD-Karte oder USB-Speicher gefunden.</string>
     <string name="status_importing">.ebl-Dateien werden importiert...</string>
+    <string name="status_importing_progress">Importieren: %1$d/%2$d (%3$s)</string>
+    <string name="log_import_copied">Kopiert: %1$s</string>
+    <string name="log_import_already_present">Bereits vorhanden, übersprungen: %1$s</string>
     <string name="log_import_no_files">Keine .ebl-Dateien gefunden.</string>
-    <string name="log_import_done">%1$d .ebl-Datei(en) importiert.</string>
+    <string name="log_import_done">%1$d .ebl-Datei(en) importiert (%2$d bereits vorhanden, übersprungen).</string>
+    <string name="log_import_all_duplicates">Nichts Neues -- alle %1$d gefundenen .ebl-Datei(en) waren bereits vorhanden.</string>
+    <string name="log_import_renamed">Gleicher Name, anderer Inhalt -- beide behalten: %1$s</string>
+    <string name="log_import_file_error">Problem beim Importieren einer Datei: %1$s</string>
+    <string name="log_import_media_disconnected">Verbindung zur SD-Karte/zum USB-Speicher verloren -- erneut anschließen und noch einmal versuchen.</string>
+    <string name="log_import_unreadable">%1$d Element(e) konnten nicht gelesen werden (Verbindung zum Medium möglicherweise zwischendurch unterbrochen) -- erneut versuchen, um das Fehlende noch zu importieren.</string>
+    <string name="log_import_aborted">Import gestoppt: Verbindung zur SD-Karte/zum USB-Speicher verloren nach %1$d von %2$d Datei(en) -- erneut versuchen für den Rest.</string>
+    <string name="phase_importing">Importieren</string>
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Wird auf ayuus.com hochgeladen (zu WordPress)...</string>

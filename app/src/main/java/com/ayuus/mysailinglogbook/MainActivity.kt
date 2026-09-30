@@ -5,7 +5,11 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.enableEdgeToEdge
@@ -47,7 +51,10 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import com.chaquo.python.Python
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.json.JSONObject
 import java.io.File
+import java.io.FileNotFoundException
+import java.util.concurrent.atomic.AtomicBoolean
 import java.security.Security
 
 /**
@@ -180,6 +187,15 @@ class MainActivity : AppCompatActivity() {
         importButton = iconButton(getString(R.string.tooltip_import), iconRes = R.drawable.ic_folder_download_24) {
             if (SyncState.inProgress) return@iconButton
             if (bootModeBusy()) return@iconButton
+            // Switches away from a currently-shown logbook right away, on the tap itself (asked
+            // for explicitly) -- not only once a folder is actually picked (see
+            // importFromRemovableMedia()'s own matching reset): every other toolbar action that
+            // can produce a log line already does this at the moment it's tapped, so this one
+            // logging silently behind an still-visible logbook (the "no media"/"no .ebl files"
+            // outcomes especially -- neither of those ever reaches importFromRemovableMedia() at
+            // all) was the odd one out.
+            showingLocalLogbook = false
+            setLogExpanded(true)
             // Checked before ever opening the system picker (asked for explicitly): with nothing
             // removable attached, that picker only ever offers internal folders, which can never
             // hold anything an import needs -- a log line here is more honest about why than
@@ -465,8 +481,17 @@ class MainActivity : AppCompatActivity() {
      * Harmless to call even when nothing has been cached yet (a download that's only just
      * started, before its very first progress update reached SyncState). */
     private fun restoreLiveSyncUi() {
+        // Same "don't yank the scroll position" check refreshLogView() already applies to every
+        // other incoming line (see isLogScrolledToBottom()'s own doc comment) -- found in
+        // practice, a real bug: this call site had its own unconditional fullScroll() instead,
+        // so reopening the app while reading back through an earlier part of a long-running
+        // import's log threw that reading position away every single time, not just when a
+        // fresh line happened to arrive.
+        val wasAtBottom = isLogScrolledToBottom()
         logView.text = styledLogText(SyncState.lastLogText)
-        logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
+        if (wasAtBottom) {
+            logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
+        }
         val phase = SyncState.lastProgressPhase
         if (phase != null && SyncState.lastProgressTotal > 0) {
             progressBar.visibility = View.VISIBLE
@@ -590,6 +615,8 @@ class MainActivity : AppCompatActivity() {
         val initiator = if (SyncState.inProgress) SyncState.runInitiator ?: RunInitiator.SYNC else null
         val running = initiator != null
         buildButton.isEnabled = !running || initiator == RunInitiator.BUILD
+        importButton.isEnabled = !running || initiator == RunInitiator.IMPORT
+        setBusyAppearance(importButton, initiator == RunInitiator.IMPORT)
         val configured = settingsStore.isRestUploadConfigComplete || settingsStore.isSftpConfigComplete
         val wasEnabled = publishButton.isEnabled
         publishButton.isEnabled = if (running) initiator == RunInitiator.PUBLISH else configured
@@ -1797,12 +1824,26 @@ class MainActivity : AppCompatActivity() {
 
     /** Recursively collects every .ebl file under [dir], at any depth -- SD/USB media doesn't
      * have to mirror Actisense's own folder structure (asked for explicitly), so this doesn't
-     * assume any particular layout, just walks everything the picked tree contains. */
-    private fun findEblFiles(dir: DocumentFile): List<DocumentFile> {
+     * assume any particular layout, just walks everything the picked tree contains.
+     *
+     * [isDisconnected] is checked before each dir.listFiles() call, not a wall-clock timeout
+     * around it (tried first, found wanting, removed -- asked for explicitly, "timers zijn een
+     * slecht idee, effect hangt af van cpu-snelheid"; the real problem it was papering over is
+     * that a blocked SAF read over a genuinely gone connection can't be force-cancelled from here
+     * at all, timer or not -- found in practice, the same session: the read only ever actually
+     * failed once Android itself noticed the drive was gone and tore the connection down, not
+     * because of anything a timeout did). importFromRemovableMedia() registers a real,
+     * event-driven listener for exactly that OS-level "the drive is gone now" signal (see its own
+     * comment) instead of guessing at how long is too long to wait -- this just stops the scan
+     * from *starting* another subtree once that signal has actually arrived, same reasoning as
+     * stageForImport()'s own check. */
+    private fun findEblFiles(dir: DocumentFile, isDisconnected: () -> Boolean): List<DocumentFile> {
+        if (isDisconnected()) return emptyList()
         val result = mutableListOf<DocumentFile>()
         for (child in dir.listFiles()) {
+            if (isDisconnected()) break
             if (child.isDirectory) {
-                result += findEblFiles(child)
+                result += findEblFiles(child, isDisconnected)
             } else if (child.isFile && child.name?.endsWith(".ebl", ignoreCase = true) == true) {
                 result += child
             }
@@ -1810,59 +1851,338 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    /** importButton's own handler (see importFolderLauncher): copies every .ebl file found
-     * anywhere under the picked tree into a fresh, timestamped subfolder of EblStorage's own
-     * downloadDir() -- never straight into it, so an import can never collide with a file already
-     * there or from an earlier import, whatever the source's own names or nesting look like.
-     * Within one import, a same-named file from two different source subfolders gets a "-1"/"-2"
-     * suffix instead of silently overwriting the first copy (see the destFile loop below).
-     * Once copied, hands off to the exact same buildFromLocalFilesAndMaybePublish() pipeline
+    /** Same two patterns nmea2log's own logfile_layout.py/import_ebl.py check the archive
+     * against (kept in sync by hand -- this is Kotlin, that's Python, neither can import the
+     * other's regex). Used only to decide, while staging, whether a picked file's own immediate
+     * parent folder name is worth preserving (see stageForImport() below); import_ebl.py re-
+     * checks the same thing itself once the files are on local disk, so a wrong guess here just
+     * means that one file is treated as a loose, non-EBLnnnnnn file instead -- never a crash. */
+    private val eblFolderName = Regex("^EBL\\d{6}$")
+    private val eblFileName = Regex("^\\d{6}_\\d{3}\\.ebl$")
+
+    /** Copies every .ebl file found under the picked SAF tree into a local scratch directory
+     * import_ebl.py can actually open (a content:// Uri isn't a path plain Python can read) --
+     * preserving each source file's own immediate parent folder name when it looks like one of
+     * the W2K-2's own "EBLnnnnnn" folders (see import_ebl.py's own module doc comment for why
+     * that identity matters), so that module can tell a real W2K-2 session apart from an
+     * arbitrary one. A same-named loose (non-EBLnnnnnn) file colliding with an earlier one in
+     * this same batch gets a "-1"/"-2" suffix here, purely to survive the copy itself -- distinct
+     * loose files landing under slightly different names in the archive is harmless; silently
+     * losing one of them to a same-name overwrite before import_ebl.py even sees it would not be.
+     * Reports [onProgress] (current, total, this file's own name) after each file so the caller
+     * can drive the same progress bar/status-text/notification runSync()'s own per-file report()
+     * already does (asked for explicitly, "uniformiteit is belangrijk": copying a real USB
+     * drive's worth of files one SAF round-trip at a time is itself slow enough to need its own
+     * visible progress, the same way download already shows one file at a time passing by).
+     * Returns the staged files' own paths, ready to hand to import_staged_ebl_files_json(), and
+     * how many of [sourceFiles] could not actually be read (see the loop's own comment) --
+     * silently importing fewer files than were found, with no sign anything was skipped, is
+     * worse than a slower import: found in practice, a real, serious bug -- a USB drive whose
+     * own SAF provider started failing queries partway through a 594-file scan (Android's
+     * DocumentFile swallows that failure internally and returns a null name/false isFile instead
+     * of raising it, logging only its own "W DocumentFile: Failed query" line nothing in this
+     * app ever saw) silently dropped 552 of those 594 files from the import with a perfectly
+     * clean-looking "42 .ebl-bestand(en) geïmporteerd" success line -- and, compounding that,
+     * those files' own EBLnnnnnn folder name happened to already exist as a normal download
+     * elsewhere without a year layer (a *separate* bug, now fixed in import_ebl.py's own
+     * _find_existing_ebl_folder()), so the 42 that did make it in were quietly duplicated on disk
+     * instead of being recognized as already present.
+     *
+     * Gives up on the rest of [sourceFiles] the moment [isDisconnected] says so -- checked before
+     * each file, not a wall-clock timeout around each read (see findEblFiles()'s own doc comment
+     * for why that was tried first and removed: this is the same real, event-driven "the drive is
+     * gone" signal, not a guess). A per-file try/catch still covers an ordinary read failure that
+     * *doesn't* come with that signal (one flaky file among otherwise-good ones, still rare but
+     * not unheard of) -- that alone never aborts anything, just counts as unreadable and moves on;
+     * only [isDisconnected] itself stops the loop early.
+     *
+     * Returns the staged files' own paths, how many of [sourceFiles] could not actually be read,
+     * and whether [isDisconnected] is why the loop stopped short of the full list. */
+    private fun stageForImport(
+        sourceFiles: List<DocumentFile>,
+        stagingDir: File,
+        isDisconnected: () -> Boolean,
+        onProgress: (Int, Int, String) -> Unit,
+    ): Triple<List<File>, Int, Boolean> {
+        val staged = mutableListOf<File>()
+        var unreadable = 0
+        for ((index, sourceFile) in sourceFiles.withIndex()) {
+            if (isDisconnected()) {
+                return Triple(staged, unreadable, true)
+            }
+            // A null name here is the actual symptom of the SAF query failure findEblFiles()'s
+            // own doc comment describes, not a real property of the file -- every DocumentFile it
+            // returns passed this same check once already, during the scan; this can still be the
+            // first time it fails for a given file, since DocumentFile re-queries the provider on
+            // every access rather than caching what listFiles() first saw.
+            val name = sourceFile.name
+            if (name == null) {
+                unreadable++
+                onProgress(index + 1, sourceFiles.size, "?")
+                continue
+            }
+            val parentName = sourceFile.parentFile?.name.orEmpty()
+            val destDir = if (eblFolderName.matches(parentName) && eblFileName.matches(name)) {
+                File(stagingDir, parentName)
+            } else {
+                stagingDir
+            }
+            destDir.mkdirs()
+            var destFile = File(destDir, name)
+            var suffix = 1
+            while (destFile.exists()) {
+                val dot = name.lastIndexOf('.')
+                val base = if (dot >= 0) name.substring(0, dot) else name
+                val ext = if (dot >= 0) name.substring(dot) else ""
+                destFile = File(destDir, "$base-$suffix$ext")
+                suffix++
+            }
+            // A per-file try/catch, not the whole loop's own (see importFromRemovableMedia()'s
+            // own FileNotFoundException/SecurityException handling, still there for a connection
+            // lost before staging ever starts) -- one flaky file out of hundreds shouldn't abort
+            // an otherwise-good import; unreadable's own count and the [warning] line it drives
+            // surfaces the problem instead of hiding it, without throwing away what did work.
+            //
+            // Up to FILE_READ_MAX_RETRIES retries (three attempts total) before giving up on this
+            // one file, the same convention w2k2_download.py's own _DOWNLOAD_MAX_RETRIES (and
+            // geocode.py's/open_meteo.py's own lookup retries) already use for a single transient
+            // failure -- asked for explicitly, "graag in totaal 3x proberen, net als bij url's".
+            // A short pause between attempts, not on the first one -- same shape as that Python
+            // retry loop's own "if attempt: sleep(...)" -- gives a momentary provider hiccup a
+            // real chance to clear before trying again, instead of hammering it back to back.
+            // Doesn't help a *hung* read that never returns at all (no attempt ever finishes, so
+            // there's nothing here to retry) -- that's isDisconnected()'s own job, checked at the
+            // top of this loop, not this.
+            var copied = false
+            for (attempt in 0..FILE_READ_MAX_RETRIES) {
+                if (attempt > 0) Thread.sleep(FILE_READ_RETRY_DELAY_MS)
+                copied = try {
+                    contentResolver.openInputStream(sourceFile.uri)?.use { input ->
+                        destFile.outputStream().use { output -> input.copyTo(output) }
+                        true
+                    } ?: false
+                } catch (e: java.io.IOException) {
+                    false
+                }
+                if (copied) break
+            }
+            if (!copied || destFile.length() == 0L) {
+                destFile.delete()
+                unreadable++
+                onProgress(index + 1, sourceFiles.size, name)
+                continue
+            }
+            staged += destFile
+            onProgress(index + 1, sourceFiles.size, name)
+        }
+        return Triple(staged, unreadable, false)
+    }
+
+    /** importButton's own handler (see importFolderLauncher): stages every .ebl file found under
+     * the picked tree (see stageForImport() above), then hands the staged paths to nmea2log's
+     * shared import_ebl.import_staged_ebl_files() (via android_entry's JSON-wrapped
+     * import_staged_ebl_files_json() -- see its own doc comment for why a JSON string, not the
+     * raw dict, crosses the Chaquopy boundary here) -- that module owns the actual placement
+     * (by year, preserving the source's own EBLnnnnnn structure), duplicate-skip and reformatted-
+     * SD-card-collision handling, exactly the same way for both this app and the iOS one. Once
+     * imported, hands off to the exact same buildFromLocalFilesAndMaybePublish() pipeline
      * runSync()/runOfflineBuild() already use, so the freshly imported files get decoded,
      * assembled and (per the usual "Automatisch publiceren na bouwen" setting) published like any
      * other .ebl files already on the device would be. */
     private fun importFromRemovableMedia(treeUri: Uri) {
         if (SyncState.inProgress) return
         if (bootModeBusy()) return
-        importButton.isEnabled = false
         showingLocalLogbook = false
         setLogExpanded(true)
-        handleLogLine("[info] " + getString(R.string.status_importing))
+        // Same "a run is in progress" bookkeeping runSync()/buildFromLocalFilesAndMaybePublish()
+        // use (asked for explicitly, found in practice: importButton.isEnabled = false on its own
+        // left syncButton/buildButton/publishButton fully tappable during an import, unlike every
+        // other long-running action here) -- updatePublishButtonEnabled() below now disables
+        // those and pulses importButton itself the same way, purely from this state. Also
+        // required for the real system notification just below: without lastStatusText/
+        // lastNotificationText set and a real notification actually up, onResume()'s own restore
+        // logic (see its own doc comment on SyncState.lastNotificationText) found inProgress=true
+        // with nothing to restore from and fell back to "Downloaden loopt al...", which read as a
+        // stale/wrong download notification rather than the import actually running.
+        SyncState.inProgress = true
+        SyncState.runInitiator = RunInitiator.IMPORT
+        SyncState.lastStatusText = getString(R.string.status_importing)
+        SyncState.lastNotificationText = SyncState.lastStatusText
+        handleLogLine("[info] ${SyncState.lastStatusText}")
+        val startIntent = Intent(this, SyncNotificationService::class.java)
+            .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, SyncState.lastStatusText)
+        startSyncNotification(startIntent)
+        updatePublishButtonEnabled()
         acquireManualRunWakeLock()
+        // A real, event-driven "the removable drive is gone" signal, not a wall-clock timeout
+        // around each SAF read (asked for explicitly, "timers zijn een slecht idee" -- see
+        // findEblFiles()'s own doc comment for the full reasoning and what was tried first).
+        // ACTION_MEDIA_* covers an SD card being ejected/removed the normal way; USB_DEVICE_DETACHED
+        // covers a USB drive being physically unplugged -- registered together since either kind
+        // of media can be picked here, and there's no way to know ahead of time which this is.
+        val mediaDisconnected = AtomicBoolean(false)
+        val mediaDisconnectReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                mediaDisconnected.set(true)
+            }
+        }
+        registerReceiver(
+            mediaDisconnectReceiver,
+            IntentFilter().apply {
+                addAction(Intent.ACTION_MEDIA_REMOVED)
+                addAction(Intent.ACTION_MEDIA_BAD_REMOVAL)
+                addAction(Intent.ACTION_MEDIA_EJECT)
+                addDataScheme("file")
+            },
+        )
+        registerReceiver(mediaDisconnectReceiver, IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED))
         Thread {
             var importedCount = 0
+            val stagingDir = File(cacheDir, "ebl-import-${System.currentTimeMillis()}")
             try {
                 val sourceRoot = DocumentFile.fromTreeUri(this, treeUri)
-                val sourceFiles = if (sourceRoot != null) findEblFiles(sourceRoot) else emptyList()
+                val sourceFiles = if (sourceRoot != null) findEblFiles(sourceRoot) { mediaDisconnected.get() } else emptyList()
                 if (sourceFiles.isEmpty()) {
                     handleLogLine("[info] " + getString(R.string.log_import_no_files))
                 } else {
-                    val importDir = File(EblStorage.downloadDir(this), "import-${System.currentTimeMillis()}")
-                    importDir.mkdirs()
-                    val importStart = System.currentTimeMillis()
-                    for (sourceFile in sourceFiles) {
-                        val name = sourceFile.name ?: continue
-                        var destFile = File(importDir, name)
-                        var suffix = 1
-                        while (destFile.exists()) {
-                            val dot = name.lastIndexOf('.')
-                            val base = if (dot >= 0) name.substring(0, dot) else name
-                            val ext = if (dot >= 0) name.substring(dot) else ""
-                            destFile = File(importDir, "$base-$suffix$ext")
-                            suffix++
-                        }
-                        contentResolver.openInputStream(sourceFile.uri)?.use { input ->
-                            destFile.outputStream().use { output -> input.copyTo(output) }
-                        }
-                        importedCount++
+                    stagingDir.mkdirs()
+                    val (staged, unreadableCount, abortedEarly) = stageForImport(
+                        sourceFiles, stagingDir, { mediaDisconnected.get() },
+                    ) { current, total, fileName ->
+                        updateProgressBar(getString(R.string.phase_importing), current, total)
+                        // Same per-file notification/status-text update as a download's own
+                        // SyncController.report() (asked for explicitly, "uniformiteit is
+                        // belangrijk") -- the file name visibly cycling in the notification
+                        // shade is what "elk bestand voorbijkomen" was actually describing there,
+                        // not a per-file log line (report() deliberately skips one of those too,
+                        // for the same reason: easily hundreds of files, see its own comment).
+                        val text = getString(R.string.status_importing_progress, current, total, fileName)
+                        SyncState.lastStatusText = text
+                        SyncState.lastNotificationText = text
+                        // Not wrapped in withActiveActivity (unlike updateProgressBar() above,
+                        // which already does its own internally): Context.startService()/
+                        // startForegroundService() are safe to call off the main thread, same as
+                        // SyncController.report()'s own matching call for a download.
+                        startSyncNotification(
+                            Intent(this, SyncNotificationService::class.java)
+                                .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text),
+                        )
                     }
-                    EblStorage.indexForPc(applicationContext, importDir, importStart)
-                    handleLogLine(getString(R.string.log_import_done, importedCount))
+                    if (abortedEarly) {
+                        // See stageForImport()'s own doc comment: five failures in a row (the
+                        // actual signature of the whole connection being gone, not just one bad
+                        // file) stops the scan there instead of racing through every remaining
+                        // file -- each failing near-instantly -- to a misleadingly "complete"
+                        // progress bar (asked for explicitly, found in practice: that's exactly
+                        // what pulling the drive mid-import looked like before this). Just this
+                        // one [error] line, not also the plain [warning] below (asked for
+                        // explicitly, found in practice: showing both for the same underlying
+                        // "the drive is gone" event read as two different problems instead of
+                        // one) -- unreadableCount here is a subset of what this line already
+                        // explains (staged.size vs. sourceFiles.size), not separate information.
+                        handleLogLine(
+                            "[error] " + getString(R.string.log_import_aborted, staged.size, sourceFiles.size),
+                        )
+                    } else if (unreadableCount > 0) {
+                        // Scattered, non-consecutive failures that never reached the abort
+                        // threshold -- a real, standalone problem worth its own line here, unlike
+                        // the aborted case above where it would just repeat what that [error]
+                        // line already says.
+                        handleLogLine("[warning] " + getString(R.string.log_import_unreadable, unreadableCount))
+                    }
+                    val importStart = System.currentTimeMillis()
+                    val actisenseDir = EblStorage.downloadDir(this)
+                    // One line per file, what actually happened to it (asked for explicitly,
+                    // "ook melden wat je ermee hebt gedaan"), reported live as each file actually
+                    // lands -- the same "Python calls back into Kotlin per file, during its own
+                    // real work" shape SyncController.report() already uses for a download (see
+                    // ImportProgressCallback's own doc comment: root-caused, not the earlier fix
+                    // here, which tried to fake this from the Kotlin side after
+                    // import_staged_ebl_files_json() had already finished all the real work,
+                    // with nothing left to pace a replay loop over its own, already-decided
+                    // result).
+                    val progressCallback = object : ImportProgressCallback {
+                        override fun report(current: Int, total: Int, name: String, outcome: String) {
+                            when (outcome) {
+                                "imported" -> handleLogLine("[info] " + getString(R.string.log_import_copied, name))
+                                "skipped_duplicate" -> handleLogLine("[info] " + getString(R.string.log_import_already_present, name))
+                            }
+                            updateProgressBar(getString(R.string.phase_importing), current, total)
+                        }
+                    }
+                    val resultJson = Python.getInstance().getModule("nmea2log.android_entry").callAttr(
+                        "import_staged_ebl_files_json",
+                        staged.map { it.absolutePath }.toTypedArray(),
+                        actisenseDir.absolutePath,
+                        progressCallback,
+                    ).toString()
+                    val result = JSONObject(resultJson)
+                    importedCount = result.getInt("imported")
+                    val skipped = result.getInt("skipped_duplicate")
+                    // A same name that turned out to hold different content (a reformatted SD
+                    // card reusing an EBLnnnnnn folder, or two unrelated loose files sharing a
+                    // name) -- see import_ebl.py's own doc comment. Nothing was lost (both are
+                    // kept, under different names), but it's worth flagging more than a plain
+                    // import, hence [warning] rather than [info] (asked for explicitly).
+                    val renamed = result.getJSONArray("renamed")
+                    for (i in 0 until renamed.length()) {
+                        handleLogLine("[warning] " + getString(R.string.log_import_renamed, renamed.getString(i)))
+                    }
+                    val errors = result.getJSONArray("errors")
+                    for (i in 0 until errors.length()) {
+                        handleLogLine("[warning] " + getString(R.string.log_import_file_error, errors.getString(i)))
+                    }
+                    if (importedCount > 0) {
+                        handleLogLine(getString(R.string.log_import_done, importedCount, skipped))
+                        EblStorage.indexForPc(applicationContext, actisenseDir, importStart)
+                    } else if (skipped > 0) {
+                        handleLogLine("[info] " + getString(R.string.log_import_all_duplicates, skipped))
+                    } else {
+                        handleLogLine("[info] " + getString(R.string.log_import_no_files))
+                    }
                 }
+            } catch (e: FileNotFoundException) {
+                // The SD card/USB drive was pulled mid-import (asked for explicitly: this used to
+                // fall through to the generic "Unexpected error: java.io.FileNotFoundException:
+                // ..." below, which read as an app bug rather than the mundane, expected "the
+                // cable/card came loose" it actually was every time it was seen in practice).
+                handleLogLine("[error] " + getString(R.string.log_import_media_disconnected))
+            } catch (e: SecurityException) {
+                // Same underlying cause as above -- removing the media (or just its own OS-level
+                // permission grant expiring) revokes this app's access to the picked tree, which
+                // surfaces as a SecurityException on the next SAF call rather than a
+                // FileNotFoundException.
+                handleLogLine("[error] " + getString(R.string.log_import_media_disconnected))
             } catch (e: Exception) {
                 handleLogLine("[error] " + getString(R.string.error_unexpected, e.toString()))
             } finally {
+                try {
+                    unregisterReceiver(mediaDisconnectReceiver)
+                } catch (e: IllegalArgumentException) {
+                    // Already unregistered, or never actually registered (both registerReceiver()
+                    // calls above throwing would have skipped straight past the try block that
+                    // needed this) -- never actually reachable given the two calls right before
+                    // Thread{}.start() above always run first, but harmless either way.
+                }
+                stagingDir.deleteRecursively()
                 releaseManualRunWakeLock()
-                withActiveActivity { importButton.isEnabled = true }
+                // No completion notification of its own here (unlike download/build's own
+                // finally blocks) -- deliberately: an import that found anything to import always
+                // continues straight into buildFromLocalFilesAndMaybePublish() below, which starts
+                // its own fresh notification and posts its own "Klaar" completion when *that*
+                // finishes -- posting one here too would just be two notifications in a row for
+                // what reads as one action from the owner's side. Still stopped/reset here so that
+                // fresh notification actually starts fresh, instead of trying to update this
+                // (about to be pointless) one.
+                stopService(Intent(this, SyncNotificationService::class.java))
+                SyncState.notificationForegrounded = false
+                SyncState.notificationStartFailed = false
+                SyncState.inProgress = false
+                SyncState.runInitiator = null
+                withActiveActivity {
+                    updatePublishButtonEnabled()
+                    hideProgressBar()
+                }
                 if (importedCount > 0) {
                     withActiveActivity { buildFromLocalFilesAndMaybePublish(forcePublish = false) }
                 }
@@ -2247,6 +2567,15 @@ class MainActivity : AppCompatActivity() {
         // own rounds, so this matches BootModeService's WAKE_LOCK_TIMEOUT_MS rather than a short
         // one meant for a single quick operation.
         private const val WAKE_LOCK_TIMEOUT_MS = 6 * 60 * 60 * 1000L
+
+        // stageForImport()'s own per-file retry count -- three attempts total, the same
+        // convention w2k2_download.py's own _DOWNLOAD_MAX_RETRIES (and every other lookup retry
+        // in that codebase) already uses; _RETRY_DELAY_MS mirrors that module's own
+        // _DOWNLOAD_RETRY_DELAY_S the same way (a short, local-I/O-scaled pause, not a network
+        // one -- there's no round trip to a remote server to wait out here, just a SAF provider
+        // that might need a moment).
+        private const val FILE_READ_MAX_RETRIES = 2
+        private const val FILE_READ_RETRY_DELAY_MS = 500L
 
         // A mid-tone red (Material's "red 700") for styledLogText()'s own "[error]" highlight --
         // readable against both a light and a dark system theme, since the log view itself has no

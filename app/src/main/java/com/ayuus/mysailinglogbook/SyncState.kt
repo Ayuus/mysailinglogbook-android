@@ -131,4 +131,4 @@ object SyncState {
     var lastProgressTotal: Int = 0
 }
 
-enum class RunInitiator { SYNC, BUILD, PUBLISH }
+enum class RunInitiator { SYNC, BUILD, PUBLISH, IMPORT }

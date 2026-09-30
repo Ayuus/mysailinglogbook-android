@@ -64,7 +64,9 @@ the signal it uses to tell "I'm on the boat" from any other network the phone mi
 
 ### The toolbar
 
-Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **build**
+Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **import**
+(copy `.ebl` files from an SD card or USB drive instead -- no W2K-2 needed, e.g. a card pulled
+straight from the instrument -- then build/publish exactly like a normal download would), **build**
 (build the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
 the current logbook to the website configured in Settings), **view logbook** (show the
