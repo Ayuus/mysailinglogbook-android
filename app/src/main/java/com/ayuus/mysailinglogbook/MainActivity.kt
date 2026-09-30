@@ -348,6 +348,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(layout)
         indexExistingEblFilesForPcOnce()
+        cleanUpOrphanedImportStagingDirs()
         updatePublishButtonEnabled()
         updateBootButton()
         updateSyncButtonAvailability()
@@ -1071,6 +1072,37 @@ class MainActivity : AppCompatActivity() {
             val dir = File(base, "Actisense")
             if (dir.exists()) indexEblFilesForPc(dir, 0L)
             prefs.edit().putBoolean(KEY_EBL_INDEXED_FOR_PC, true).apply()
+        }.start()
+    }
+
+    /** Deletes any `ebl-import-*` staging directory left behind under cacheDir by a previous
+     * importFromRemovableMedia() run that never reached its own finally block -- found in
+     * practice to be a real gap, asked about explicitly ("wordt lokale scratch-map opgeruimd
+     * onder alle omstandigheden?"): that finally block's own stagingDir.deleteRecursively() (see
+     * importFromRemovableMedia()'s own comment) covers every exception this app's own code can
+     * catch, but not the process being killed outright mid-import (force-stop, the OS's low-
+     * memory killer, a crash) -- nothing runs then, so that one run's own staging directory (named
+     * with that run's own start time, never reused) is simply orphaned, and a future run's own
+     * cleanup only ever deletes its own directory, not an older one left by a previous run.
+     *
+     * SyncState.inProgress guard is required, not just cheap insurance -- onCreate() (this
+     * function's only caller) runs on every Activity recreation, not only a genuinely fresh
+     * process launch, and an import's own background Thread (unlike a download, not tied to any
+     * Service) keeps running across a recreation the same process is still hosting; without this
+     * check, a rotation or task-switch-and-return landing mid-import would sweep away the exact
+     * staging directory that Thread is still actively reading from. Skipped for any run in
+     * progress, not only an import specifically -- simpler, and free either way: nothing to clean
+     * up yet if a download/build/publish is what's actually running, so the only cost of being
+     * this conservative is trying again on the next launch, once nothing is running to protect.
+     *
+     * Otherwise run on every launch, off the main thread (a leftover directory from a large,
+     * interrupted import could hold hundreds of files) -- cacheDir is exclusive to this app, so
+     * deleting whatever matches this name pattern is safe once nothing could still be using it. */
+    private fun cleanUpOrphanedImportStagingDirs() {
+        if (SyncState.inProgress) return
+        Thread {
+            cacheDir.listFiles { file -> file.isDirectory && file.name.startsWith("ebl-import-") }
+                ?.forEach { it.deleteRecursively() }
         }.start()
     }
 
