@@ -418,7 +418,7 @@ class SettingsActivity : AppCompatActivity() {
                 // -- someone who only ever imports from a card has no reason to have W2K-2
                 // credentials at all, and blocking Save entirely until they typed something into
                 // both fields made every other setting on this screen unreachable too, not just
-                // the download feature). runSync() itself still shows a clear message the moment
+                // the download feature). runDownload() itself still shows a clear message the moment
                 // the owner actually presses the download button with incomplete settings -- see
                 // its own isW2k2ConfigComplete check -- which is the only point this was ever
                 // actually actionable information for them.

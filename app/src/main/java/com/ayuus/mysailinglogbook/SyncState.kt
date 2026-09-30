@@ -5,7 +5,7 @@ package com.ayuus.mysailinglogbook
  * recreation, e.g. a screen rotation -- an instance field would reset to false on a new
  * MainActivity instance even though the background sync Thread from the previous instance is
  * still running, which would let a rotation start a second, fully concurrent sync the same way
- * a double-tap used to (see MainActivity.runSync()).
+ * a double-tap used to (see MainActivity.runDownload()).
  */
 object SyncState {
     @Volatile
@@ -40,7 +40,7 @@ object SyncState {
      * onResume(), cleared in onPause() -- see both there.
      *
      * A sync's background Thread is started by, and stays lexically bound to, whichever Activity
-     * instance was current at the time (see runSync()/syncFromW2k2()) -- found in practice, a
+     * instance was current at the time (see runDownload()/syncFromW2k2()) -- found in practice, a
      * real bug: once that specific instance stopped being the one on screen (recreated for any
      * reason -- reopening the app after it was backgrounded turned out to be enough, not just a
      * screen rotation, which android:configChanges on its own only covers), every further
@@ -102,4 +102,4 @@ object SyncState {
     var lastProgressTotal: Int = 0
 }
 
-enum class RunInitiator { SYNC, BUILD, PUBLISH, IMPORT }
+enum class RunInitiator { DOWNLOAD, BUILD, PUBLISH, IMPORT }

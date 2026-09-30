@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var logView: TextView
     private lateinit var logScroll: ScrollView
     private lateinit var webView: WebView
-    private lateinit var syncButton: Button
+    private lateinit var downloadButton: Button
     private lateinit var buildButton: Button
     private lateinit var importButton: Button
     private lateinit var publishButton: Button
@@ -174,15 +174,15 @@ class MainActivity : AppCompatActivity() {
         // word for that one-directional flow. Tapping it while a download (or offline build) is
         // already running cancels it instead of starting a new one -- see cancelSyncStayInApp()'s
         // own doc comment for why.
-        syncButton = iconButton(getString(R.string.tooltip_sync), iconRes = R.drawable.ic_download_24) {
-            if (SyncState.inProgress) cancelSyncStayInApp() else runSync()
+        downloadButton = iconButton(getString(R.string.tooltip_sync), iconRes = R.drawable.ic_download_24) {
+            if (SyncState.inProgress) cancelSyncStayInApp() else runDownload()
         }
-        // A second way to get .ebl files onto the device besides syncButton's own W2K-2 download
+        // A second way to get .ebl files onto the device besides downloadButton's own W2K-2 download
         // (asked for explicitly): picks a folder from an SD card or USB drive via the system's own
         // document picker, copies whatever .ebl files it finds anywhere in there (any nesting --
         // SD/USB layouts don't have to match Actisense's own folder structure) into the app's own
         // Actisense folder, then builds/publishes exactly like a normal download would. Placed
-        // right next to syncButton (asked for explicitly): this is a download too in the end, just
+        // right next to downloadButton (asked for explicitly): this is a download too in the end, just
         // from SD/USB instead of the W2K-2.
         importButton = iconButton(getString(R.string.tooltip_import), iconRes = R.drawable.ic_folder_download_24) {
             if (SyncState.inProgress) return@iconButton
@@ -318,7 +318,7 @@ class MainActivity : AppCompatActivity() {
             // future button goes back to a plain-emoji label.
             isBaselineAligned = false
             gravity = Gravity.CENTER_VERTICAL
-            addView(syncButton)
+            addView(downloadButton)
             addView(importButton)
             addView(buildButton)
             addView(publishButton)
@@ -452,7 +452,7 @@ class MainActivity : AppCompatActivity() {
         if (!isChangingConfigurations) {
             SyncState.cancelled = true
             // Stopped here directly, not left to the background Thread's own finally block (see
-            // runSync()) -- that block only runs once the Python side notices isCancelled() and
+            // runDownload()) -- that block only runs once the Python side notices isCancelled() and
             // unwinds, which can take a while if it's currently blocked inside a single blocking
             // HTTP call (login, folder listing, a whole file's download) with no cancellation
             // check until that call returns (found in practice: the notification stayed on screen
@@ -527,7 +527,7 @@ class MainActivity : AppCompatActivity() {
      * background; whether it is on is what the service persisted (BootModeStateStore). */
     private fun toggleBootMode() {
         // The mode reports through the log, so bring it back over the logbook -- like a sync or build
-        // does when it starts (see runSync()); otherwise its lines land in a log nobody can see.
+        // does when it starts (see runDownload()); otherwise its lines land in a log nobody can see.
         showingLocalLogbook = false
         setLogExpanded(true)
         if (BootModeStateStore(this).isActive) sendBootAction(BootModeService.ACTION_STOP) else startBootMode()
@@ -613,7 +613,7 @@ class MainActivity : AppCompatActivity() {
         // While a run is in progress, the button that started it stays enabled and pulses (tapping
         // it cancels, see cancelSyncStayInApp()) -- the same toggle for the download button, the
         // build button and the publish button alike -- while the other two stay disabled.
-        val initiator = if (SyncState.inProgress) SyncState.runInitiator ?: RunInitiator.SYNC else null
+        val initiator = if (SyncState.inProgress) SyncState.runInitiator ?: RunInitiator.DOWNLOAD else null
         val running = initiator != null
         buildButton.isEnabled = !running || initiator == RunInitiator.BUILD
         importButton.isEnabled = !running || initiator == RunInitiator.IMPORT
@@ -626,7 +626,7 @@ class MainActivity : AppCompatActivity() {
         }
         setBusyAppearance(buildButton, initiator == RunInitiator.BUILD)
         setBusyAppearance(publishButton, initiator == RunInitiator.PUBLISH)
-        setBusyAppearance(syncButton, initiator == RunInitiator.SYNC)
+        setBusyAppearance(downloadButton, initiator == RunInitiator.DOWNLOAD)
         ViewCompat.setTooltipText(
             publishButton,
             getString(
@@ -646,8 +646,8 @@ class MainActivity : AppCompatActivity() {
             // build/publish runs it is just disabled (updateSyncButtonAvailability() takes over
             // again once nothing is running -- its own hotspot/W2K-2 check decides isEnabled
             // then, not this function).
-            syncButton.isEnabled = initiator == RunInitiator.SYNC
-            if (initiator == RunInitiator.SYNC) ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_cancel))
+            downloadButton.isEnabled = initiator == RunInitiator.DOWNLOAD
+            if (initiator == RunInitiator.DOWNLOAD) ViewCompat.setTooltipText(downloadButton, getString(R.string.tooltip_cancel))
         }
     }
 
@@ -681,16 +681,16 @@ class MainActivity : AppCompatActivity() {
      * android_entry.discover_w2k2_only() over the network) ran again on every onCreate()/onResume(),
      * which in practice meant a fresh "Geen Actisense W2K-2 gevonden" log line every time the app
      * so much as came back to the foreground -- confusing repetition, not useful information.
-     * runSync() already does the exact same single-attempt, no-retry check (HotspotDetector, then
+     * runDownload() already does the exact same single-attempt, no-retry check (HotspotDetector, then
      * discover_w2k2() as syncFromW2k2()'s own first step) the instant the button is actually
      * pressed, and already reports a clean "not found" outcome on its own -- nothing here needs to
-     * duplicate that ahead of time. Like updatePublishButtonEnabled(), never overrides syncButton
+     * duplicate that ahead of time. Like updatePublishButtonEnabled(), never overrides downloadButton
      * while a download is already in progress (it deliberately stays enabled then, to double as
      * the cancel button). */
     private fun updateSyncButtonAvailability() {
         if (SyncState.inProgress) return
-        syncButton.isEnabled = true
-        ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_sync))
+        downloadButton.isEnabled = true
+        ViewCompat.setTooltipText(downloadButton, getString(R.string.tooltip_sync))
     }
 
     /** Found in practice, still not fully understood at the OS level: right after this Activity's
@@ -704,8 +704,8 @@ class MainActivity : AppCompatActivity() {
      *
      * Retries a few times, spaced out, before concluding settings are genuinely incomplete --
      * cheap either way: it either papers over that race, or costs a little under a second before
-     * showing the same message runSync() itself would show for a real empty-settings case. Only
-     * used for the automatic startup attempt; a manual 🔄 tap goes straight to runSync() and its
+     * showing the same message runDownload() itself would show for a real empty-settings case. Only
+     * used for the automatic startup attempt; a manual 🔄 tap goes straight to runDownload() and its
      * own immediate check, since by then the app has already been running long enough that this
      * race isn't a concern. */
     private fun autoStartSyncWithSettingsRetry(attemptsLeft: Int = 5) {
@@ -730,7 +730,7 @@ class MainActivity : AppCompatActivity() {
             // asked for explicitly: always trying (and usually failing, away from the boat) on
             // every single app launch used to mean a visible "Hotspot controleren..." cycle each
             // time, for no benefit when there was never any real chance of finding it. A real full
-            // download (see runSync()) still does its own, more thorough discover_w2k2() scan, which can
+            // download (see runDownload()) still does its own, more thorough discover_w2k2() scan, which can
             // still come back "not found" (the hotspot's on, but the W2K-2 itself never actually
             // joined it) -- that outcome (and this cheap check's own, right below) is always a
             // quiet log line + notification rather than a popup, auto-started or manual alike.
@@ -743,7 +743,7 @@ class MainActivity : AppCompatActivity() {
                 // on-screen appearance by several seconds, especially right after a fresh
                 // install), that can't be guaranteed -- so per the fallback instruction, it just
                 // stays open instead of guessing at a delay again.
-                runSync()
+                runDownload()
             } else {
                 // No existing-logbook fallback here (asked for explicitly, "logboek alleen tonen
                 // als auto download uit staat") -- this whole function only ever runs when
@@ -762,24 +762,24 @@ class MainActivity : AppCompatActivity() {
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
         } else {
-            // Just calls runSync() rather than duplicating its own isW2k2ConfigComplete check
+            // Just calls runDownload() rather than duplicating its own isW2k2ConfigComplete check
             // and log_fill_w2k2_credentials line here too (asked for explicitly, "1x is toch
-            // genoeg?") -- runSync() already starts with the exact same check, and produces the
+            // genoeg?") -- runDownload() already starts with the exact same check, and produces the
             // exact same message, for a manual tap on the download button. Retries above exist
             // purely for the settings-store-still-loading race (see this function's own doc
             // comment); once those are exhausted, settings are either genuinely complete (handled
-            // by runSync() itself) or genuinely incomplete (also handled by runSync() itself) --
-            // either way, runSync() is the single source of truth for what to do about it. Note
+            // by runDownload() itself) or genuinely incomplete (also handled by runDownload() itself) --
+            // either way, runDownload() is the single source of truth for what to do about it. Note
             // this deliberately does NOT replace the branch above (settings complete, hotspot
             // reachable): that one's own cheap HotspotDetector precheck before ever calling
-            // runSync() is a real, separate optimisation (asked for explicitly, see its own
+            // runDownload() is a real, separate optimisation (asked for explicitly, see its own
             // comment) to avoid a "Hotspot controleren..." cycle on every single launch away from
             // the boat -- only this settings-incomplete branch was pure duplication.
-            runSync()
+            runDownload()
         }
     }
 
-    /** Call right before starting a manual run's own background Thread (runSync()/
+    /** Call right before starting a manual run's own background Thread (runDownload()/
      * buildFromLocalFilesAndMaybePublish()); release with releaseManualRunWakeLock() in that
      * Thread's own finally block, same pairing as SyncState.inProgress. A generous fixed timeout
      * (see WAKE_LOCK_TIMEOUT_MS), not indefinite -- a safety net only, same reasoning as
@@ -813,7 +813,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun runSync() {
+    private fun runDownload() {
         if (SyncState.inProgress) return
         if (bootModeBusy()) return
         if (!settingsStore.isW2k2ConfigComplete) {
@@ -832,9 +832,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         SyncState.inProgress = true
-        SyncState.runInitiator = RunInitiator.SYNC
+        SyncState.runInitiator = RunInitiator.DOWNLOAD
         SyncState.cancelled = false
-        // syncButton deliberately stays enabled here (unlike buildButton/publishButton) --
+        // downloadButton deliberately stays enabled here (unlike buildButton/publishButton) --
         // tapping it again while a sync is running cancels it instead (see the button's own
         // onClick below and cancelSyncStayInApp()), asked for explicitly: the app's own
         // auto-start-on-launch (see autoStartSyncWithSettingsRetry()) has no way to be skipped
@@ -1029,7 +1029,7 @@ class MainActivity : AppCompatActivity() {
 
     // Tracks whether 📖 is currently showing the fully-covering local view above, so a second tap
     // knows to toggle back to the log instead of just reloading the same file again. Reset to
-    // false wherever a sync/offline-build starts (see runSync()/runOfflineBuild()) -- those
+    // false wherever a sync/offline-build starts (see runDownload()/runOfflineBuild()) -- those
     // already re-expand the log themselves via setLogExpanded(true), so this only needs to stay
     // in sync with that, not drive it.
     private var showingLocalLogbook = false
@@ -1045,7 +1045,7 @@ class MainActivity : AppCompatActivity() {
      * there was no fresh logbook.html for ☁️ to send, or an old one sat there unchanged. A
      * cache-hit rebuild when nothing's actually missing is fast, so this costs little even when
      * ☁️ alone (an already-fresh logbook.html) would have been enough. Shares SyncState.inProgress
-     * with runSync() so this can't run at the same time as a sync's own automatic upload at the
+     * with runDownload() so this can't run at the same time as a sync's own automatic upload at the
      * end of it. */
     private fun runPublish() {
         if (SyncState.inProgress) return
@@ -1055,7 +1055,7 @@ class MainActivity : AppCompatActivity() {
         // to fill in "de publiceer-instellingen (SFTP)" even though publishing itself would have
         // worked fine via REST. Matches uploadIfConfigured()'s own check exactly.
         if (!settingsStore.isRestUploadConfigComplete && !settingsStore.isSftpConfigComplete) {
-            // Same fix as runSync()'s own matching guard (asked for explicitly, "check ook bij
+            // Same fix as runDownload()'s own matching guard (asked for explicitly, "check ook bij
             // andere knoppen of dit goed gaat in alle gevallen") -- without this, tapping publish
             // while a logbook was already showing added this line to the log invisibly, since
             // refreshLogView() updates the log view's own text regardless of whether it's
@@ -1455,14 +1455,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** publishFailed: the build succeeded but a publish attempted right after it (still before
-     * this is called -- see runSync()/buildFromLocalFilesAndMaybePublish()'s own comments on the
+     * this is called -- see runDownload()/buildFromLocalFilesAndMaybePublish()'s own comments on the
      * ordering) failed. The "Klaar: ..." line is still logged either way (the build itself did
      * succeed), but the WebView switch is skipped so the log -- which by now already has the
      * publish failure's own [error] line in it -- stays in front instead of covering it back up
      * a moment after showing it. */
     private fun showSyncResult(result: SyncResult, publishFailed: Boolean = false) {
         if (result.ok && result.htmlPath != null) {
-            // tripCount is null specifically for runSync()'s own "result.ok came back false with
+            // tripCount is null specifically for runDownload()'s own "result.ok came back false with
             // no error text, but logbook.html's mtime proves it actually succeeded" recovery --
             // the real count isn't independently knowable there without re-parsing the file, so
             // this is worded around rather than showing a literal "null" (found in practice).
@@ -1491,13 +1491,13 @@ class MainActivity : AppCompatActivity() {
             // off, no special handling needed (see _needs_download() in w2k2_download.py).
             // The build and publish buttons end up here too: say which one was stopped.
             val resultText = getString(
-                if (SyncState.runInitiator == RunInitiator.SYNC) R.string.status_sync_stopped else R.string.status_build_stopped,
+                if (SyncState.runInitiator == RunInitiator.DOWNLOAD) R.string.status_sync_stopped else R.string.status_build_stopped,
             )
             SyncState.lastStatusText = resultText
             handleLogLine("[info] $resultText")
         } else {
             // Same "no popup, auto-started or manual alike" carve-out as the earlier "hotspot
-            // staat uit" case (see runSync()) -- "W2K-2 not found on this subnet" is the other
+            // staat uit" case (see runDownload()) -- "W2K-2 not found on this subnet" is the other
             // half of that same expected, common not-at-the-boat outcome, so it gets the same
             // calm treatment (existing logbook shown if there is one, a log line, a real
             // notification in place of a popup) instead of the loud "Fout: ..." dialog, regardless
@@ -1605,7 +1605,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Shared core of closeAppAndCancelSync() and cancelSyncStayInApp() below -- sets the flag
-     * runSync()'s background Thread checks (both during download, between files, and during
+     * runDownload()'s background Thread checks (both during download, between files, and during
      * decode, see run_pipeline()'s should_cancel) and actually stops SyncNotificationService,
      * rather than just leaving it: that service has android:stopWithTask="false" (see the
      * manifest), so it wouldn't otherwise notice a cancellation that doesn't also finish this
@@ -1646,13 +1646,13 @@ class MainActivity : AppCompatActivity() {
      * auto-start has no way to be skipped, so opening the app to use ☁️ Publiceren on its own
      * (re-send an already-built logbook.html without a fresh download) was never actually
      * reachable, both buttons stay disabled for as long as the auto-started download keeps
-     * running. Unlike closeAppAndCancelSync(), the app stays open and runSync()'s own Thread
+     * running. Unlike closeAppAndCancelSync(), the app stays open and runDownload()'s own Thread
      * (once it notices the cancellation, same as any other cancelled download) re-enables both
      * buttons itself in its finally block -- nothing else to do here. */
     private fun cancelSyncStayInApp() {
         cancelSync()
         val cancelledText = getString(
-            if (SyncState.runInitiator == RunInitiator.SYNC) R.string.status_sync_cancelled else R.string.status_build_cancelled,
+            if (SyncState.runInitiator == RunInitiator.DOWNLOAD) R.string.status_sync_cancelled else R.string.status_build_cancelled,
         )
         SyncState.lastStatusText = cancelledText
         handleLogLine("[info] $cancelledText")
@@ -1697,18 +1697,18 @@ class MainActivity : AppCompatActivity() {
         if (bootModeBusy()) return
         SyncState.inProgress = true
         SyncState.runInitiator = if (forcePublish) RunInitiator.PUBLISH else RunInitiator.BUILD
-        // Reset here too, not only in runSync(): a cancelled earlier run leaves it true, which
+        // Reset here too, not only in runDownload(): a cancelled earlier run leaves it true, which
         // would cancel this new build the moment it starts.
         SyncState.cancelled = false
         // The button that started this build stays enabled as its cancel button -- a long local
         // decode (see run_pipeline()'s should_cancel) should be cancellable by tapping it again,
         // same as a normal sync with the sync button.
         updatePublishButtonEnabled()
-        // Log deliberately NOT cleared here (asked for explicitly, see runSync()'s own matching
+        // Log deliberately NOT cleared here (asked for explicitly, see runDownload()'s own matching
         // comment) -- it accumulates across every run this process makes instead.
         SyncState.lastStatusText = getString(R.string.status_building_with_existing_data)
         handleLogLine("[info] ${SyncState.lastStatusText}")
-        // Shown immediately, same as runSync()'s own startIntent -- asked for explicitly, found
+        // Shown immediately, same as runDownload()'s own startIntent -- asked for explicitly, found
         // in practice: listing every .ebl file and loading the trip cache can itself take well
         // over ten seconds on a big archive before handleLogLine()'s first real progress line
         // ever arrives, during which nothing was visible outside the app at all before this (read
@@ -1730,8 +1730,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 val result = buildFromLocalFiles()
                 syncSucceeded = result.ok
-                // Before showing the logbook, not after -- see runSync()'s own matching comment.
-                // Same "Automatisch publiceren na bouwen" gate as runSync()'s own matching call,
+                // Before showing the logbook, not after -- see runDownload()'s own matching comment.
+                // Same "Automatisch publiceren na bouwen" gate as runDownload()'s own matching call,
                 // unless forcePublish overrides it (see this function's own doc comment).
                 var publishFailed = false
                 if (result.ok && result.htmlPath != null && (forcePublish || settingsStore.autoPublishAfterBuild)) {
@@ -1749,7 +1749,7 @@ class MainActivity : AppCompatActivity() {
                 SyncState.lastStatusText = message
                 handleLogLine("[error] $message")
             } finally {
-                // Same "Voltooid"-completion treatment as runSync() -- see its own finally for
+                // Same "Voltooid"-completion treatment as runDownload() -- see its own finally for
                 // the full reasoning. Only posted if a notification was ever actually shown for
                 // this run (see startSyncNotification()'s own eligibility check) -- this path,
                 // Only posted if a notification was ever actually shown for this run (see
@@ -1767,7 +1767,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 SyncState.notificationForegrounded = false
                 SyncState.notificationStartFailed = false
-                SyncState.inProgress = false  // must always happen, see runSync()'s own finally
+                SyncState.inProgress = false  // must always happen, see runDownload()'s own finally
                 SyncState.runInitiator = null
                 releaseManualRunWakeLock()
                 withActiveActivity {
@@ -1838,7 +1838,7 @@ class MainActivity : AppCompatActivity() {
      * loose files landing under slightly different names in the archive is harmless; silently
      * losing one of them to a same-name overwrite before import_ebl.py even sees it would not be.
      * Reports [onProgress] (current, total, this file's own name) after each file so the caller
-     * can drive the same progress bar/status-text/notification runSync()'s own per-file report()
+     * can drive the same progress bar/status-text/notification runDownload()'s own per-file report()
      * already does (asked for explicitly, "uniformiteit is belangrijk": copying a real USB
      * drive's worth of files one SAF round-trip at a time is itself slow enough to need its own
      * visible progress, the same way download already shows one file at a time passing by).
@@ -1969,7 +1969,7 @@ class MainActivity : AppCompatActivity() {
      * (by year, preserving the source's own EBLnnnnnn structure), duplicate-skip and reformatted-
      * SD-card-collision handling, exactly the same way for both this app and the iOS one. Once
      * imported, hands off to the exact same buildFromLocalFilesAndMaybePublish() pipeline
-     * runSync()/runOfflineBuild() already use, so the freshly imported files get decoded,
+     * runDownload()/runOfflineBuild() already use, so the freshly imported files get decoded,
      * assembled and (per the usual "Automatisch publiceren na bouwen" setting) published like any
      * other .ebl files already on the device would be. */
     private fun importFromRemovableMedia(treeUri: Uri) {
@@ -1977,9 +1977,9 @@ class MainActivity : AppCompatActivity() {
         if (bootModeBusy()) return
         showingLocalLogbook = false
         setLogExpanded(true)
-        // Same "a run is in progress" bookkeeping runSync()/buildFromLocalFilesAndMaybePublish()
+        // Same "a run is in progress" bookkeeping runDownload()/buildFromLocalFilesAndMaybePublish()
         // use (asked for explicitly, found in practice: importButton.isEnabled = false on its own
-        // left syncButton/buildButton/publishButton fully tappable during an import, unlike every
+        // left downloadButton/buildButton/publishButton fully tappable during an import, unlike every
         // other long-running action here) -- updatePublishButtonEnabled() below now disables
         // those and pulses importButton itself the same way, purely from this state. Also
         // required for the real system notification just below: without lastStatusText/
@@ -2046,7 +2046,7 @@ class MainActivity : AppCompatActivity() {
                 // even known yet at this point), so without this the owner would otherwise see
                 // nothing change at all -- not the log, not the notification, not even the
                 // progress bar -- for however long that walk takes on a large card. Same one-time
-                // phase-transition shape runSync() already uses for its own "Bestandenlijst
+                // phase-transition shape runDownload() already uses for its own "Bestandenlijst
                 // ophalen..." line between hotspot-check and the live per-file download updates.
                 val searchingText = getString(R.string.status_searching_files)
                 SyncState.lastStatusText = searchingText
@@ -2065,7 +2065,7 @@ class MainActivity : AppCompatActivity() {
                     // searchingText above for the whole copying phase below (which, like a
                     // download's own per-file report(), deliberately has no line of its own per
                     // file -- see its own comment), reading as stuck even while the bar/
-                    // notification kept moving. Same gap turned out to exist in runSync() too
+                    // notification kept moving. Same gap turned out to exist in runDownload() too
                     // (see syncFromW2k2()'s own matching fix, "%1$d file(s) need downloading" --
                     // added there for the same reason, at the same point in that flow).
                     handleLogLine("[info] " + getString(R.string.log_import_copying_started, sourceFiles.size))
@@ -2354,7 +2354,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** Uploads the fresh logbook (always, if SFTP or REST publish settings are filled in) --
-     * called after a successful build/sync, before that result is shown (see runSync()/
+     * called after a successful build/sync, before that result is shown (see runDownload()/
      * buildFromLocalFilesAndMaybePublish()'s own comments on why that order, not the reverse),
      * still on the background Thread. Runs at most once per sync. The upload itself is
      * LogbookPublisher's; this just relays its own progress line to the notification too. */

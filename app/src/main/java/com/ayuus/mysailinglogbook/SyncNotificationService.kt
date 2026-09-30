@@ -131,7 +131,7 @@ class SyncNotificationService : Service() {
      *    "Voltooid" completion notification a run that got to finish would otherwise end with.
      *  - Currently uploading (SyncState.uploading, see its own doc comment): left running,
      *    same as ever -- not itself safely resumable mid-request the same way, and comparatively
-     *    fast anyway. Finishes and stops itself via runSync()'s/runPublish()'s own finally block,
+     *    fast anyway. Finishes and stops itself via runDownload()'s/runPublish()'s own finally block,
      *    same as a run that was never interrupted at all. The ongoing notification's text is
      *    overwritten here to say so explicitly (asked for explicitly, found in practice: closing
      *    the app right during an upload otherwise looked like the close had no effect at all --
@@ -260,7 +260,7 @@ class SyncNotificationService : Service() {
 
         /** Replaces the ongoing download notification with a final, dismissible one once a run
          * finishes successfully -- found in practice, asked for explicitly: stopService() alone
-         * (MainActivity.runSync()'s own finally) just makes the notification disappear the
+         * (MainActivity.runDownload()'s own finally) just makes the notification disappear the
          * instant a download ends, with nothing left behind to say it actually finished (as
          * opposed to, say, having been swiped away mid-run) or when. Posted under the same
          * NOTIFICATION_ID as the ongoing one, so it replaces it in place rather than adding a
@@ -271,7 +271,7 @@ class SyncNotificationService : Service() {
          * sense to offer then, not after a download that only rebuilt the local logbook.
          *
          * iconRes is the same static action icon the ongoing notification used (ic_download_24
-         * for runSync(), ic_refresh_24 for buildFromLocalFilesAndMaybePublish()) -- asked for
+         * for runDownload(), ic_refresh_24 for buildFromLocalFilesAndMaybePublish()) -- asked for
          * explicitly, uniform for both: the icon just stops moving/updating once done, rather
          * than switching to a generic "done"/app icon that no longer says which action this was. */
         fun postCompletionNotification(context: Context, resultText: String, publishedUrl: String?, iconRes: Int) {
