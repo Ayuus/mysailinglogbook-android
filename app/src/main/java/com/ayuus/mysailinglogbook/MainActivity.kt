@@ -1988,22 +1988,54 @@ class MainActivity : AppCompatActivity() {
             val stagingDir = File(cacheDir, "ebl-import-${System.currentTimeMillis()}")
             try {
                 val sourceRoot = DocumentFile.fromTreeUri(this, treeUri)
+                // Its own distinct status/notification text, not left on the generic
+                // "Importing .ebl files..." kickoff line above (asked for explicitly, "volstrekt
+                // onduidelijk wat hij aan het doen is") -- findEblFiles() below is a plain
+                // recursive directory walk with no per-file callback of its own (the total isn't
+                // even known yet at this point), so without this the owner would otherwise see
+                // nothing change at all -- not the log, not the notification, not even the
+                // progress bar -- for however long that walk takes on a large card. Same one-time
+                // phase-transition shape runSync() already uses for its own "Bestandenlijst
+                // ophalen..." line between hotspot-check and the live per-file download updates.
+                val searchingText = getString(R.string.status_searching_files)
+                SyncState.lastStatusText = searchingText
+                SyncState.lastNotificationText = searchingText
+                handleLogLine("[info] $searchingText")
+                startSyncNotification(
+                    Intent(this, SyncNotificationService::class.java)
+                        .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, searchingText),
+                )
                 val sourceFiles = if (sourceRoot != null) findEblFiles(sourceRoot) { mediaDisconnected.get() } else emptyList()
                 if (sourceFiles.isEmpty()) {
                     handleLogLine("[info] " + getString(R.string.log_import_no_files))
                 } else {
+                    // One-time phase-transition line (asked for explicitly, "logregel blijft
+                    // staan op zoek, terwijl balk loopt") -- without this, the log stayed on
+                    // searchingText above for the whole copying phase below (which, like a
+                    // download's own per-file report(), deliberately has no line of its own per
+                    // file -- see its own comment), reading as stuck even while the bar/
+                    // notification kept moving. Same gap turned out to exist in runSync() too
+                    // (see syncFromW2k2()'s own matching fix, "%1$d file(s) need downloading" --
+                    // added there for the same reason, at the same point in that flow).
+                    handleLogLine("[info] " + getString(R.string.log_import_copying_started, sourceFiles.size))
                     stagingDir.mkdirs()
                     val (staged, unreadableCount, abortedEarly) = stageForImport(
                         sourceFiles, stagingDir, { mediaDisconnected.get() },
                     ) { current, total, fileName ->
-                        updateProgressBar(getString(R.string.phase_importing), current, total)
+                        // "Copying", not "Importing" (asked for explicitly) -- this phase is only
+                        // the SAF-to-local-scratch-file copy (see stageForImport()'s own doc
+                        // comment); the actual import -- deciding per file whether it's new,
+                        // already present, or a same-name-different-content collision, and placing
+                        // it in the archive -- is the separate phase below, which keeps its own
+                        // "Importing" label.
+                        updateProgressBar(getString(R.string.phase_copying), current, total)
                         // Same per-file notification/status-text update as a download's own
                         // SyncController.report() (asked for explicitly, "uniformiteit is
                         // belangrijk") -- the file name visibly cycling in the notification
                         // shade is what "elk bestand voorbijkomen" was actually describing there,
                         // not a per-file log line (report() deliberately skips one of those too,
                         // for the same reason: easily hundreds of files, see its own comment).
-                        val text = getString(R.string.status_importing_progress, current, total, fileName)
+                        val text = getString(R.string.status_copying_progress, current, total, fileName)
                         SyncState.lastStatusText = text
                         SyncState.lastNotificationText = text
                         // Not wrapped in withActiveActivity (unlike updateProgressBar() above,
@@ -2012,7 +2044,21 @@ class MainActivity : AppCompatActivity() {
                         // SyncController.report()'s own matching call for a download.
                         startSyncNotification(
                             Intent(this, SyncNotificationService::class.java)
-                                .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text),
+                                .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
+                                // A real progress bar in the notification too, not just text
+                                // (asked for explicitly, "kan logbalk ook in melding, zoals bij
+                                // download?") -- same EXTRA_PROGRESS_CURRENT/EXTRA_PROGRESS_MAX
+                                // pair SyncController.report() already sends for a download; left
+                                // out before now, which is why this notification's text updated
+                                // per file but never grew an actual bar the way the in-app one
+                                // (updateProgressBar() above) already did. Deliberately not also
+                                // EXTRA_CURRENT/EXTRA_TOTAL/EXTRA_FILE_NAME -- those three together
+                                // make SyncNotificationService.onStartCommand() build its own
+                                // status_downloading-worded text instead of using EXTRA_STATUS_TEXT
+                                // above, which would show the wrong ("Downloading: ...") wording
+                                // here.
+                                .putExtra(SyncNotificationService.EXTRA_PROGRESS_CURRENT, current)
+                                .putExtra(SyncNotificationService.EXTRA_PROGRESS_MAX, total),
                         )
                     }
                     if (abortedEarly) {
@@ -2039,22 +2085,55 @@ class MainActivity : AppCompatActivity() {
                     }
                     val importStart = System.currentTimeMillis()
                     val actisenseDir = EblStorage.downloadDir(this)
-                    // One line per file, what actually happened to it (asked for explicitly,
-                    // "ook melden wat je ermee hebt gedaan"), reported live as each file actually
-                    // lands -- the same "Python calls back into Kotlin per file, during its own
-                    // real work" shape SyncController.report() already uses for a download (see
+                    // Same one-time phase-transition line as log_import_copying_started above,
+                    // between copying and this next phase (asked for explicitly, same fix).
+                    handleLogLine("[info] " + getString(R.string.log_import_importing_started, staged.size))
+                    // One line per newly-imported file, reported live as each one actually lands --
+                    // the same "Python calls back into Kotlin per file, during its own real work"
+                    // shape SyncController.report() already uses for a download (see
                     // ImportProgressCallback's own doc comment: root-caused, not the earlier fix
                     // here, which tried to fake this from the Kotlin side after
-                    // import_staged_ebl_files_json() had already finished all the real work,
-                    // with nothing left to pace a replay loop over its own, already-decided
-                    // result).
+                    // import_staged_ebl_files_json() had already finished all the real work, with
+                    // nothing left to pace a replay loop over its own, already-decided result).
+                    //
+                    // "skipped_duplicate" deliberately does NOT get its own live line here (asked
+                    // for explicitly, "gelijk maken" -- this used to log both) -- matches
+                    // w2k2_download.py's own "[skip] ... already complete locally" being logged at
+                    // level="debug" rather than the default "info" (see download_file()'s own
+                    // comment there: "a normal day-to-day sync with a couple thousand files already
+                    // local produced that many lines on screen... for zero new information,
+                    // drowning out the handful of lines that actually mattered"). Exactly the same
+                    // reasoning applies here -- a reformatted or previously-imported SD card can
+                    // just as easily be mostly duplicates. Still counted (see the "skipped" summary
+                    // line below, and result.getInt("skipped_duplicate")) -- only the one line per
+                    // duplicate file is gone, not the information that it happened.
                     val progressCallback = object : ImportProgressCallback {
                         override fun report(current: Int, total: Int, name: String, outcome: String) {
-                            when (outcome) {
-                                "imported" -> handleLogLine("[info] " + getString(R.string.log_import_copied, name))
-                                "skipped_duplicate" -> handleLogLine("[info] " + getString(R.string.log_import_already_present, name))
+                            if (outcome == "imported") {
+                                handleLogLine("[info] " + getString(R.string.log_import_copied, name))
                             }
                             updateProgressBar(getString(R.string.phase_importing), current, total)
+                            // Same notification update the copying phase above already does (asked
+                            // for explicitly, "volstrekt onduidelijk wat hij aan het doen is...
+                            // zelfde als download") -- this phase used to update only the in-app
+                            // bottom bar, leaving the notification frozen on whatever text/progress
+                            // copying last left it at for the entire importing phase, same bug
+                            // findEblFiles()'s own scanning phase still has (no per-file signal to
+                            // report during a plain directory walk, unlike this one).
+                            val text = getString(R.string.status_importing_progress, current, total, name)
+                            SyncState.lastStatusText = text
+                            SyncState.lastNotificationText = text
+                            startSyncNotification(
+                                // this@MainActivity, not this -- this is an anonymous
+                                // ImportProgressCallback object, whose own bare `this` is itself,
+                                // not the enclosing Activity (found while writing this: it would
+                                // otherwise fail to compile, Intent() has no overload taking an
+                                // ImportProgressCallback).
+                                Intent(this@MainActivity, SyncNotificationService::class.java)
+                                    .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
+                                    .putExtra(SyncNotificationService.EXTRA_PROGRESS_CURRENT, current)
+                                    .putExtra(SyncNotificationService.EXTRA_PROGRESS_MAX, total),
+                            )
                         }
                     }
                     val resultJson = Python.getInstance().getModule("nmea2log.android_entry").callAttr(

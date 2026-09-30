@@ -55,9 +55,13 @@
     <!-- Import von SD/USB -->
     <string name="log_import_no_media">Keine SD-Karte oder USB-Speicher gefunden.</string>
     <string name="status_importing">.ebl-Dateien werden importiert...</string>
+    <string name="status_searching_files">Suche nach .ebl-Dateien...</string>
+    <string name="status_copying_progress">Kopieren: %1$d/%2$d (%3$s)</string>
+    <string name="phase_copying">Kopieren</string>
     <string name="status_importing_progress">Importieren: %1$d/%2$d (%3$s)</string>
+    <string name="log_import_copying_started">%1$d .ebl-Datei(en) gefunden -- wird kopiert...</string>
+    <string name="log_import_importing_started">Kopieren abgeschlossen -- %1$d Datei(en) werden importiert...</string>
     <string name="log_import_copied">Kopiert: %1$s</string>
-    <string name="log_import_already_present">Bereits vorhanden, übersprungen: %1$s</string>
     <string name="log_import_no_files">Keine .ebl-Dateien gefunden.</string>
     <string name="log_import_done">%1$d .ebl-Datei(en) importiert (%2$d bereits vorhanden, übersprungen).</string>
     <string name="log_import_all_duplicates">Nichts Neues -- alle %1$d gefundenen .ebl-Datei(en) waren bereits vorhanden.</string>

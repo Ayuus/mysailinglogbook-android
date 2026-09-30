@@ -59,9 +59,13 @@
     <!-- Import van SD/USB -->
     <string name="log_import_no_media">Geen SD-kaart of USB-stick gevonden.</string>
     <string name="status_importing">.ebl-bestanden importeren...</string>
+    <string name="status_searching_files">Zoeken naar .ebl-bestanden...</string>
+    <string name="status_copying_progress">Kopiëren: %1$d/%2$d (%3$s)</string>
+    <string name="phase_copying">Kopiëren</string>
     <string name="status_importing_progress">Importeren: %1$d/%2$d (%3$s)</string>
+    <string name="log_import_copying_started">%1$d .ebl-bestand(en) gevonden -- kopiëren...</string>
+    <string name="log_import_importing_started">Kopiëren klaar -- %1$d bestand(en) importeren...</string>
     <string name="log_import_copied">Gekopieerd: %1$s</string>
-    <string name="log_import_already_present">Al aanwezig, overgeslagen: %1$s</string>
     <string name="log_import_no_files">Geen .ebl-bestanden gevonden.</string>
     <string name="log_import_done">%1$d .ebl-bestand(en) geïmporteerd (%2$d al aanwezig, overgeslagen).</string>
     <string name="log_import_all_duplicates">Niets nieuws -- alle %1$d gevonden .ebl-bestand(en) waren al aanwezig.</string>
