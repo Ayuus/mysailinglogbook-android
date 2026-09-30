@@ -193,18 +193,24 @@ MainActivity (manual "sync now" + auto-start on launch)
 
 ## Design choices worth knowing before changing this code
 
-**Missing/incomplete W2K-2 settings are no longer announced on every app launch.**
-`autoStartSyncWithSettingsRetry()` (the automatic download attempt `onCreate()` makes on every
-launch) used to log "vul W2K-2-gegevens in" once its retry window gave up finding complete
-settings, on every single cold start -- appropriate back when the W2K-2 was the only way to get
-`.ebl` files onto the phone at all, so incomplete settings really did mean "this app can't do
-anything useful yet". That stopped being true once `importButton`'s SD/USB import (see the toolbar
-section above) reached the same decode/build/publish pipeline without the W2K-2 involved at all:
-someone who only ever imports from a card has no reason to fill in W2K-2 credentials, and doesn't
-need to be told so on every launch. The message still exists -- `runSync()` shows the exact same
-`log_fill_w2k2_credentials` line the instant the download button is actually pressed with
-incomplete settings -- just no longer proactively, since by then it's genuinely actionable
-information instead of a startup nag.
+**`autoStartSyncWithSettingsRetry()`'s own "vul W2K-2-gegevens in" line is not a startup nag --
+it's gated behind an explicit opt-in.** `onCreate()` only ever calls this function at all when
+`settingsStore.autoSyncOnLaunch` ("Automatisch downloaden bij starten") is already on (see its own
+branching, right above); with that setting off, a fresh launch calls `viewLocalLogbook()` instead
+and never reaches this function, message or not. Tempting to remove the message once
+`importButton`'s SD/USB import (see the toolbar section above) meant W2K-2 credentials were no
+longer strictly required to use the app at all -- tried exactly that, found in practice it was
+wrong: someone who only ever imports from a card has no reason to turn *on* "automatically
+download on launch" in the first place, so they'd never reach this branch either way, message or
+not. The only person this line can ever actually reach already asked for auto-download
+specifically, and incomplete settings blocking that is exactly the kind of thing they'd want to
+know about, every time, until fixed -- not a nag, a status report on a feature they opted into.
+Deliberately does *not* fall back to showing whatever logbook is already on the phone (asked for
+explicitly, "logboek alleen tonen als auto download uit staat") -- same reasoning applies to its
+own hotspot-not-found sibling branch just above: with auto-download on, the owner asked to see
+fresh data, not whatever's cached; that fallback belongs solely to the
+`settingsStore.autoSyncOnLaunch == false` branch in `onCreate()`, which calls `viewLocalLogbook()`
+unconditionally.
 
 **`HotspotDetector` has two different checks, deliberately not interchangeable.**
 `detectSubnetPrefix()` -- used everywhere the app actually reaches the W2K-2 (manual sync, boat

@@ -745,10 +745,12 @@ class MainActivity : AppCompatActivity() {
                 // stays open instead of guessing at a delay again.
                 runSync()
             } else {
-                val existing = File(filesDir, "logbook.html")
-                if (existing.exists()) {
-                    loadLogbookIntoWebView(existing.absolutePath)
-                }
+                // No existing-logbook fallback here (asked for explicitly, "logboek alleen tonen
+                // als auto download uit staat") -- this whole function only ever runs when
+                // settingsStore.autoSyncOnLaunch is on (see onCreate()'s own branching), so
+                // showing a logbook automatically here is out of scope: that's what the
+                // autoSyncOnLaunch==false branch's own viewLocalLogbook() call is for. With
+                // auto-download on, the owner asked to see fresh data, not whatever's cached.
                 handleLogLine("[info] " + getString(R.string.log_hotspot_precheck_skipped))
                 // A real Android notification too, not just the in-app log (asked for explicitly)
                 // -- this can fire well before the owner ever looks at the app again (e.g. the
@@ -764,28 +766,18 @@ class MainActivity : AppCompatActivity() {
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
         } else {
-            // No "vul W2K2-gegevens in" line here anymore once retries are exhausted (asked for
-            // explicitly) -- W2K-2 settings being empty is no longer necessarily a problem worth
-            // greeting the owner with on every single launch: importButton's own SD/USB-based
-            // import (see importFromRemovableMedia()) reaches the exact same .ebl-decode/build/
-            // publish pipeline without the W2K-2 involved at all, so opening the app with no
-            // intention of ever using the download button is now a normal, supported way to use
-            // it, not an incomplete setup. runSync() itself still shows this exact message
-            // (log_fill_w2k2_credentials) the moment the owner actually presses the download
-            // button -- see its own check -- which is the only point this was ever actually
-            // actionable information for them.
-            //
-            // Still shows whatever's already on the phone, though (found in practice, asked for
-            // explicitly, "als er html is, die tonen toch?") -- this branch fell through to a
-            // blank screen otherwise, unlike its own hotspot-not-found sibling just above (which
-            // already did this) and the settingsStore.autoSyncOnLaunch==false branch in onCreate()
-            // (which calls viewLocalLogbook() unconditionally) -- same gap that existed even
-            // before the nag line was removed, just harder to notice under a log line that read
-            // as if something had actually happened.
-            val existing = File(filesDir, "logbook.html")
-            if (existing.exists()) {
-                loadLogbookIntoWebView(existing.absolutePath)
-            }
+            // The "vul W2K2-gegevens in" line belongs here after all (reinstated -- found in
+            // practice, asked for explicitly: this whole function is only ever reached when
+            // settingsStore.autoSyncOnLaunch is already on -- see onCreate()'s own branching --
+            // meaning the owner explicitly asked for this. Someone who only ever imports from
+            // SD/USB and never touches W2K-2 credentials would have no reason to turn that
+            // setting on in the first place, so they'd never reach this branch either way, nag or
+            // not; the only person this line can ever reach already opted into auto-download and
+            // deserves to know why it isn't happening).
+            handleLogLine("[info] " + getString(R.string.log_fill_w2k2_credentials))
+            // No existing-logbook fallback here either, same reasoning as the hotspot-not-found
+            // branch above (asked for explicitly, "logboek alleen tonen als auto download uit
+            // staat").
         }
     }
 
