@@ -817,6 +817,16 @@ class MainActivity : AppCompatActivity() {
         if (SyncState.inProgress) return
         if (bootModeBusy()) return
         if (!settingsStore.isW2k2ConfigComplete) {
+            // Switches away from a currently-shown logbook first (found in practice, asked for
+            // explicitly, "ik drukte op download terwijl html werd getoond" -- "2e keer niks"):
+            // handleLogLine() below always updates the log view's own text regardless of whether
+            // it's actually the visible layout right now (see refreshLogView()'s own doc comment
+            // on why -- it has no idea, and doesn't check), so without this the line was added but
+            // invisible behind the still-showing WebView, reading as if nothing had happened at
+            // all. Every other path through this function already does this (see below); only
+            // this early-return guard was missing it.
+            showingLocalLogbook = false
+            setLogExpanded(true)
             handleLogLine("[info] " + getString(R.string.log_fill_w2k2_credentials))
             return
         }
@@ -1045,6 +1055,13 @@ class MainActivity : AppCompatActivity() {
         // to fill in "de publiceer-instellingen (SFTP)" even though publishing itself would have
         // worked fine via REST. Matches uploadIfConfigured()'s own check exactly.
         if (!settingsStore.isRestUploadConfigComplete && !settingsStore.isSftpConfigComplete) {
+            // Same fix as runSync()'s own matching guard (asked for explicitly, "check ook bij
+            // andere knoppen of dit goed gaat in alle gevallen") -- without this, tapping publish
+            // while a logbook was already showing added this line to the log invisibly, since
+            // refreshLogView() updates the log view's own text regardless of whether it's
+            // actually the visible layout right now.
+            showingLocalLogbook = false
+            setLogExpanded(true)
             handleLogLine("[info] " + getString(R.string.log_fill_publish_settings))
             return
         }
