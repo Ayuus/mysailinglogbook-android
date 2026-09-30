@@ -34,6 +34,14 @@ class BootModeService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Found in practice, live: a real, reproducible crash loop -- this service can be the very
+        // first Python-touching action in a fresh process (a boat-mode tick fired via AlarmManager
+        // before the owner ever opened the app themselves this run), and every path below that
+        // reaches BootModeController.step() calls Python.getInstance() with no guard of its own,
+        // same as every other Python entry point in this app (MainActivity's own three call sites,
+        // W2kBootExecutor) already has. One call here covers all of them: every ctl.start()/stop()/
+        // resume()/tick() below funnels through step(), so nothing downstream needs its own copy.
+        PythonStarter.ensureStarted(this)
         val action = intent?.action
         val store = BootModeStateStore(this)
         // Started with startForegroundService(): this has to follow within seconds, whatever else happens.

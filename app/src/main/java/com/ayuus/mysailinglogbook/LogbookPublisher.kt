@@ -19,6 +19,15 @@ object LogbookPublisher {
      * negligible, so it always runs regardless of connection type.
      */
     fun publish(context: Context, settings: SettingsStore, htmlFile: File, log: (String) -> Unit, onStart: (String) -> Unit = {}): Boolean {
+        // Found while auditing every Python.getInstance() call site for the same gap
+        // BootModeService.onStartCommand()'s own fix closed ("kan dit ook op andere plaatsen
+        // optreden?"): every caller of this function so far happened to have already started
+        // Python earlier in the same call chain (a build/download that ran first), but nothing
+        // here actually guaranteed that -- this function has its own direct Python.getInstance()
+        // call below (and RestUploader.uploadLogbook()'s own, unguarded the same way, runs
+        // straight after it in the same call chain), so it needs its own guard like every other
+        // entry point, not a borrowed one from whichever caller happened to run first.
+        PythonStarter.ensureStarted(context)
         val useRest = settings.isRestUploadConfigComplete
         if (!useRest && !settings.isSftpConfigComplete) {
             log("[skip] " + context.getString(R.string.log_upload_not_configured))
