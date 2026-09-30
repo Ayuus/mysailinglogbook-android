@@ -1963,6 +1963,21 @@ class MainActivity : AppCompatActivity() {
                     } ?: false
                 } catch (e: java.io.IOException) {
                     false
+                } catch (e: IllegalArgumentException) {
+                    // Found in practice, live: pulling the SD card mid-copy doesn't always surface
+                    // as an IOException here -- the framework's own scoped-storage permission check
+                    // on openInputStream() (SAF verifying this document is still a legitimate child
+                    // of the granted tree, done via the provider's own isChildDocument()) throws
+                    // this instead when the root itself is already gone ("Failed to determine if
+                    // ... is child of ...: FileNotFoundException: No root for <volume>"), wrapping
+                    // what is really the exact same "the drive is gone" condition IOException would
+                    // have meant, in a type that check wasn't catching. Treated identically: still
+                    // retried above (harmless if the root really is gone -- isDisconnected() at the
+                    // top of the outer loop is what actually stops things, same as any other
+                    // unreadable file), and until it does, this one file is just unreadable rather
+                    // than an uncaught crash the outer catch(Exception) reported as "Onverwachte
+                    // fout" -- misleading, since nothing was actually wrong with the app.
+                    false
                 }
                 if (copied) break
             }
@@ -2026,7 +2041,8 @@ class MainActivity : AppCompatActivity() {
                 mediaDisconnected.set(true)
             }
         }
-        registerReceiver(
+        ContextCompat.registerReceiver(
+            this,
             mediaDisconnectReceiver,
             IntentFilter().apply {
                 addAction(Intent.ACTION_MEDIA_REMOVED)
@@ -2034,9 +2050,23 @@ class MainActivity : AppCompatActivity() {
                 addAction(Intent.ACTION_MEDIA_EJECT)
                 addDataScheme("file")
             },
+            ContextCompat.RECEIVER_NOT_EXPORTED,
         )
-        registerReceiver(mediaDisconnectReceiver, IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED))
+        ContextCompat.registerReceiver(
+            this,
+            mediaDisconnectReceiver,
+            IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         Thread {
+            // Found in practice, live: a fresh process whose very first Python-touching action is
+            // an import (no download/build/publish already run first, each of which happens to
+            // call this on their own) reached the Python call below with Python never actually
+            // started, surfacing as "RuntimeException: Cannot use GenericPlatform on Android" --
+            // not an import-specific bug, just the one path here that was missing the same call
+            // every other Python entry point (syncFromW2k2(), buildFromLocalFiles(), etc.) already
+            // makes for itself, unconditionally, before touching Python.
+            PythonStarter.ensureStarted(this)
             var importedCount = 0
             val stagingDir = File(cacheDir, "ebl-import-${System.currentTimeMillis()}")
             try {
@@ -2152,6 +2182,16 @@ class MainActivity : AppCompatActivity() {
                 // permission grant expiring) revokes this app's access to the picked tree, which
                 // surfaces as a SecurityException on the next SAF call rather than a
                 // FileNotFoundException.
+                handleLogLine("[error] " + getString(R.string.log_import_media_disconnected))
+            } catch (e: IllegalArgumentException) {
+                // Same underlying cause again, seen live during findEblFiles()'s own scan (before
+                // staging -- see stageForImport()'s per-file catch for the same failure caught
+                // there instead, once staging is under way): the framework's scoped-storage
+                // ancestry check (provider's own isChildDocument()) throws this, not
+                // FileNotFoundException/SecurityException directly, when the root is already gone.
+                // A backstop for any SAF call site this class doesn't already wrap in its own
+                // retry, not a substitute for one -- see stageForImport()'s own comment for why the
+                // per-file copy loop still needs its own matching catch instead of relying on this.
                 handleLogLine("[error] " + getString(R.string.log_import_media_disconnected))
             } catch (e: Exception) {
                 handleLogLine("[error] " + getString(R.string.error_unexpected, e.toString()))
