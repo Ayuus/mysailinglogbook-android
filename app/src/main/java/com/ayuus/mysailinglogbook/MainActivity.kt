@@ -763,16 +763,30 @@ class MainActivity : AppCompatActivity() {
             android.os.Handler(mainLooper).postDelayed(
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
+        } else {
+            // No "vul W2K2-gegevens in" line here anymore once retries are exhausted (asked for
+            // explicitly) -- W2K-2 settings being empty is no longer necessarily a problem worth
+            // greeting the owner with on every single launch: importButton's own SD/USB-based
+            // import (see importFromRemovableMedia()) reaches the exact same .ebl-decode/build/
+            // publish pipeline without the W2K-2 involved at all, so opening the app with no
+            // intention of ever using the download button is now a normal, supported way to use
+            // it, not an incomplete setup. runSync() itself still shows this exact message
+            // (log_fill_w2k2_credentials) the moment the owner actually presses the download
+            // button -- see its own check -- which is the only point this was ever actually
+            // actionable information for them.
+            //
+            // Still shows whatever's already on the phone, though (found in practice, asked for
+            // explicitly, "als er html is, die tonen toch?") -- this branch fell through to a
+            // blank screen otherwise, unlike its own hotspot-not-found sibling just above (which
+            // already did this) and the settingsStore.autoSyncOnLaunch==false branch in onCreate()
+            // (which calls viewLocalLogbook() unconditionally) -- same gap that existed even
+            // before the nag line was removed, just harder to notice under a log line that read
+            // as if something had actually happened.
+            val existing = File(filesDir, "logbook.html")
+            if (existing.exists()) {
+                loadLogbookIntoWebView(existing.absolutePath)
+            }
         }
-        // No "vul W2K2-gegevens in" line here anymore once retries are exhausted (asked for
-        // explicitly) -- W2K-2 settings being empty is no longer necessarily a problem worth
-        // greeting the owner with on every single launch: importButton's own SD/USB-based import
-        // (see importFromRemovableMedia()) reaches the exact same .ebl-decode/build/publish
-        // pipeline without the W2K-2 involved at all, so opening the app with no intention of ever
-        // using the download button is now a normal, supported way to use it, not an incomplete
-        // setup. runSync() itself still shows this exact message (log_fill_w2k2_credentials) the
-        // moment the owner actually presses the download button -- see its own check -- which is
-        // the only point this was ever actually actionable information for them.
     }
 
     /** Call right before starting a manual run's own background Thread (runSync()/
