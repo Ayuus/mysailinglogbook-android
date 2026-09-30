@@ -674,107 +674,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** The download button is disabled with an explanatory tooltip until a real scan confirms
-     * the W2K-2 is actually reachable -- asked for explicitly: HotspotDetector's own cheap,
-     * local, no-network-I/O check (still used first, below) only tells whether this device's own
-     * hotspot looks on, not whether the W2K-2 itself ever joined it, so a boat with the hotspot
-     * up but the W2K-2 switched off (or just not yet connected) used to show the button as
-     * enabled right up until tapping it actually failed. Real confirmation needs
-     * android_entry.discover_w2k2_only() -- the same network scan a real download does as its
-     * own first step (~1s, see w2k2_download.discover_w2k2's own doc comment), just standing
-     * alone and reported via DiscoverController instead of also downloading/building anything.
-     * Run off the main thread; HotspotDetector's cheap check still gates it first so a scan is
-     * only ever attempted when there's a real chance of finding something (this app's own
-     * history already avoided scanning on every single launch for no benefit, see
-     * autoStartSyncWithSettingsRetry()'s own doc comment). Like updatePublishButtonEnabled(),
-     * never overrides syncButton while a download is already in progress (it deliberately stays
-     * enabled then, to double as the cancel button) -- and a scan already in flight when this is
-     * called again (e.g. onCreate() then onResume() in quick succession) is left to finish on its
-     * own rather than started twice. */
-    private fun updateSyncButtonAvailability(logIfNotFound: Boolean = true) {
+    /** The download button always stays enabled, whether or not the W2K-2 has actually been seen
+     * yet -- asked for explicitly, reversing this function's own earlier "disabled until a real
+     * scan confirms it" behavior: that background scan (HotspotDetector's cheap local check, then
+     * android_entry.discover_w2k2_only() over the network) ran again on every onCreate()/onResume(),
+     * which in practice meant a fresh "Geen Actisense W2K-2 gevonden" log line every time the app
+     * so much as came back to the foreground -- confusing repetition, not useful information.
+     * runSync() already does the exact same single-attempt, no-retry check (HotspotDetector, then
+     * discover_w2k2() as syncFromW2k2()'s own first step) the instant the button is actually
+     * pressed, and already reports a clean "not found" outcome on its own -- nothing here needs to
+     * duplicate that ahead of time. Like updatePublishButtonEnabled(), never overrides syncButton
+     * while a download is already in progress (it deliberately stays enabled then, to double as
+     * the cancel button). */
+    private fun updateSyncButtonAvailability() {
         if (SyncState.inProgress) return
-        val subnetPrefix = HotspotDetector.detectSubnetPrefix()
-        if (subnetPrefix == null) {
-            // Its own tooltip, distinct from tooltip_w2k2_not_found below -- asked for
-            // explicitly: the two look the same at a glance (the download button just disabled
-            // either way) but mean different things -- this one means no scan was even attempted
-            // (nothing to scan *for* without a subnet to scan), while w2k2_not_found means a real scan ran and
-            // came back empty. Conflating them under one message misled into thinking a real
-            // check had already ruled out the W2K-2, when nothing had actually been tried yet.
-            //
-            // Also logged, not just set as a tooltip -- found in practice, live on a real device:
-            // a disabled Button's onTouchEvent() returns before ever reaching the long-press/
-            // tooltip-trigger logic at all, so a tooltip on a *disabled* view never actually shows
-            // on a touch-only screen (no mouse to hover with) -- confirmed by testing, this app's
-            // own earlier assumption that tooltips "work regardless of enabled state" turned out
-            // to only hold for hover, not touch. The tooltip text is left set anyway (harmless,
-            // and still reachable via mouse/stylus hover on a device that has one), but the log
-            // line -- always visible, no interaction needed -- is what most people actually see.
-            syncButton.isEnabled = false
-            ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_hotspot_not_on))
-            handleLogLine("[info] " + getString(R.string.log_sync_hotspot_not_on))
-            return
-        }
-        if (SyncState.discoverScanInProgress) return
-        // Reuse a scan that only just finished, rather than hitting the network again for an
-        // answer already in hand (asked for explicitly: a run's own finally block already
-        // re-checks this the instant it finishes, so onResume() firing right after -- reopening
-        // the app, or a rotation landing right after a run -- had no reason to scan again).
-        val cachedFound = SyncState.lastW2k2Found
-        if (cachedFound != null && System.currentTimeMillis() - SyncState.lastW2k2CheckAt < RECENT_SCAN_MS) {
-            syncButton.isEnabled = cachedFound
-            ViewCompat.setTooltipText(
-                syncButton,
-                getString(if (cachedFound) R.string.tooltip_sync else R.string.tooltip_w2k2_not_found),
-            )
-            return
-        }
-        SyncState.discoverScanInProgress = true
-        syncButton.isEnabled = false
-        ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_w2k2_checking))
-        Thread {
-            PythonStarter.ensureStarted(this)
-            val controller = object : DiscoverController {
-                override fun onDiscoverResult(found: Boolean) {
-                    SyncState.discoverScanInProgress = false
-                    // SyncState.lastW2k2Found != false, not just logIfNotFound -- found in
-                    // practice, a real bug: logIfNotFound=false (see the build's own finally
-                    // block, still the main reason this suppresses a repeat) only covers *that*
-                    // one call site; onResume()'s own call to this function (default
-                    // logIfNotFound=true) knew nothing about a run having just logged the exact
-                    // same "not found" moments ago, so simply reopening the app shortly after a
-                    // run logged it again. Comparing against the last scan's own outcome instead
-                    // catches every call site at once: only a genuine change is ever worth a line.
-                    if (!found && logIfNotFound && SyncState.lastW2k2Found != false) {
-                        // Same reasoning as the hotspot-not-on branch above: the tooltip alone
-                        // isn't actually visible on a touch-only screen, so this is the log
-                        // line most people will actually see. Not logged on success -- found
-                        // is the expected, self-explanatory outcome (the download button just
-                        // works), nothing to explain, and this can run again on every onResume()
-                        // while the app stays open near the boat, so a repeated "found" line
-                        // would just be noise for no benefit.
-                        handleLogLine("[info] " + getString(R.string.log_sync_w2k2_not_found))
-                    }
-                    SyncState.lastW2k2Found = found
-                    SyncState.lastW2k2CheckAt = System.currentTimeMillis()
-                    withActiveActivity {
-                        if (!SyncState.inProgress) {
-                            syncButton.isEnabled = found
-                            ViewCompat.setTooltipText(
-                                syncButton,
-                                getString(if (found) R.string.tooltip_sync else R.string.tooltip_w2k2_not_found),
-                            )
-                        }
-                    }
-                }
-            }
-            try {
-                Python.getInstance().getModule("nmea2log.android_entry")
-                    .callAttr("discover_w2k2_only", subnetPrefix, controller)
-            } catch (e: Exception) {
-                controller.onDiscoverResult(false)
-            }
-        }.start()
+        syncButton.isEnabled = true
+        ViewCompat.setTooltipText(syncButton, getString(R.string.tooltip_sync))
     }
 
     /** Found in practice, still not fully understood at the OS level: right after this Activity's
@@ -847,9 +762,16 @@ class MainActivity : AppCompatActivity() {
             android.os.Handler(mainLooper).postDelayed(
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
-        } else {
-            handleLogLine("[info] " + getString(R.string.log_fill_w2k2_credentials))
         }
+        // No "vul W2K2-gegevens in" line here anymore once retries are exhausted (asked for
+        // explicitly) -- W2K-2 settings being empty is no longer necessarily a problem worth
+        // greeting the owner with on every single launch: importButton's own SD/USB-based import
+        // (see importFromRemovableMedia()) reaches the exact same .ebl-decode/build/publish
+        // pipeline without the W2K-2 involved at all, so opening the app with no intention of ever
+        // using the download button is now a normal, supported way to use it, not an incomplete
+        // setup. runSync() itself still shows this exact message (log_fill_w2k2_credentials) the
+        // moment the owner actually presses the download button -- see its own check -- which is
+        // the only point this was ever actually actionable information for them.
     }
 
     /** Call right before starting a manual run's own background Thread (runSync()/
@@ -1798,12 +1720,7 @@ class MainActivity : AppCompatActivity() {
                 SyncState.runInitiator = null
                 releaseManualRunWakeLock()
                 withActiveActivity {
-                    // logIfNotFound=false: the button still needs a fresh scan to know whether
-                    // to re-enable itself, but the sync that just finished already implies the
-                    // W2K-2 was reachable moments ago -- see updateSyncButtonAvailability()'s
-                    // own comment on why repeating that log line here would be confusing, not
-                    // informative.
-                    updateSyncButtonAvailability(logIfNotFound = false)
+                    updateSyncButtonAvailability()
                     updatePublishButtonEnabled()
                     hideProgressBar()
                 }
@@ -2625,13 +2542,5 @@ class MainActivity : AppCompatActivity() {
         // Material's "yellow 600" for styledLogText()'s own warning highlight -- "amber 700"
         // (#FFA000) read as orange in practice, not yellow.
         private val LOG_WARNING_COLOR = Color.parseColor("#FDD835")
-
-        // How long a completed W2K-2 scan (SyncState.lastW2k2Found/lastW2k2CheckAt) is trusted
-        // without a fresh one -- see updateSyncButtonAvailability()'s own doc comment. Short on
-        // purpose: long enough to skip a redundant scan when onResume() fires right after a run's
-        // own finally block already checked, nowhere near long enough to miss the W2K-2 actually
-        // coming into range while the owner keeps the app open (still re-checked every time this
-        // function is next called after that, e.g. the next onResume()).
-        private const val RECENT_SCAN_MS = 10_000L
     }
 }

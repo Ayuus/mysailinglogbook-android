@@ -193,6 +193,19 @@ MainActivity (manual "sync now" + auto-start on launch)
 
 ## Design choices worth knowing before changing this code
 
+**Missing/incomplete W2K-2 settings are no longer announced on every app launch.**
+`autoStartSyncWithSettingsRetry()` (the automatic download attempt `onCreate()` makes on every
+launch) used to log "vul W2K-2-gegevens in" once its retry window gave up finding complete
+settings, on every single cold start -- appropriate back when the W2K-2 was the only way to get
+`.ebl` files onto the phone at all, so incomplete settings really did mean "this app can't do
+anything useful yet". That stopped being true once `importButton`'s SD/USB import (see the toolbar
+section above) reached the same decode/build/publish pipeline without the W2K-2 involved at all:
+someone who only ever imports from a card has no reason to fill in W2K-2 credentials, and doesn't
+need to be told so on every launch. The message still exists -- `runSync()` shows the exact same
+`log_fill_w2k2_credentials` line the instant the download button is actually pressed with
+incomplete settings -- just no longer proactively, since by then it's genuinely actionable
+information instead of a startup nag.
+
 **`HotspotDetector` has two different checks, deliberately not interchangeable.**
 `detectSubnetPrefix()` -- used everywhere the app actually reaches the W2K-2 (manual sync, boat
 mode's own search/probe) -- takes *any* interface with a private IPv4 address up, preferring an

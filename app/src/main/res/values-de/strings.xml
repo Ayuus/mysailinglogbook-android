@@ -1,9 +1,6 @@
 <resources>
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Herunterladen</string>
-    <string name="tooltip_hotspot_not_on">Kein privates Netzwerk gefunden</string>
-    <string name="tooltip_w2k2_not_found">Kein Actisense W2K-2 gefunden</string>
-    <string name="tooltip_w2k2_checking">Suche nach einem Actisense W2K-2…</string>
     <string name="tooltip_publish">Auf ayuus.com veröffentlichen</string>
     <string name="tooltip_publish_not_configured">Kein Host konfiguriert</string>
     <string name="tooltip_build_local">Bordbuch zusammenstellen</string>
@@ -19,8 +16,6 @@
     <string name="log_hotspot_precheck_skipped">Kein privates Netzwerk gefunden (schnelle Vorabprüfung) -- automatischer Download übersprungen.</string>
     <string name="notif_w2k2_not_found">W2K-2 nicht gefunden.</string>
     <string name="log_fill_w2k2_credentials">Trage zuerst den W2K-2-Benutzernamen und das Passwort in den Einstellungen ein.</string>
-    <string name="log_sync_hotspot_not_on">Kein privates Netzwerk gefunden -- Download-Schaltfläche deaktiviert.</string>
-    <string name="log_sync_w2k2_not_found">Kein Actisense W2K-2 gefunden -- Download-Schaltfläche deaktiviert.</string>
     <string name="status_checking_hotspot">Netzwerk wird geprüft...</string>
     <string name="status_hotspot_off">Kein privates Netzwerk gefunden (oder der W2K-2 ist nicht darauf) -- schalte deinen Hotspot ein oder verbinde dich mit demselben Netzwerk wie der W2K-2, um herunterzuladen.</string>
     <string name="status_listing_files">Dateiliste wird abgerufen (Subnetz %1$s0/24)...</string>

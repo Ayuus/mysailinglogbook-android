@@ -35,35 +35,6 @@ object SyncState {
     @Volatile
     var bootBusy = false
 
-    /** True only while MainActivity.updateSyncButtonAvailability()'s own background discovery
-     * scan is running -- process-wide for the same reason inProgress is: guards against
-     * onCreate() then onResume() firing in quick succession (a fresh launch does both) starting
-     * two concurrent discover_w2k2_only() scans instead of the second one just leaving the first
-     * to finish on its own. */
-    @Volatile
-    var discoverScanInProgress = false
-
-    /** The outcome of the most recent updateSyncButtonAvailability() scan that actually completed
-     * (null before the first one ever finishes this process). Lets a "not found" log line fire
-     * only on a genuine change, not on every call site that happens to run one -- found in
-     * practice, a real bug: a run's own finally block already suppresses this exact line right
-     * after it (logIfNotFound=false, nothing changed since the run's own start-of-run check), but
-     * onResume() runs its own scan with the default logIfNotFound=true and has no idea a run just
-     * established the same outcome moments ago, so simply reopening/resuming the app shortly
-     * after a run logged the identical "not found" line again, reading as something having gone
-     * wrong when nothing had. */
-    @Volatile
-    var lastW2k2Found: Boolean? = null
-
-    /** When [lastW2k2Found] was last actually established by a real scan (System.currentTimeMillis(),
-     * 0L before the first one) -- lets updateSyncButtonAvailability() skip a redundant *scan* too,
-     * not just its log line, when one just ran moments ago (asked for explicitly: a run's own
-     * finally block already re-checks this the instant it finishes; onResume() firing right after
-     * -- reopening the app, or the run's own withActiveActivity{} landing right after a rotation --
-     * had no reason to scan the network again for an answer it already just had). */
-    @Volatile
-    var lastW2k2CheckAt = 0L
-
     /** Whichever MainActivity instance is currently resumed and visible, or null when none is
      * (backgrounded, or briefly between an old instance pausing and a new one resuming). Set in
      * onResume(), cleared in onPause() -- see both there.
