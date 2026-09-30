@@ -135,7 +135,6 @@
     <string name="button_cache_places">Noms de lieux, météo et houle</string>
     <string name="dialog_clear_places_cache_message">Effacer tous les noms de lieux, données météo et de houle recherchés ? Le prochain téléchargement les recherchera à nouveau (consomme des données mobiles supplémentaires).</string>
     <string name="button_save">Enregistrer</string>
-    <string name="toast_username_password_required">Le nom d\'utilisateur et le mot de passe sont obligatoires</string>
     <string name="toast_settings_saved">Paramètres enregistrés</string>
 
     <!-- Boat mode -->

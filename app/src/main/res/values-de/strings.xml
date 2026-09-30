@@ -135,7 +135,6 @@
     <string name="button_cache_places">Ortsnamen, Wetter- und Wellendaten</string>
     <string name="dialog_clear_places_cache_message">Alle abgerufenen Ortsnamen, Wetter- und Wellendaten löschen? Der nächste Download ruft diese dann erneut ab (kostet zusätzliche mobile Daten).</string>
     <string name="button_save">Speichern</string>
-    <string name="toast_username_password_required">Benutzername und Passwort sind erforderlich</string>
     <string name="toast_settings_saved">Einstellungen gespeichert</string>
 
     <!-- Boat mode -->

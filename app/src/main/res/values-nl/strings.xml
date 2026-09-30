@@ -139,7 +139,6 @@
     <string name="button_cache_places">Plaatsnamen, weer- en golfgegevens</string>
     <string name="dialog_clear_places_cache_message">Alle opgezochte plaatsnamen, weer- en golfgegevens wissen? Bij het eerstvolgende downloaden worden deze dan opnieuw opgezocht (kost extra mobiele data).</string>
     <string name="button_save">Opslaan</string>
-    <string name="toast_username_password_required">Gebruikersnaam en wachtwoord zijn verplicht</string>
     <string name="toast_settings_saved">Instellingen opgeslagen</string>
 
     <!-- Boat mode -->

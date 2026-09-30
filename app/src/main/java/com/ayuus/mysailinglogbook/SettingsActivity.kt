@@ -412,14 +412,16 @@ class SettingsActivity : AppCompatActivity() {
                 setMargins(padding / 2, padding, padding, padding)
             }
             setOnClickListener {
-                if (userField.text.isBlank() || passwordField.text.isBlank()) {
-                    Toast.makeText(
-                        this@SettingsActivity,
-                        getString(R.string.toast_username_password_required),
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    return@setOnClickListener
-                }
+                // No longer required to be filled in before saving (asked for explicitly, found
+                // in practice: this predates importButton's SD/USB-based import, which reaches
+                // the exact same decode/build/publish pipeline without the W2K-2 involved at all
+                // -- someone who only ever imports from a card has no reason to have W2K-2
+                // credentials at all, and blocking Save entirely until they typed something into
+                // both fields made every other setting on this screen unreachable too, not just
+                // the download feature). runSync() itself still shows a clear message the moment
+                // the owner actually presses the download button with incomplete settings -- see
+                // its own isW2k2ConfigComplete check -- which is the only point this was ever
+                // actually actionable information for them.
                 store.w2k2User = userField.text.toString().trim()
                 store.w2k2Password = passwordField.text.toString()
                 store.boatName = boatNameField.text.toString().trim()

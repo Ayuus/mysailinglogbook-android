@@ -146,7 +146,6 @@
     <string name="button_cache_places">Place names, weather &amp; wave data</string>
     <string name="dialog_clear_places_cache_message">Clear all looked-up place names, weather and wave data? The next download will look these up again (uses extra mobile data).</string>
     <string name="button_save">Save</string>
-    <string name="toast_username_password_required">Username and password are required</string>
     <string name="toast_settings_saved">Settings saved</string>
 
     <!-- Boat mode -->
