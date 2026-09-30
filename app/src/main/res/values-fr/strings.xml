@@ -14,7 +14,6 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Aucun réseau privé détecté (vérification rapide) -- téléchargement automatique ignoré.</string>
-    <string name="notif_w2k2_not_found">W2K-2 introuvable.</string>
     <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe W2K-2 dans les Paramètres.</string>
     <string name="status_checking_hotspot">Vérification du réseau...</string>
     <string name="status_hotspot_off">Aucun réseau privé détecté (ou le W2K-2 n\'y est pas connecté) -- activez votre point d\'accès, ou rejoignez le même réseau que le W2K-2, pour télécharger.</string>

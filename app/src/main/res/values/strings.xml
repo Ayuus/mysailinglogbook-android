@@ -22,7 +22,6 @@
          English in every language, matching the untranslated tags log.py's own Python-side log
          lines always use (see translations.py's module docstring on CSV/GPX staying English). -->
     <string name="log_hotspot_precheck_skipped">No private network detected (cheap pre-check) -- automatic download skipped.</string>
-    <string name="notif_w2k2_not_found">W2K-2 not found.</string>
     <string name="log_fill_w2k2_credentials">Fill in the W2K-2 username and password via Settings first.</string>
     <string name="status_checking_hotspot">Checking network...</string>
     <string name="status_hotspot_off">No private network detected (or the W2K-2 isn\'t on it) -- turn on your hotspot, or join the same network as the W2K-2, to download.</string>

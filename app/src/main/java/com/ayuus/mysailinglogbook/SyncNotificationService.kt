@@ -258,51 +258,6 @@ class SyncNotificationService : Service() {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
         }
 
-        /** Posted in place of the ongoing download notification when the *automatic*, on-launch
-         * download attempt (see MainActivity.autoStartSyncWithSettingsRetry()) couldn't reach the
-         * W2K-2 -- asked for explicitly: this is the routine, expected outcome of opening the app
-         * away from the boat, not something worth a modal popup (see runSync()'s own isAutoStart
-         * handling) or even a loud in-app status banner -- a plain log line covers the in-app
-         * side, and this notification covers being told about it without having to be looking at
-         * the app right when it happens. A manual tap on the download button still gets the
-         * normal dialog instead, no notification of its own needed there since the owner is
-         * already looking at the app. */
-        fun postNotFoundNotification(context: Context, message: String) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
-                    PackageManager.PERMISSION_GRANTED
-            ) {
-                return
-            }
-            // Same action + flags as onStartCommand()'s own openAppIntent above, not a plain
-            // FLAG_ACTIVITY_NEW_TASK launch -- found in practice, asked for explicitly: a plain
-            // launch Intent stacks a brand new MainActivity instance on top even when one is
-            // already alive, which re-runs onCreate() and its own autoStartSyncWithSettingsRetry()
-            // call -- so tapping "W2K-2 niet gevonden" started a fresh download attempt that had no
-            // better chance of finding the W2K-2 than the one that had just failed. SINGLE_TOP/
-            // CLEAR_TOP instead bring an already-alive instance to the front via onNewIntent()
-            // (a no-op beyond that, see its own doc comment), which just shows the app window.
-            val reopenIntent = Intent(context, MainActivity::class.java).apply {
-                action = MainActivity.ACTION_TOGGLE_FROM_NOTIFICATION
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
-            val contentIntent = PendingIntent.getActivity(context, 0, reopenIntent, pendingIntentFlags)
-            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle(context.getString(R.string.app_name))
-                .setContentText(message)
-                .setSmallIcon(android.R.drawable.stat_sys_download_done)
-                .setAutoCancel(true)
-                .setTimeoutAfter(STALE_NOTIFICATION_TIMEOUT_MS)
-                .setContentIntent(contentIntent)
-                .build()
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-        }
-
         /** Replaces the ongoing download notification with a final, dismissible one once a run
          * finishes successfully -- found in practice, asked for explicitly: stopService() alone
          * (MainActivity.runSync()'s own finally) just makes the notification disappear the
@@ -332,11 +287,11 @@ class SyncNotificationService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
             // Tapping the body opens the app (asked for explicitly) -- same ACTION_TOGGLE_FROM_
-            // NOTIFICATION + SINGLE_TOP/CLEAR_TOP pattern as postNotFoundNotification() above,
-            // which brings an already-alive MainActivity to the front via onNewIntent() rather
-            // than starting a fresh one -- this used to deliberately have no content intent at
-            // all, over a concern (from before that pattern existed here) that reopening would
-            // look like it "hangs" by re-running the auto-start-on-launch flow from scratch;
+            // NOTIFICATION + SINGLE_TOP/CLEAR_TOP pattern onStartCommand()'s own openAppIntent
+            // above uses, which brings an already-alive MainActivity to the front via
+            // onNewIntent() rather than starting a fresh one -- this used to deliberately have no
+            // content intent at all, over a concern that reopening would look like it "hangs" by
+            // re-running the auto-start-on-launch flow from scratch;
             // SINGLE_TOP/CLEAR_TOP avoids that exact problem, same as it already does for the
             // other notifications in this class.
             val reopenIntent = Intent(context, MainActivity::class.java).apply {

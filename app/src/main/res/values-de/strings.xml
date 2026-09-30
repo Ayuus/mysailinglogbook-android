@@ -14,7 +14,6 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Kein privates Netzwerk gefunden (schnelle Vorabprüfung) -- automatischer Download übersprungen.</string>
-    <string name="notif_w2k2_not_found">W2K-2 nicht gefunden.</string>
     <string name="log_fill_w2k2_credentials">Trage zuerst den W2K-2-Benutzernamen und das Passwort in den Einstellungen ein.</string>
     <string name="status_checking_hotspot">Netzwerk wird geprüft...</string>
     <string name="status_hotspot_off">Kein privates Netzwerk gefunden (oder der W2K-2 ist nicht darauf) -- schalte deinen Hotspot ein oder verbinde dich mit demselben Netzwerk wie der W2K-2, um herunterzuladen.</string>

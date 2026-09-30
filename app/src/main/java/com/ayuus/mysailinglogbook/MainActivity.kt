@@ -751,15 +751,11 @@ class MainActivity : AppCompatActivity() {
                 // showing a logbook automatically here is out of scope: that's what the
                 // autoSyncOnLaunch==false branch's own viewLocalLogbook() call is for. With
                 // auto-download on, the owner asked to see fresh data, not whatever's cached.
+                // No system notification here (asked for explicitly, "meldingen alleen gebruiken
+                // voor langdurige processen") -- this is a cheap, synchronous, no-network-I/O
+                // check, over before it started; nothing actually ran long enough to be worth
+                // learning about after walking away. The log line above is enough.
                 handleLogLine("[info] " + getString(R.string.log_hotspot_precheck_skipped))
-                // A real Android notification too, not just the in-app log (asked for explicitly)
-                // -- this can fire well before the owner ever looks at the app again (e.g. the
-                // very first check after a fresh launch), so it's the only way to learn about it
-                // without watching the screen right at this moment. Plain statement, not "tik
-                // om..." -- tapping it does exactly what tapping any notification does (opens the
-                // app), nothing beyond that specific to this one (found in practice: worded like
-                // there was a dedicated action behind the tap, there wasn't).
-                SyncNotificationService.postNotFoundNotification(this, getString(R.string.notif_w2k2_not_found))
             }
         } else if (attemptsLeft > 0) {
             android.os.Handler(mainLooper).postDelayed(
@@ -876,12 +872,12 @@ class MainActivity : AppCompatActivity() {
                     stopService(Intent(this, SyncNotificationService::class.java))
                     SyncState.notificationForegrounded = false
                     SyncState.notificationStartFailed = false
-                    // No popup, auto-started or manual download tap alike (asked for explicitly)
-                    // -- "W2K-2 not reachable yet" is the expected, common outcome of not being
-                    // at the boat, not something worth a modal interruption; the log line above
-                    // plus a real Android notification (in place of the ongoing download one this
-                    // replaces) are enough either way.
-                    SyncNotificationService.postNotFoundNotification(this, message)
+                    // No popup, and no system notification either (asked for explicitly,
+                    // "meldingen alleen gebruiken voor langdurige processen") -- "W2K-2 not
+                    // reachable yet" is the expected, common outcome of not being at the boat, not
+                    // something worth a modal interruption, and this cheap check bailed before any
+                    // real download work even started -- nothing ran long enough to be worth
+                    // learning about after walking away. The log line above is enough.
                     SyncState.inProgress = false
                     SyncState.runInitiator = null
                     updateSyncButtonAvailability()
@@ -1495,12 +1491,10 @@ class MainActivity : AppCompatActivity() {
                 if (existing.exists()) {
                     loadLogbookIntoWebView(existing.absolutePath)
                 }
+                // No system notification here either (asked for explicitly, "meldingen alleen
+                // gebruiken voor langdurige processen") -- the discover_w2k2() scan itself only
+                // takes about a second; not something worth learning about after walking away.
                 handleLogLine("[info] ${result.error}")
-                // Plain statement, not "tik om..." -- tapping this notification does exactly
-                // what tapping any notification does (opens the app), nothing beyond that
-                // specific to this one (found in practice: worded like there was a dedicated
-                // action behind the tap, there wasn't).
-                SyncNotificationService.postNotFoundNotification(this, getString(R.string.notif_w2k2_not_found))
                 return
             }
             // Same calm, dismissible treatment, not the loud dialog below -- asked for

@@ -18,7 +18,6 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Geen privénetwerk gevonden (snelle controle) -- automatisch downloaden overgeslagen.</string>
-    <string name="notif_w2k2_not_found">W2K-2 niet gevonden.</string>
     <string name="log_fill_w2k2_credentials">Vul eerst de W2K-2 gebruikersnaam en het wachtwoord in via Instellingen.</string>
     <string name="status_checking_hotspot">Netwerk controleren...</string>
     <string name="status_hotspot_off">Geen privénetwerk gevonden (of de W2K-2 zit er niet op) -- zet je hotspot aan, of verbind met hetzelfde netwerk als de W2K-2, om te downloaden.</string>
