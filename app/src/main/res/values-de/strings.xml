@@ -21,7 +21,7 @@
     <string name="log_sync_done_at">Fertig: %1$s</string>
     <string name="notif_sync_done_at">Fertig %1$s</string>
     <string name="error_unexpected_sync">Unerwarteter Fehler während des Downloads: %1$s</string>
-    <string name="log_no_logbook_to_view">Noch kein Bordbuch zum Ansehen -- zuerst herunterladen.</string>
+    <string name="log_no_logbook_to_view">Noch kein Bordbuch zum Ansehen -- zuerst eines zusammenstellen.</string>
     <string name="log_no_ebl_files_to_build">Noch keine .ebl-Dateien auf diesem Gerät -- nichts zusammenzustellen.</string>
     <string name="log_publish_not_configured">Kein Veröffentlichungsziel eingerichtet -- Veröffentlichen-Schaltfläche deaktiviert.</string>
     <string name="log_fill_publish_settings">Trage zuerst die Veröffentlichungseinstellungen (REST oder SFTP) in den Einstellungen ein.</string>

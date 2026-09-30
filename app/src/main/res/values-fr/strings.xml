@@ -21,7 +21,7 @@
     <string name="log_sync_done_at">Terminé : %1$s</string>
     <string name="notif_sync_done_at">Terminé %1$s</string>
     <string name="error_unexpected_sync">Erreur inattendue pendant le téléchargement : %1$s</string>
-    <string name="log_no_logbook_to_view">Aucun journal à consulter pour l\'instant -- téléchargez d\'abord.</string>
+    <string name="log_no_logbook_to_view">Aucun journal à consulter pour l\'instant -- assemblez-en un d\'abord.</string>
     <string name="log_no_ebl_files_to_build">Aucun fichier .ebl sur cet appareil pour l\'instant -- rien à assembler.</string>
     <string name="log_publish_not_configured">Aucune destination de publication configurée -- bouton de publication désactivé.</string>
     <string name="log_fill_publish_settings">Renseignez d\'abord les paramètres de publication (REST ou SFTP) dans les Paramètres.</string>

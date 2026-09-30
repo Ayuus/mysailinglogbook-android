@@ -25,7 +25,7 @@
     <string name="log_sync_done_at">Voltooid: %1$s</string>
     <string name="notif_sync_done_at">Voltooid %1$s</string>
     <string name="error_unexpected_sync">Onverwachte fout tijdens downloaden: %1$s</string>
-    <string name="log_no_logbook_to_view">Nog geen logboek om te bekijken -- download eerst.</string>
+    <string name="log_no_logbook_to_view">Nog geen logboek om te bekijken -- stel er eerst een samen.</string>
     <string name="log_no_ebl_files_to_build">Nog geen .ebl-bestanden op dit toestel -- niets om samen te stellen.</string>
     <string name="log_publish_not_configured">Geen publicatiebestemming ingesteld -- publiceerknop uitgeschakeld.</string>
     <string name="log_fill_publish_settings">Vul eerst de publiceer-instellingen (REST of SFTP) in via Instellingen.</string>

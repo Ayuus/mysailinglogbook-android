@@ -29,7 +29,7 @@
     <string name="log_sync_done_at">Done: %1$s</string>
     <string name="notif_sync_done_at">Done %1$s</string>
     <string name="error_unexpected_sync">Unexpected error during download: %1$s</string>
-    <string name="log_no_logbook_to_view">No logbook to view yet -- download first.</string>
+    <string name="log_no_logbook_to_view">No logbook to view yet -- assemble one first.</string>
     <string name="log_no_ebl_files_to_build">No .ebl files on this device yet -- nothing to assemble.</string>
     <string name="log_publish_not_configured">No publish destination configured -- publish button disabled.</string>
     <string name="log_fill_publish_settings">Fill in the publish settings (REST or SFTP) via Settings first.</string>
