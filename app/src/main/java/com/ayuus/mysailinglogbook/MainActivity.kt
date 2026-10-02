@@ -1483,6 +1483,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 setLogExpanded(false)
                 loadLogbookIntoWebView(result.htmlPath)
+                // The logbook is showing now, so 📖's next tap has to go back to the full log, not
+                // load the same file again and hide the log entirely (asked for explicitly: after
+                // a successful run the log couldn't be read without tapping 📖 twice). Same as
+                // the iOS app's own _log_result(), which already sets showing_local_logbook here.
+                showingLocalLogbook = true
             }
         } else if (result.cancelled) {
             // The app was closed mid-download (see onDestroy()) -- by the time this runs the
