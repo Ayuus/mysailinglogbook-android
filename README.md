@@ -191,6 +191,18 @@ MainActivity (manual "sync now" + auto-start on launch)
   app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
   messages verbatim in the UI, and `onDownloadComplete()` (see below).
 
+## Texts shared with the iOS app
+
+The strings both apps show are not edited here: they live in the nmea2log repo's `src/nmea2log/app_texts.py`
+(the iOS app reads that file directly) and are written into `values*/strings.xml` from there:
+
+```bash
+python -m nmea2log.export_android_strings app/src/main/res      # run from the nmea2log repo's src/
+```
+
+Edit such a string in `app_texts.py` and export, never by hand in `strings.xml` (the next export would
+overwrite it). Strings that only exist on Android stay here. `--check` reports drift.
+
 ## Design choices worth knowing before changing this code
 
 **`autoStartSyncWithSettingsRetry()`'s own "vul W2K-2-gegevens in" line is not a startup nag --
