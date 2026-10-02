@@ -229,7 +229,18 @@ class MainActivity : AppCompatActivity() {
         buildButton = iconButton(getString(R.string.tooltip_build_local), iconRes = R.drawable.ic_refresh_24) {
             // While its own run is in progress this is the (only enabled) cancel button, see
             // updatePublishButtonEnabled().
-            if (SyncState.inProgress) cancelSyncStayInApp() else runOfflineBuild()
+            if (SyncState.inProgress) {
+                cancelSyncStayInApp()
+            } else if (logbookShownAsRunResult) {
+                // Asked for explicitly: with a run's own result showing over a small strip of the log,
+                // this tap only brings the log back (a run takes minutes, and tapping here to read the
+                // log must not also start one); the next tap, with the log already showing, assembles.
+                showingLocalLogbook = false
+                setLogExpanded(true)
+                logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
+            } else {
+                runOfflineBuild()
+            }
         }
         // Material's own "upload" icon (ic_upload_24), not the ☁️ emoji it replaced -- asked for
         // explicitly, found in practice: a plain cloud alone didn't read as obviously "publish"
@@ -1019,6 +1030,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         showingLocalLogbook = true
+        logbookShownAsRunResult = false
         // Fully hides the log rather than leaving setLogExpanded(false)'s own small collapsed
         // strip (still used as-is after a normal download/publish completes) -- asked for explicitly,
         // this view is meant to cover the whole screen, not share it with a log peek.
@@ -1033,6 +1045,11 @@ class MainActivity : AppCompatActivity() {
     // already re-expand the log themselves via setLogExpanded(true), so this only needs to stay
     // in sync with that, not drive it.
     private var showingLocalLogbook = false
+
+    // True while the logbook is showing as the result of a run, with the log still visible as a
+    // strip below it (see showSyncResult()); false as soon as the log is expanded again or 📖 shows
+    // the logbook over the whole screen. The Assemble button reads it, see buildButton.
+    private var logbookShownAsRunResult = false
 
     /** Manual re-publish (the ☁️ icon): builds the logbook from whatever .ebl files are already
      * on the phone (same as runOfflineBuild(), see buildFromLocalFilesAndMaybePublish()'s own
@@ -1445,6 +1462,7 @@ class MainActivity : AppCompatActivity() {
      * shrinks back down to a small scrollable strip and the WebView takes the space instead. */
     private fun setLogExpanded(expanded: Boolean) {
         if (expanded) {
+            logbookShownAsRunResult = false
             logScroll.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 0f)
         } else {
@@ -1488,6 +1506,7 @@ class MainActivity : AppCompatActivity() {
                 // a successful run the log couldn't be read without tapping 📖 twice). Same as
                 // the iOS app's own _log_result(), which already sets showing_local_logbook here.
                 showingLocalLogbook = true
+                logbookShownAsRunResult = true
             }
         } else if (result.cancelled) {
             // The app was closed mid-download (see onDestroy()) -- by the time this runs the
