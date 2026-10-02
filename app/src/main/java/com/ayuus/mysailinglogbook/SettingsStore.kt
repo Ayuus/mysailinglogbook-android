@@ -49,12 +49,12 @@ class SettingsStore(context: Context) {
     val isW2k2ConfigComplete: Boolean
         get() = w2k2User.isNotBlank() && w2k2Password.isNotBlank()
 
-    // On by default (preserves the original, always-on behavior for anyone upgrading) -- asked
-    // for explicitly: the owner wants to choose whether opening the app tries to reach the W2K-2
+    // Off by default (asked for explicitly, reversing the original always-on-for-upgraders
+    // default): the owner wants to choose whether opening the app tries to reach the W2K-2
     // right away (see MainActivity.onCreate()'s own autoStartSyncWithSettingsRetry() call) or
     // only ever downloads on an explicit tap of the download button.
     var autoSyncOnLaunch: Boolean
-        get() = prefs.getBoolean(KEY_AUTO_SYNC_ON_LAUNCH, true)
+        get() = prefs.getBoolean(KEY_AUTO_SYNC_ON_LAUNCH, false)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_SYNC_ON_LAUNCH, value).apply()
 
     // On by default too (same reasoning as autoSyncOnLaunch above) -- asked for explicitly: the
