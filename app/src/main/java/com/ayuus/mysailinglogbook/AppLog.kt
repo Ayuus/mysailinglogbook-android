@@ -40,8 +40,23 @@ object AppLog {
      * as lines come in from the main thread, the sync thread and the boat-mode service. */
     fun append(stampedLine: String) {
         synchronized(fileLock) {
-            SyncState.lastLogText = if (SyncState.lastLogText.isEmpty()) stampedLine else "${SyncState.lastLogText}\n$stampedLine"
+            val text = if (SyncState.lastLogText.isEmpty()) stampedLine else "${SyncState.lastLogText}\n$stampedLine"
+            SyncState.lastLogText = trimmed(text)
         }
+    }
+
+    // The running log text is what the log view re-renders, so it is kept to the last MAX_LOG_LINES lines
+    // (trimmed once past twice that, not on every line) -- found in practice, a full decode of a season
+    // (2326 files, one line each, plus warnings) made it so long that rebuilding the view per line saturated
+    // the main thread: the log lagged behind by tens of minutes and could not be scrolled. The full
+    // history is in nmea2log.log regardless (see appendToFile()/log.py); same cap as the iOS app's log view.
+    private const val MAX_LOG_LINES = 1000
+    private const val TRIM_ABOVE_CHARS = 150_000
+
+    private fun trimmed(text: String): String {
+        if (text.length <= TRIM_ABOVE_CHARS) return text
+        val lines = text.split("\n")
+        return if (lines.size > MAX_LOG_LINES * 2) lines.takeLast(MAX_LOG_LINES).joinToString("\n") else text
     }
 
     /** A line Python has already stamped and written to the log file itself (log.py): kept in the running

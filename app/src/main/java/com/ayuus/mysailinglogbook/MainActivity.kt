@@ -46,6 +46,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.WindowInsetsCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
@@ -237,7 +238,6 @@ class MainActivity : AppCompatActivity() {
                 // log must not also start one); the next tap, with the log already showing, assembles.
                 showingLocalLogbook = false
                 setLogExpanded(true)
-                logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
             } else {
                 runOfflineBuild()
             }
@@ -1315,14 +1315,23 @@ class MainActivity : AppCompatActivity() {
      * position unless it was at the bottom. Public: AppLog calls it for lines made outside this
      * Activity (the boat-mode service). */
     fun refreshLogView() {
+        // Coalesced: at most one re-render per LOG_REFRESH_INTERVAL_MS however many lines arrive (a decode
+        // logs one every few seconds, an import one per file). Re-styling and laying out the whole text
+        // per line is what saturated the main thread on a long run, see AppLog.append().
+        if (!logRefreshPending.compareAndSet(false, true)) return
         runOnUiThread {
-            val wasAtBottom = isLogScrolledToBottom()
-            logView.text = styledLogText(SyncState.lastLogText)
-            if (wasAtBottom) {
-                logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
-            }
+            logView.postDelayed({
+                logRefreshPending.set(false)
+                val wasAtBottom = isLogScrolledToBottom()
+                logView.text = styledLogText(SyncState.lastLogText)
+                if (wasAtBottom) {
+                    logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
+                }
+            }, LOG_REFRESH_INTERVAL_MS)
         }
     }
+
+    private val logRefreshPending = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /** [text] (the log's own accumulated lines) with every "[error]" line shown bold and in red,
      * and every "[warning]"/"[anomaly]"/"[geocode]" line shown bold and in amber -- asked for
@@ -1470,6 +1479,11 @@ class MainActivity : AppCompatActivity() {
             logScroll.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, collapsedHeight)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
         }
+        // To the newest line once the new size is applied -- found in practice: the log strip kept a run's
+        // result under the logbook, but showed the *top* of the log (the start of the run) and had to be
+        // scrolled through to reach the end, which on a long log was hopeless. The scroll the log view
+        // does itself when a line arrives measures the old (full-height) layout, so it cannot do this.
+        logScroll.doOnLayout { logScroll.fullScroll(View.FOCUS_DOWN) }
     }
 
     /** publishFailed: the build succeeded but a publish attempted right after it (still before
@@ -2668,6 +2682,9 @@ class MainActivity : AppCompatActivity() {
 
         // How much of the log file to show when the boat mode is open in a process that has no log text yet.
         private const val BOOT_LOG_TAIL_LINES = 60
+
+        // How soon after a log line the log view is re-rendered at the latest, see refreshLogView().
+        private const val LOG_REFRESH_INTERVAL_MS = 250L
 
         private const val KEY_BATTERY_PROMPTED = "boot_battery_prompted_v1"
         private const val KEY_EBL_INDEXED_FOR_PC = "ebl_indexed_for_pc_v1"
