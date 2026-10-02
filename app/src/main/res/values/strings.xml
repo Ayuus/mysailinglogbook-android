@@ -162,10 +162,10 @@
     <string name="checkbox_boat_final_left">Final round when I have left the boat</string>
     <string name="label_boat_left_minutes">Left the boat: W2K-2 unreachable for (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Turn off after final round</string>
-    <string name="checkbox_boat_auto_start">Start automatically on launch</string>
-    <string name="tooltip_boat_mode">Start boat mode</string>
-    <string name="tooltip_boat_mode_on">Stop boat mode</string>
-    <string name="boat_log_enabled">Boat mode is on (started via the clock button or Settings).</string>
+    <string name="checkbox_boat_auto_start">Turn on automatically on launch</string>
+    <string name="tooltip_boat_mode">Turn on boat mode</string>
+    <string name="tooltip_boat_mode_on">Turn off boat mode</string>
+    <string name="boat_log_enabled">Boat mode is on (turned on via the sailboat button or Settings).</string>
     <string name="boat_log_simulation">Boat mode (simulation): time runs 30x faster and nothing is really downloaded or published.</string>
     <string name="boat_status_searching">Boat mode: looking for the W2K-2...</string>
     <!-- Quiet notification-only addition (no log line) while the search above keeps retrying with
@@ -193,5 +193,5 @@
     <string name="boat_notif_channel_description">Notifications while boat mode is on: the status and a way to stop it</string>
     <string name="boat_notif_action_now">Round now</string>
     <string name="boat_notif_action_stop">Stop</string>
-    <string name="boat_notif_text_starting">Starting...</string>
+    <string name="boat_notif_text_starting">Turning on...</string>
 </resources>

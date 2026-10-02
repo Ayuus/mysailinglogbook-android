@@ -151,10 +151,10 @@
     <string name="checkbox_boat_final_left">Dernière ronde quand j\'ai quitté le bateau</string>
     <string name="label_boat_left_minutes">Quitté le bateau : W2K-2 injoignable depuis (minutes)</string>
     <string name="checkbox_boat_stop_after_final">Désactiver après la dernière ronde</string>
-    <string name="checkbox_boat_auto_start">Démarrer automatiquement au lancement</string>
-    <string name="tooltip_boat_mode">Démarrer le mode bateau</string>
-    <string name="tooltip_boat_mode_on">Arrêter le mode bateau</string>
-    <string name="boat_log_enabled">Le mode bateau est activé (démarré via le bouton horloge ou les Paramètres).</string>
+    <string name="checkbox_boat_auto_start">Activer automatiquement au démarrage</string>
+    <string name="tooltip_boat_mode">Activer le mode bateau</string>
+    <string name="tooltip_boat_mode_on">Désactiver le mode bateau</string>
+    <string name="boat_log_enabled">Le mode bateau est activé (via le bouton voilier ou les Paramètres).</string>
     <string name="boat_log_simulation">Mode bateau (simulation) : le temps passe 30 fois plus vite, rien n\'est réellement téléchargé ni publié.</string>
     <string name="boat_status_searching">Mode bateau : recherche du W2K-2...</string>
     <string name="boat_notif_last_check_with_next">(dernier contrôle %1$s, prochain %2$s)</string>
@@ -180,5 +180,5 @@
     <string name="boat_notif_channel_description">Notifications tant que le mode bateau est actif : l\'état et un moyen de l\'arrêter</string>
     <string name="boat_notif_action_now">Maintenant</string>
     <string name="boat_notif_action_stop">Arrêter</string>
-    <string name="boat_notif_text_starting">Démarrage...</string>
+    <string name="boat_notif_text_starting">Activation...</string>
 </resources>
