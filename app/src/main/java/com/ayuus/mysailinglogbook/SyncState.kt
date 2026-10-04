@@ -89,6 +89,11 @@ object SyncState {
     @Volatile
     var lastNotificationText: String? = null
 
+    /** Whether the sync notification last showed the download icon (a file being fetched) rather than the
+     * build one -- see SyncNotificationService.postInterruptedNotification(). */
+    @Volatile
+    var notificationShowsDownload: Boolean = false
+
     @Volatile
     var lastProgressPhase: String? = null
 

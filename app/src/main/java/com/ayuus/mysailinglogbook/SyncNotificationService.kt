@@ -51,6 +51,9 @@ class SyncNotificationService : Service() {
         // phase after it (found in practice, reported: the animated download icon stayed up
         // through the whole build too, though nothing was downloading by then).
         val isDownloading = current >= 0 && total >= 0 && fileName != null
+        // Remembered for postInterruptedNotification(): the app may be swept away at any moment, and the
+        // notification that replaces this one then shows the icon of what was running.
+        SyncState.notificationShowsDownload = isDownloading
         // Tapping the notification opens the app (asked for explicitly) -- without a
         // setContentIntent, tapping it did nothing at all. FLAG_IMMUTABLE is required since API 31
         // (Android 12); this app's minSdk 24 means the flag itself must still be built
@@ -250,7 +253,9 @@ class SyncNotificationService : Service() {
             val notification = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(context.getString(R.string.app_name))
                 .setContentText(context.getString(R.string.notif_sync_interrupted_by_close))
-                .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                // The icon of what was running (download or build), like the completion notification: the
+                // generic system "download done" arrow said nothing about what had been interrupted.
+                .setSmallIcon(if (SyncState.notificationShowsDownload) R.drawable.ic_download_24 else R.drawable.ic_refresh_24)
                 .setAutoCancel(true)
                 .setTimeoutAfter(STALE_NOTIFICATION_TIMEOUT_MS)
                 .setContentIntent(contentIntent)
