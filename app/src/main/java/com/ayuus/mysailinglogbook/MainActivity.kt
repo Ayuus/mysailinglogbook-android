@@ -2662,10 +2662,10 @@ class MainActivity : AppCompatActivity() {
         // A mid-tone red (Material's "red 700") for LogAdapter's own "[error]" highlight --
         // readable against both a light and a dark system theme, since the log view itself has no
         // background color of its own, just whatever the theme gives it.
-        private val LOG_ERROR_COLOR = Color.parseColor("#D32F2F")
+        private val LOG_ERROR_COLOR = Color.parseColor(SharedConstants.LOG_ERROR_COLOR)
 
         // Material's "yellow 600" for LogAdapter's own warning highlight -- "amber 700"
         // (#FFA000) read as orange in practice, not yellow.
-        private val LOG_WARNING_COLOR = Color.parseColor("#FDD835")
+        private val LOG_WARNING_COLOR = Color.parseColor(SharedConstants.LOG_WARNING_COLOR)
     }
 }

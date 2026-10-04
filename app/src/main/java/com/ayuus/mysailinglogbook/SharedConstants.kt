@@ -6,6 +6,7 @@ package com.ayuus.mysailinglogbook
 object SharedConstants {
     const val EBL_DIR_NAME = "Actisense"
     const val LOGBOOK_FILE_NAME = "logbook.html"
+    const val LOG_ERROR_COLOR = "#D32F2F"
     val LOG_ERROR_TAGS = listOf("[error]")
     const val LOG_FILE_NAME = "nmea2log.log"
     const val LOG_MAX_LINES = 200000
@@ -13,6 +14,7 @@ object SharedConstants {
     const val LOG_STRIP_HEIGHT = 150
     const val LOG_TIMESTAMP_REGEX = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} "
     const val LOG_TRIM_TO = 150000
+    const val LOG_WARNING_COLOR = "#FDD835"
     val LOG_WARNING_TAGS = listOf("[warning]", "[anomaly]", "[geocode]")
     const val SAMPLE_CACHE_FILE_NAME = "sample_cache.pkl"
 }
