@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The shared texts are looked up by name at run time (resources.getIdentifier: the log lines of a run, the
+     boat-mode statuses), so resource shrinking must not remove strings that nothing references directly. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/*" />

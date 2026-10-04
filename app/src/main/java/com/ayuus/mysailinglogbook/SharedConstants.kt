@@ -17,6 +17,7 @@ object SharedConstants {
     const val LOG_WARNING_COLOR = "#FDD835"
     val LOG_WARNING_TAGS = listOf("[warning]", "[anomaly]", "[geocode]")
     const val SAMPLE_CACHE_FILE_NAME = "sample_cache.pkl"
+    val BOOT_STATUS_TEXT_KEYS = mapOf("SEARCHING" to "boat_status_searching", "ROUND_STARTED" to "boat_status_round_started", "ROUND_DONE" to "boat_status_round_done", "ROUND_FAILED" to "boat_status_round_failed", "W2K_NOT_FOUND_RETRY" to "boat_status_w2k2_not_found_retry", "HARBOUR_FINAL" to "boat_status_harbour_final", "LEFT_BOAT" to "boat_status_left_boat", "LEFT_BOAT_NOTHING_TO_PUBLISH" to "boat_status_left_boat_nothing", "WAITING_IN_PORT" to "boat_status_waiting_in_port", "PUBLISH_STARTED" to "boat_status_publish_started", "PUBLISH_OK" to "boat_status_publish_ok", "PUBLISH_FAILED" to "boat_status_publish_failed", "STOPPED" to "boat_status_stopped")
 }
 
 object SharedDefaults {
