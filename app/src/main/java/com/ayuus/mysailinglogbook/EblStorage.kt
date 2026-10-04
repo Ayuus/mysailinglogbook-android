@@ -19,9 +19,9 @@ object EblStorage {
      * copy fails partway; a failed copy's partial leftovers are cleaned up so the next call retries.
      */
     fun downloadDir(context: Context): File {
-        val oldDir = File(context.filesDir, "Actisense")
+        val oldDir = File(context.filesDir, SharedConstants.EBL_DIR_NAME)
         val externalBase = context.getExternalFilesDir(null) ?: return oldDir
-        val newDir = File(externalBase, "Actisense")
+        val newDir = File(externalBase, SharedConstants.EBL_DIR_NAME)
         if (oldDir.exists() && !newDir.exists()) {
             try {
                 oldDir.copyRecursively(newDir, overwrite = false)

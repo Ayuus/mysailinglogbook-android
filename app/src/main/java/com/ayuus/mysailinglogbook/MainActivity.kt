@@ -522,7 +522,7 @@ class MainActivity : AppCompatActivity() {
         showingLocalLogbook = false
         setLogExpanded(true)
         if (LogBuffer.isEmpty()) {
-            val logFile = File(filesDir, "nmea2log.log")
+            val logFile = File(filesDir, SharedConstants.LOG_FILE_NAME)
             if (logFile.exists()) {
                 LogBuffer.replaceAll(logFile.readLines(Charsets.UTF_8).takeLast(BOOT_LOG_TAIL_LINES))
             }
@@ -872,7 +872,7 @@ class MainActivity : AppCompatActivity() {
 
         // Captured before this run starts -- see the "actually produced a fresh file" fallback
         // check below, right after syncFromW2k2() returns.
-        val htmlFile = File(filesDir, "logbook.html")
+        val htmlFile = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
         val htmlMtimeBeforeThisRun = if (htmlFile.exists()) htmlFile.lastModified() else -1L
 
         acquireManualRunWakeLock()
@@ -1020,7 +1020,7 @@ class MainActivity : AppCompatActivity() {
             setLogExpanded(true)
             return
         }
-        val htmlFile = File(filesDir, "logbook.html")
+        val htmlFile = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
         if (!htmlFile.exists()) {
             handleLogLine("[info] " + getString(R.string.log_no_logbook_to_view))
             return
@@ -1103,7 +1103,7 @@ class MainActivity : AppCompatActivity() {
         if (prefs.getBoolean(KEY_EBL_INDEXED_FOR_PC, false)) return
         Thread {
             val base = getExternalFilesDir(null) ?: return@Thread
-            val dir = File(base, "Actisense")
+            val dir = File(base, SharedConstants.EBL_DIR_NAME)
             if (dir.exists()) indexEblFilesForPc(dir, 0L)
             prefs.edit().putBoolean(KEY_EBL_INDEXED_FOR_PC, true).apply()
         }.start()
@@ -1169,8 +1169,8 @@ class MainActivity : AppCompatActivity() {
 
         val downloadDir = eblDownloadDir()
         val syncStartedAt = System.currentTimeMillis()
-        val outputHtmlPath = File(filesDir, "logbook.html")
-        val sampleCachePath = File(filesDir, "sample_cache.pkl")
+        val outputHtmlPath = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
+        val sampleCachePath = File(filesDir, SharedConstants.SAMPLE_CACHE_FILE_NAME)
 
         // Captured by the controller's onResult() below, not read back out of callAttr()'s own
         // return value afterward -- see SyncController.onResult()'s own doc comment for why.
@@ -1423,7 +1423,7 @@ class MainActivity : AppCompatActivity() {
             logList.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 0f)
         } else {
-            val collapsedHeight = (150 * resources.displayMetrics.density).toInt()
+            val collapsedHeight = (SharedConstants.LOG_STRIP_HEIGHT * resources.displayMetrics.density).toInt()
             logList.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, collapsedHeight)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
         }
@@ -1477,7 +1477,7 @@ class MainActivity : AppCompatActivity() {
                 // Not at the boat: the logbook that is already there is made ready. No system
                 // notification (asked for explicitly: only for long-running processes) -- discovery
                 // itself takes about a second.
-                val existing = File(filesDir, "logbook.html")
+                val existing = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
                 if (existing.exists()) loadLogbookIntoWebView(existing.absolutePath)
             }
             "error" -> showOfflineOrCloseDialog(lastText)
@@ -2274,8 +2274,8 @@ class MainActivity : AppCompatActivity() {
         val androidEntry = Python.getInstance().getModule("nmea2log.android_entry")
 
         val downloadDir = eblDownloadDir()
-        val outputHtmlPath = File(filesDir, "logbook.html")
-        val sampleCachePath = File(filesDir, "sample_cache.pkl")
+        val outputHtmlPath = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
+        val sampleCachePath = File(filesDir, SharedConstants.SAMPLE_CACHE_FILE_NAME)
         // A plain array, not a Kotlin List -- found in practice: passing a List straight across
         // the Chaquopy boundary via callAttr() reached Python as something that raised
         // "TypeError: 'ArrayList' object is not iterable" the moment run_pipeline() tried to
@@ -2564,7 +2564,7 @@ class MainActivity : AppCompatActivity() {
         // reloading an unchanged page would discard an unsaved Remarks edit sitting open in the
         // WebView for no reason.
         if (!SyncState.inProgress) {
-            val htmlFile = File(filesDir, "logbook.html")
+            val htmlFile = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
             if (htmlFile.exists() && htmlFile.lastModified() != lastLoadedHtmlMtime) {
                 loadLogbookIntoWebView(htmlFile.absolutePath)
             }
@@ -2638,7 +2638,7 @@ class MainActivity : AppCompatActivity() {
         private const val BOOT_LOG_TAIL_LINES = 60
 
         // How soon after a log line the log view is re-rendered at the latest, see refreshLogView().
-        private const val LOG_REFRESH_INTERVAL_MS = 250L
+        private const val LOG_REFRESH_INTERVAL_MS = SharedConstants.LOG_REFRESH_INTERVAL_MS.toLong()
 
         private const val KEY_BATTERY_PROMPTED = "boot_battery_prompted_v1"
         private const val KEY_EBL_INDEXED_FOR_PC = "ebl_indexed_for_pc_v1"

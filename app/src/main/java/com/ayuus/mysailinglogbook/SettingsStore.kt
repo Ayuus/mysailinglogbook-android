@@ -54,7 +54,7 @@ class SettingsStore(context: Context) {
     // right away (see MainActivity.onCreate()'s own autoStartSyncWithSettingsRetry() call) or
     // only ever downloads on an explicit tap of the download button.
     var autoSyncOnLaunch: Boolean
-        get() = prefs.getBoolean(KEY_AUTO_SYNC_ON_LAUNCH, false)
+        get() = prefs.getBoolean(KEY_AUTO_SYNC_ON_LAUNCH, SharedDefaults.AUTO_SYNC_ON_LAUNCH)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_SYNC_ON_LAUNCH, value).apply()
 
     // On by default too (same reasoning as autoSyncOnLaunch above) -- asked for explicitly: the
@@ -63,7 +63,7 @@ class SettingsStore(context: Context) {
     // -- checked via MainActivity's own new 📖 button (viewLocalLogbook()) and the ☁️ button still
     // publishes on demand either way.
     var autoPublishAfterBuild: Boolean
-        get() = prefs.getBoolean(KEY_AUTO_PUBLISH_AFTER_BUILD, true)
+        get() = prefs.getBoolean(KEY_AUTO_PUBLISH_AFTER_BUILD, SharedDefaults.AUTO_PUBLISH_AFTER_BUILD)
         set(value) = prefs.edit().putBoolean(KEY_AUTO_PUBLISH_AFTER_BUILD, value).apply()
 
     // Password auth, not a private key -- confirmed working against the real TransIP account
@@ -136,7 +136,7 @@ class SettingsStore(context: Context) {
     // dark-mode toggle at all (see LogbookApplication's own comment) simply resolves "system" to
     // light there -- "dark" is still available as an explicit choice in Settings for it.
     var themeMode: String
-        get() = prefs.getString(KEY_THEME_MODE, "system") ?: "system"
+        get() = prefs.getString(KEY_THEME_MODE, SharedDefaults.THEME_MODE) ?: SharedDefaults.THEME_MODE
         set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
 
     // Optionally user-editable (see SettingsActivity): filled in, the very first SFTP connection
@@ -151,39 +151,39 @@ class SettingsStore(context: Context) {
     // Boat mode (see BootModeController and nmea2log/bootmode.py, whose BootModeConfig has the same
     // names in snake_case and the same defaults).
     var bootRoundIntervalMinutes: Int
-        get() = prefs.getInt(KEY_BOOT_ROUND_INTERVAL_MINUTES, 60)
+        get() = prefs.getInt(KEY_BOOT_ROUND_INTERVAL_MINUTES, SharedDefaults.BOOT_ROUND_INTERVAL_MINUTES)
         set(value) = prefs.edit().putInt(KEY_BOOT_ROUND_INTERVAL_MINUTES, value).apply()
 
     var bootPublishEveryRound: Boolean
-        get() = prefs.getBoolean(KEY_BOOT_PUBLISH_EVERY_ROUND, false)
+        get() = prefs.getBoolean(KEY_BOOT_PUBLISH_EVERY_ROUND, SharedDefaults.BOOT_PUBLISH_EVERY_ROUND)
         set(value) = prefs.edit().putBoolean(KEY_BOOT_PUBLISH_EVERY_ROUND, value).apply()
 
     var bootFinalOnHarbour: Boolean
-        get() = prefs.getBoolean(KEY_BOOT_FINAL_ON_HARBOUR, true)
+        get() = prefs.getBoolean(KEY_BOOT_FINAL_ON_HARBOUR, SharedDefaults.BOOT_FINAL_ON_HARBOUR)
         set(value) = prefs.edit().putBoolean(KEY_BOOT_FINAL_ON_HARBOUR, value).apply()
 
     var bootHarbourStationaryMinutes: Int
-        get() = prefs.getInt(KEY_BOOT_HARBOUR_STATIONARY_MINUTES, 30)
+        get() = prefs.getInt(KEY_BOOT_HARBOUR_STATIONARY_MINUTES, SharedDefaults.BOOT_HARBOUR_STATIONARY_MINUTES)
         set(value) = prefs.edit().putInt(KEY_BOOT_HARBOUR_STATIONARY_MINUTES, value).apply()
 
     var bootHarbourEngineOffMinutes: Int
-        get() = prefs.getInt(KEY_BOOT_HARBOUR_ENGINE_OFF_MINUTES, 10)
+        get() = prefs.getInt(KEY_BOOT_HARBOUR_ENGINE_OFF_MINUTES, SharedDefaults.BOOT_HARBOUR_ENGINE_OFF_MINUTES)
         set(value) = prefs.edit().putInt(KEY_BOOT_HARBOUR_ENGINE_OFF_MINUTES, value).apply()
 
     var bootFinalOnLeftBoat: Boolean
-        get() = prefs.getBoolean(KEY_BOOT_FINAL_ON_LEFT_BOAT, true)
+        get() = prefs.getBoolean(KEY_BOOT_FINAL_ON_LEFT_BOAT, SharedDefaults.BOOT_FINAL_ON_LEFT_BOAT)
         set(value) = prefs.edit().putBoolean(KEY_BOOT_FINAL_ON_LEFT_BOAT, value).apply()
 
     var bootLeftBoatMinutes: Int
-        get() = prefs.getInt(KEY_BOOT_LEFT_BOAT_MINUTES, 20)
+        get() = prefs.getInt(KEY_BOOT_LEFT_BOAT_MINUTES, SharedDefaults.BOOT_LEFT_BOAT_MINUTES)
         set(value) = prefs.edit().putInt(KEY_BOOT_LEFT_BOAT_MINUTES, value).apply()
 
     var bootStopAfterFinal: Boolean
-        get() = prefs.getBoolean(KEY_BOOT_STOP_AFTER_FINAL, false)
+        get() = prefs.getBoolean(KEY_BOOT_STOP_AFTER_FINAL, SharedDefaults.BOOT_STOP_AFTER_FINAL)
         set(value) = prefs.edit().putBoolean(KEY_BOOT_STOP_AFTER_FINAL, value).apply()
 
     var bootAutoStart: Boolean
-        get() = prefs.getBoolean(KEY_BOOT_AUTO_START, false)
+        get() = prefs.getBoolean(KEY_BOOT_AUTO_START, SharedDefaults.BOOT_AUTO_START)
         set(value) = prefs.edit().putBoolean(KEY_BOOT_AUTO_START, value).apply()
 
     /** The boat-mode settings as the JSON nmea2log.bootmode.BootModeConfig.from_dict() takes. */
@@ -200,9 +200,9 @@ class SettingsStore(context: Context) {
         .toString()
 
     companion object {
-        const val DEFAULT_SFTP_PORT = 22
-        // Same default as build_arg_parser()'s own --min-stop-minutes (see cli.py).
-        const val DEFAULT_MIN_STOP_MINUTES = 10.0f
+        // The defaults of both apps are defined once, in nmea2log/app_settings.py (see SharedConstants.kt).
+        const val DEFAULT_SFTP_PORT = SharedDefaults.DEFAULT_SFTP_PORT
+        val DEFAULT_MIN_STOP_MINUTES = SharedDefaults.DEFAULT_MIN_STOP_MINUTES.toFloat()
         private const val KEY_W2K2_USER = "w2k2_user"
         private const val KEY_W2K2_PASSWORD = "w2k2_password"
         private const val KEY_BOAT_NAME = "boat_name"

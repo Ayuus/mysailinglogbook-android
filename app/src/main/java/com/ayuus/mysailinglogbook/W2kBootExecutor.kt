@@ -120,8 +120,8 @@ class W2kBootExecutor(
         entry().callAttr(
             "sync_from_w2k2",
             settings.w2k2User, settings.w2k2Password, subnet, downloadDir.absolutePath,
-            File(context.filesDir, "logbook.html").absolutePath,
-            File(context.filesDir, "sample_cache.pkl").absolutePath,
+            File(context.filesDir, SharedConstants.LOGBOOK_FILE_NAME).absolutePath,
+            File(context.filesDir, SharedConstants.SAMPLE_CACHE_FILE_NAME).absolutePath,
             settings.boatName, settings.mmsi, settings.callSign, controller, settings.minStopMinutes,
         )
         val done = outcome ?: return BootRoundResult.Failed(context.getString(R.string.error_no_result))
@@ -137,7 +137,7 @@ class W2kBootExecutor(
         Thread {
             SyncState.bootBusy = true
             val ok = try {
-                val html = File(context.filesDir, "logbook.html")
+                val html = File(context.filesDir, SharedConstants.LOGBOOK_FILE_NAME)
                 html.exists() && LogbookPublisher.publish(context, settings, html, ::logLine) { onProgress(it) }
             } catch (e: Exception) {
                 logLine("[error] $e")

@@ -47,8 +47,8 @@ class LogAdapter(
         val line = LogBuffer[position]
         view.text = line
         val color = when {
-            "[error]" in line -> errorColor
-            "[warning]" in line || "[anomaly]" in line || "[geocode]" in line -> warningColor
+            SharedConstants.LOG_ERROR_TAGS.any { it in line } -> errorColor
+            SharedConstants.LOG_WARNING_TAGS.any { it in line } -> warningColor
             else -> null
         }
         view.setTextColor(color ?: defaults)

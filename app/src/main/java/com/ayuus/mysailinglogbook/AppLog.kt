@@ -11,7 +11,7 @@ import java.io.File
  */
 object AppLog {
     // What Python's log() puts in front of every line.
-    private val TIMESTAMP_REGEX = Regex("^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} ")
+    private val TIMESTAMP_REGEX = Regex(SharedConstants.LOG_TIMESTAMP_REGEX)
 
     // Serializes appends of app-made lines to the log file.
     private val fileLock = Any()
@@ -29,7 +29,7 @@ object AppLog {
     fun appendToFile(context: Context, stampedLine: String) {
         try {
             synchronized(fileLock) {
-                File(context.filesDir, "nmea2log.log").appendText(stampedLine + "\n", Charsets.UTF_8)
+                File(context.filesDir, SharedConstants.LOG_FILE_NAME).appendText(stampedLine + "\n", Charsets.UTF_8)
             }
         } catch (e: Exception) {
             // best effort only

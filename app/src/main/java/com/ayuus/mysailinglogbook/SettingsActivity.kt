@@ -210,7 +210,7 @@ class SettingsActivity : AppCompatActivity() {
         // leaving the boat (see BootModeController / nmea2log/bootmode.py). The values only feed
         // BootModeConfig; the decisions themselves are made in Python.
         sectionHeader(getString(R.string.section_boat_mode))
-        val bootIntervalOptions = listOf(30, 60, 120, 180)
+        val bootIntervalOptions = SharedDefaults.BOOT_INTERVAL_CHOICES
         layout.addView(
             TextView(this).apply {
                 text = getString(R.string.label_boat_interval)
@@ -373,7 +373,7 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.button_cache_data),
             getString(R.string.dialog_clear_data_cache_message),
         ) {
-            listOf(File(filesDir, "sample_cache.pkl"), File(filesDir, ".trip_cache.pkl"))
+            listOf(File(filesDir, SharedConstants.SAMPLE_CACHE_FILE_NAME), File(filesDir, ".trip_cache.pkl"))
         }
         clearCacheRow(
             getString(R.string.button_cache_places),
@@ -434,10 +434,10 @@ class SettingsActivity : AppCompatActivity() {
                 store.bootRoundIntervalMinutes = bootIntervalOptions[bootIntervalSpinner.selectedItemPosition]
                 store.bootPublishEveryRound = bootPublishEveryRoundBox.isChecked
                 store.bootFinalOnHarbour = bootFinalHarbourBox.isChecked
-                store.bootHarbourStationaryMinutes = bootStationaryField.text.toString().toIntOrNull()?.coerceAtLeast(1) ?: 30
-                store.bootHarbourEngineOffMinutes = bootEngineOffField.text.toString().toIntOrNull()?.coerceAtLeast(1) ?: 10
+                store.bootHarbourStationaryMinutes = bootStationaryField.text.toString().toIntOrNull()?.coerceAtLeast(SharedDefaults.MINIMUM_MINUTES) ?: SharedDefaults.BOOT_HARBOUR_STATIONARY_MINUTES
+                store.bootHarbourEngineOffMinutes = bootEngineOffField.text.toString().toIntOrNull()?.coerceAtLeast(SharedDefaults.MINIMUM_MINUTES) ?: SharedDefaults.BOOT_HARBOUR_ENGINE_OFF_MINUTES
                 store.bootFinalOnLeftBoat = bootFinalLeftBox.isChecked
-                store.bootLeftBoatMinutes = bootLeftMinutesField.text.toString().toIntOrNull()?.coerceAtLeast(1) ?: 20
+                store.bootLeftBoatMinutes = bootLeftMinutesField.text.toString().toIntOrNull()?.coerceAtLeast(SharedDefaults.MINIMUM_MINUTES) ?: SharedDefaults.BOOT_LEFT_BOAT_MINUTES
                 store.bootStopAfterFinal = bootStopAfterFinalBox.isChecked
                 store.bootAutoStart = bootAutoStartBox.isChecked
                 store.themeMode = when {
@@ -481,7 +481,7 @@ class SettingsActivity : AppCompatActivity() {
                     store.restUploadUser = ""
                     store.restUploadPassword = ""
                     store.sftpHost = sftpHostField.text.toString().trim()
-                    store.sftpPort = sftpPortField.text.toString().toIntOrNull() ?: SettingsStore.DEFAULT_SFTP_PORT
+                    store.sftpPort = sftpPortField.text.toString().toIntOrNull()?.coerceAtLeast(SharedDefaults.MINIMUM_PORT) ?: SettingsStore.DEFAULT_SFTP_PORT
                     store.sftpUser = sftpUserField.text.toString().trim()
                     store.sftpPassword = sftpPasswordField.text.toString()
                     store.sftpRemotePath = sftpRemotePathField.text.toString().trim()

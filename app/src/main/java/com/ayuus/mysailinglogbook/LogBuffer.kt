@@ -8,8 +8,8 @@ package com.ayuus.mysailinglogbook
  * for days; nmea2log.log has everything regardless.
  */
 object LogBuffer {
-    private const val MAX_LINES = 200_000
-    private const val TRIM_TO = 150_000
+    private const val MAX_LINES = SharedConstants.LOG_MAX_LINES
+    private const val TRIM_TO = SharedConstants.LOG_TRIM_TO
 
     private val lock = Any()
     private val lines = ArrayList<String>()
