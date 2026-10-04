@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The log: one row per line (LogAdapter). Fast scrolling gives it a handle to drag, to get from the
+     newest line to the first one (and back) at once, which the old ScrollView's scrollbar did. -->
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    app:fastScrollEnabled="true"
+    app:fastScrollHorizontalThumbDrawable="@drawable/log_scroll_thumb"
+    app:fastScrollHorizontalTrackDrawable="@drawable/log_scroll_track"
+    app:fastScrollVerticalThumbDrawable="@drawable/log_scroll_thumb"
+    app:fastScrollVerticalTrackDrawable="@drawable/log_scroll_track" />

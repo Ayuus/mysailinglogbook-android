@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The draggable handle of the log's fast scroller (see layout/log_list.xml): a grey bar that shows on a
+     light and a dark background alike, wider while it is being dragged. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#B3808080" />
+            <corners android:radius="6dp" />
+            <size android:width="12dp" android:height="48dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#80808080" />
+            <corners android:radius="4dp" />
+            <size android:width="8dp" android:height="48dp" />
+        </shape>
+    </item>
+</selector>

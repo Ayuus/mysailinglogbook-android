@@ -284,13 +284,11 @@ class MainActivity : AppCompatActivity() {
         // One row per line (see LogAdapter/LogBuffer): only the rows in sight are drawn, so the whole
         // log stays scrollable however long a run gets.
         logAdapter = LogAdapter(11f, (1 * resources.displayMetrics.density).toInt(), LOG_ERROR_COLOR, LOG_WARNING_COLOR)
-        logList = RecyclerView(this).apply {
+        logList = (layoutInflater.inflate(R.layout.log_list, null) as RecyclerView).apply {
             setPadding(0, padding / 2, 0, padding / 2)
-            clipToPadding = false
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = logAdapter
             itemAnimator = null
-            overScrollMode = View.OVER_SCROLL_NEVER
         }
         logAdapter.sync()
 
