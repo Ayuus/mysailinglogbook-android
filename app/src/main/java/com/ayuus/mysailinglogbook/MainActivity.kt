@@ -22,10 +22,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -36,7 +32,6 @@ import android.webkit.ConsoleMessage
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,6 +45,8 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.WindowInsetsCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.chaquo.python.Python
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.json.JSONObject
@@ -67,8 +64,8 @@ import java.security.Security
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var logView: TextView
-    private lateinit var logScroll: ScrollView
+    private lateinit var logList: RecyclerView
+    private lateinit var logAdapter: LogAdapter
     private lateinit var webView: WebView
     private lateinit var downloadButton: Button
     private lateinit var buildButton: Button
@@ -284,12 +281,18 @@ class MainActivity : AppCompatActivity() {
         // surface left in the app itself (asked for explicitly: a separate one-line statusView
         // banner used to sit above this, but it kept ending up saying much the same thing as
         // whatever the log already showed right below it).
-        logView = TextView(this).apply {
-            textSize = 11f
-            typeface = Typeface.MONOSPACE
+        // One row per line (see LogAdapter/LogBuffer): only the rows in sight are drawn, so the whole
+        // log stays scrollable however long a run gets.
+        logAdapter = LogAdapter(11f, (1 * resources.displayMetrics.density).toInt(), LOG_ERROR_COLOR, LOG_WARNING_COLOR)
+        logList = RecyclerView(this).apply {
             setPadding(0, padding / 2, 0, padding / 2)
+            clipToPadding = false
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = logAdapter
+            itemAnimator = null
+            overScrollMode = View.OVER_SCROLL_NEVER
         }
-        logScroll = ScrollView(this).apply { addView(logView) }
+        logAdapter.sync()
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true // the logbook's own trip map (Leaflet) needs this
@@ -343,7 +346,7 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(padding, padding, padding, padding)
             addView(buttonRow)
-            addView(logScroll)
+            addView(logList)
             addView(webView)
             addView(progressLabel)
             addView(progressBar)
@@ -500,10 +503,8 @@ class MainActivity : AppCompatActivity() {
         // import's log threw that reading position away every single time, not just when a
         // fresh line happened to arrive.
         val wasAtBottom = isLogScrolledToBottom()
-        logView.text = styledLogText(SyncState.lastLogText)
-        if (wasAtBottom) {
-            logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
-        }
+        logAdapter.sync()
+        if (wasAtBottom) scrollLogToEnd()
         val phase = SyncState.lastProgressPhase
         if (phase != null && SyncState.lastProgressTotal > 0) {
             progressBar.visibility = View.VISIBLE
@@ -525,10 +526,10 @@ class MainActivity : AppCompatActivity() {
     private fun showBootModeLog() {
         showingLocalLogbook = false
         setLogExpanded(true)
-        if (SyncState.lastLogText.isEmpty()) {
+        if (LogBuffer.isEmpty()) {
             val logFile = File(filesDir, "nmea2log.log")
             if (logFile.exists()) {
-                SyncState.lastLogText = logFile.readLines(Charsets.UTF_8).takeLast(BOOT_LOG_TAIL_LINES).joinToString("\n")
+                LogBuffer.replaceAll(logFile.readLines(Charsets.UTF_8).takeLast(BOOT_LOG_TAIL_LINES))
             }
         }
         refreshLogView()
@@ -1034,7 +1035,7 @@ class MainActivity : AppCompatActivity() {
         // Fully hides the log rather than leaving setLogExpanded(false)'s own small collapsed
         // strip (still used as-is after a normal download/publish completes) -- asked for explicitly,
         // this view is meant to cover the whole screen, not share it with a log peek.
-        logScroll.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0)
+        logList.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0)
         webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
         loadLogbookIntoWebView(htmlFile.absolutePath)
     }
@@ -1306,67 +1307,32 @@ class MainActivity : AppCompatActivity() {
      * of slack rather than exact equality: scroll position/content height can be off by a
      * rounding pixel or two even while visually "at the bottom". */
     private fun isLogScrolledToBottom(): Boolean {
-        val content = logScroll.getChildAt(0) ?: return true
         val slackPx = (4 * resources.displayMetrics.density).toInt()
-        return logScroll.scrollY + logScroll.height >= content.bottom - slackPx
+        return logList.computeVerticalScrollOffset() + logList.computeVerticalScrollExtent() >=
+            logList.computeVerticalScrollRange() - slackPx
     }
 
-    /** Shows the running log text (SyncState.lastLogText) in the log view, keeping the scroll
-     * position unless it was at the bottom. Public: AppLog calls it for lines made outside this
-     * Activity (the boat-mode service). */
+    /** Shows the lines LogBuffer has gained since the last call, keeping the scroll position unless it was
+     * at the bottom. Public: AppLog calls it for lines made outside this Activity (the boat-mode service). */
     fun refreshLogView() {
-        // Coalesced: at most one re-render per LOG_REFRESH_INTERVAL_MS however many lines arrive (a decode
-        // logs one every few seconds, an import one per file). Re-styling and laying out the whole text
-        // per line is what saturated the main thread on a long run, see AppLog.append().
+        // Coalesced: at most one update per LOG_REFRESH_INTERVAL_MS however many lines arrive (a decode
+        // logs one every few seconds, an import one per file); rows are only appended, so an update costs
+        // the same however long the log is.
         if (!logRefreshPending.compareAndSet(false, true)) return
         runOnUiThread {
-            logView.postDelayed({
+            logList.postDelayed({
                 logRefreshPending.set(false)
                 val wasAtBottom = isLogScrolledToBottom()
-                logView.text = styledLogText(SyncState.lastLogText)
-                if (wasAtBottom) {
-                    logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
-                }
+                if (logAdapter.sync() && wasAtBottom) scrollLogToEnd()
             }, LOG_REFRESH_INTERVAL_MS)
         }
     }
 
     private val logRefreshPending = java.util.concurrent.atomic.AtomicBoolean(false)
 
-    /** [text] (the log's own accumulated lines) with every "[error]" line shown bold and in red,
-     * and every "[warning]"/"[anomaly]"/"[geocode]" line shown bold and in amber -- asked for
-     * explicitly, found in practice: a single line like this easily got lost among dozens of
-     * plain "[info]" ones around it, especially once the log stays expanded rather than being
-     * read right as it happens. Hotspot-not-on and W2K-2-not-found both stay plain "[info]" (also
-     * asked for explicitly): neither is a warning, just an expected state -- the hotspot doesn't
-     * even need to be on at all, any private network shared with the W2K-2 works just as well
-     * (see the README's own note on this). A whole line at a time (from the newline before the
-     * tag to the one after, not just the tag itself), so the timestamp and the rest of the
-     * message stand out too, not just the tag word itself. */
-    private fun styledLogText(text: String): CharSequence {
-        val builder = SpannableStringBuilder(text)
-        val tagColors = listOf(
-            "[error]" to LOG_ERROR_COLOR,
-            "[warning]" to LOG_WARNING_COLOR,
-            "[anomaly]" to LOG_WARNING_COLOR,
-            // Every "[geocode]" line Python's own geocode.py ever logs is a failed lookup
-            // (Overpass or Nominatim) -- there's no separate success line to accidentally also
-            // catch here.
-            "[geocode]" to LOG_WARNING_COLOR,
-        )
-        for ((tag, color) in tagColors) {
-            var searchFrom = 0
-            while (searchFrom <= text.length) {
-                val tagIndex = text.indexOf(tag, searchFrom)
-                if (tagIndex < 0) break
-                val lineStart = text.lastIndexOf('\n', tagIndex).let { if (it < 0) 0 else it + 1 }
-                val lineEnd = text.indexOf('\n', tagIndex).let { if (it < 0) text.length else it }
-                builder.setSpan(StyleSpan(Typeface.BOLD), lineStart, lineEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                builder.setSpan(ForegroundColorSpan(color), lineStart, lineEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                searchFrom = lineEnd + 1
-            }
-        }
-        return builder
+    /** Scrolls the log to its newest line, once the rows have been laid out. */
+    private fun scrollLogToEnd() {
+        logList.post { if (logAdapter.lastPosition >= 0) logList.scrollToPosition(logAdapter.lastPosition) }
     }
 
     private fun handleLogLine(rawLine: String) {
@@ -1374,7 +1340,7 @@ class MainActivity : AppCompatActivity() {
         // Only a line that had no timestamp yet was made here; Python's own lines are already in
         // the file (log.py writes every line there itself).
         if (line != rawLine) AppLog.appendToFile(this, line)
-        // The accumulator, not logView.text itself -- logView may belong to an orphaned
+        // The accumulator, not the log view itself -- it may belong to an orphaned
         // instance, or there may be no active instance at all right now (see withActiveActivity),
         // so the running log has to live somewhere that survives either.
         AppLog.append(line)
@@ -1466,24 +1432,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** The log view (see logView/onLogLine) starts out filling the space the WebView would
+    /** The log view (see logList/LogAdapter) starts out filling the space the WebView would
      * otherwise waste while there's nothing to show it -- once a logbook actually loads, the log
      * shrinks back down to a small scrollable strip and the WebView takes the space instead. */
     private fun setLogExpanded(expanded: Boolean) {
         if (expanded) {
             logbookShownAsRunResult = false
-            logScroll.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+            logList.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 0f)
         } else {
             val collapsedHeight = (150 * resources.displayMetrics.density).toInt()
-            logScroll.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, collapsedHeight)
+            logList.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, collapsedHeight)
             webView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
         }
         // To the newest line once the new size is applied -- found in practice: the log strip kept a run's
         // result under the logbook, but showed the *top* of the log (the start of the run) and had to be
         // scrolled through to reach the end, which on a long log was hopeless. The scroll the log view
         // does itself when a line arrives measures the old (full-height) layout, so it cannot do this.
-        logScroll.doOnLayout { logScroll.fullScroll(View.FOCUS_DOWN) }
+        logList.doOnLayout { scrollLogToEnd() }
     }
 
     /** publishFailed: the build succeeded but a publish attempted right after it (still before
@@ -1511,7 +1477,7 @@ class MainActivity : AppCompatActivity() {
             handleLogLine("[info] $resultText")
             if (publishFailed) {
                 setLogExpanded(true)
-                logScroll.post { logScroll.fullScroll(View.FOCUS_DOWN) }
+                scrollLogToEnd()
             } else {
                 setLogExpanded(false)
                 loadLogbookIntoWebView(result.htmlPath)
@@ -2582,7 +2548,7 @@ class MainActivity : AppCompatActivity() {
         updatePublishButtonEnabled()
         updateSyncButtonAvailability()
         updateBootButton()
-        // Brings logView/the progress bar up to date with whatever a download -- still in
+        // Brings the log/the progress bar up to date with whatever a download -- still in
         // progress, or one that already finished while this Activity wasn't the active one --
         // has produced so far. Not gated on SyncState.inProgress alone: found in practice, a
         // real, reported "app hangs" bug -- a download that finishes while the app is
@@ -2705,12 +2671,12 @@ class MainActivity : AppCompatActivity() {
         private const val FILE_READ_MAX_RETRIES = 2
         private const val FILE_READ_RETRY_DELAY_MS = 500L
 
-        // A mid-tone red (Material's "red 700") for styledLogText()'s own "[error]" highlight --
+        // A mid-tone red (Material's "red 700") for LogAdapter's own "[error]" highlight --
         // readable against both a light and a dark system theme, since the log view itself has no
         // background color of its own, just whatever the theme gives it.
         private val LOG_ERROR_COLOR = Color.parseColor("#D32F2F")
 
-        // Material's "yellow 600" for styledLogText()'s own warning highlight -- "amber 700"
+        // Material's "yellow 600" for LogAdapter's own warning highlight -- "amber 700"
         // (#FFA000) read as orange in practice, not yellow.
         private val LOG_WARNING_COLOR = Color.parseColor("#FDD835")
     }

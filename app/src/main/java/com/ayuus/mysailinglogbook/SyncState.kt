@@ -90,9 +90,6 @@ object SyncState {
     var lastNotificationText: String? = null
 
     @Volatile
-    var lastLogText: String = ""
-
-    @Volatile
     var lastProgressPhase: String? = null
 
     @Volatile
