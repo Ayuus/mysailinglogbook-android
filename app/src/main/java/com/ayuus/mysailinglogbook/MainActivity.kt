@@ -1484,6 +1484,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** The log lines (with their [level] tag) nmea2log.run_outcome.describe_import() gives for an import result. */
+    private fun describeImport(importResultJson: String): List<String> {
+        val answer = JSONObject(
+            Python.getInstance().getModule("nmea2log.run_outcome").callAttr("describe_import_json", importResultJson).toString(),
+        )
+        val lines = answer.getJSONArray("lines")
+        return (0 until lines.length()).map { index ->
+            val line = lines.getJSONObject(index)
+            val params = line.getJSONObject("params")
+            val outcome = OutcomeLine(
+                line.getString("level"),
+                if (line.isNull("key")) null else line.getString("key"),
+                params.keys().asSequence().map { name -> if (params.isNull(name)) null else params.get(name) }.toList(),
+                if (line.isNull("text")) null else line.getString("text"),
+            )
+            val text = outcomeText(outcome)
+            if (outcome.level.isEmpty()) text else "[${outcome.level}] $text"
+        }
+    }
+
     private class OutcomeLine(val level: String, val key: String?, val params: List<Any?>, val text: String?)
     private class RunOutcome(val lines: List<OutcomeLine>, val show: String)
 
@@ -2185,27 +2205,11 @@ class MainActivity : AppCompatActivity() {
                     ).toString()
                     val result = JSONObject(resultJson)
                     importedCount = result.getInt("imported")
-                    val skipped = result.getInt("skipped_duplicate")
-                    // A same name that turned out to hold different content (a reformatted SD
-                    // card reusing an EBLnnnnnn folder, or two unrelated loose files sharing a
-                    // name) -- see import_ebl.py's own doc comment. Nothing was lost (both are
-                    // kept, under different names), but it's worth flagging more than a plain
-                    // import, hence [warning] rather than [info] (asked for explicitly).
-                    val renamed = result.getJSONArray("renamed")
-                    for (i in 0 until renamed.length()) {
-                        handleLogLine("[warning] " + getString(R.string.log_import_renamed, renamed.getString(i)))
-                    }
-                    val errors = result.getJSONArray("errors")
-                    for (i in 0 until errors.length()) {
-                        handleLogLine("[warning] " + getString(R.string.log_import_file_error, errors.getString(i)))
-                    }
+                    // What the end of the import says (renamed and failed files as warnings, then one summary
+                    // line) is decided in Python, shared with the iOS app: nmea2log/run_outcome.py.
+                    for (line in describeImport(resultJson)) handleLogLine(line)
                     if (importedCount > 0) {
-                        handleLogLine(getString(R.string.log_import_done, importedCount, skipped))
                         EblStorage.indexForPc(applicationContext, actisenseDir, importStart)
-                    } else if (skipped > 0) {
-                        handleLogLine("[info] " + getString(R.string.log_import_all_duplicates, skipped))
-                    } else {
-                        handleLogLine("[info] " + getString(R.string.log_import_no_files))
                     }
                 }
             } catch (e: FileNotFoundException) {
