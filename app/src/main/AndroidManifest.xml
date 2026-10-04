@@ -60,6 +60,12 @@
             android:label="@string/settings_activity_title"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Bound to by MainActivity, only to be told when the app is swiped away: see TaskCloseService. -->
+        <service
+            android:name=".TaskCloseService"
+            android:exported="false"
+            android:stopWithTask="false" />
+
         <service
             android:name=".SyncNotificationService"
             android:exported="false"

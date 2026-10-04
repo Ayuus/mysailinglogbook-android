@@ -6,9 +6,11 @@ import android.animation.ValueAnimator
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.hardware.usb.UsbManager
 import android.os.PowerManager
 import android.provider.Settings
@@ -20,6 +22,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import android.util.TypedValue
@@ -108,8 +111,17 @@ class MainActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK && treeUri != null) importFromRemovableMedia(treeUri)
         }
 
+    // Held only so Android calls TaskCloseService.onTaskRemoved() when the app is swiped away (the process is
+    // often killed without onDestroy() running): it removes the notifications of a finished run.
+    private val taskCloseConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {}
+        override fun onServiceDisconnected(name: ComponentName?) {}
+    }
+    private var taskCloseBound = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        taskCloseBound = bindService(Intent(this, TaskCloseService::class.java), taskCloseConnection, BIND_AUTO_CREATE)
         // Replaces the theme's own (now-removed) android:statusBarColor -- deprecated as of
         // Android 15's enforced edge-to-edge, flagged directly by Play Console's pre-launch
         // report. Draws transparent system bars across every supported API level; the existing
@@ -455,6 +467,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (taskCloseBound) {
+            unbindService(taskCloseConnection)
+            taskCloseBound = false
+        }
         // isChangingConfigurations is true for a rotation (this Activity instance is about to be
         // recreated immediately) -- only a genuine close (finish(), or the task being swiped away
         // from Recents) should stop an in-progress sync.
