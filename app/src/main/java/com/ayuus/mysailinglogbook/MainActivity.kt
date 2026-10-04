@@ -960,7 +960,7 @@ class MainActivity : AppCompatActivity() {
                 var publishFailed = false
                 if (result.ok && result.htmlPath != null && settingsStore.autoPublishAfterBuild) {
                     didPublish = uploadIfConfigured(result.htmlPath)
-                    publishFailed = !didPublish && (settingsStore.isRestUploadConfigComplete || settingsStore.isSftpConfigComplete)
+                    publishFailed = publishFailedAfter(didPublish)
                 }
                 withActiveActivity { showSyncResult(result, publishFailed) }
                 if (syncSucceeded) {
@@ -1457,92 +1457,96 @@ class MainActivity : AppCompatActivity() {
      * publish failure's own [error] line in it -- stays in front instead of covering it back up
      * a moment after showing it. */
     private fun showSyncResult(result: SyncResult, publishFailed: Boolean = false) {
-        if (result.ok && result.htmlPath != null) {
-            // tripCount is null specifically for runDownload()'s own "result.ok came back false with
-            // no error text, but logbook.html's mtime proves it actually succeeded" recovery --
-            // the real count isn't independently knowable there without re-parsing the file, so
-            // this is worded around rather than showing a literal "null" (found in practice).
-            // downloadedCount is null for runOfflineBuild()'s own result (no download happened
-            // that run at all) -- omit that clause entirely rather than showing a literal "null".
-            val resultText = if (result.tripCount == null) {
-                getString(R.string.status_ready_updated)
-            } else if (result.downloadedCount != null) {
-                getString(R.string.status_ready_with_download, result.tripCount, result.downloadedCount)
-            } else {
-                getString(R.string.status_ready_no_download, result.tripCount)
+        // What the end of the run says and shows is decided in Python (nmea2log/run_outcome.py), shared
+        // with the iOS app so the two cannot drift apart; this turns the answer into log lines and views.
+        // An ok result without a logbook file counts as the failure it is.
+        val outcome = describeOutcome(result, publishFailed)
+        var lastText = ""
+        for (line in outcome.lines) {
+            val text = outcomeText(line)
+            lastText = text
+            // The status texts (ready / stopped / error) are what the notification and a restored screen
+            // show; the calm "not found" and "no files" lines are only log lines.
+            if (line.key?.startsWith("status_") == true || line.key == "error_generic_prefix") {
+                SyncState.lastStatusText = text
             }
-            SyncState.lastStatusText = resultText
-            handleLogLine("[info] $resultText")
-            if (publishFailed) {
-                setLogExpanded(true)
-                scrollLogToEnd()
-            } else {
+            handleLogLine("[${line.level}] $text")
+        }
+        when (outcome.show) {
+            "logbook" -> {
                 setLogExpanded(false)
-                loadLogbookIntoWebView(result.htmlPath)
-                // The logbook is showing now, so 📖's next tap has to go back to the full log, not
-                // load the same file again and hide the log entirely (asked for explicitly: after
-                // a successful run the log couldn't be read without tapping 📖 twice). Same as
-                // the iOS app's own _log_result(), which already sets showing_local_logbook here.
+                loadLogbookIntoWebView(result.htmlPath!!)
+                // The logbook is showing now, so the log button's next tap has to go back to the full
+                // log, not load the same file again and hide the log entirely (asked for explicitly:
+                // after a successful run the log couldn't be read without tapping it twice). Same as the
+                // iOS app's own _log_result().
                 showingLocalLogbook = true
                 logbookShownAsRunResult = true
             }
-        } else if (result.cancelled) {
-            // The app was closed mid-download (see onDestroy()) -- by the time this runs the
-            // Activity is normally already gone, so this mostly matters when cancellation raced a
-            // rotation (config change) instead. The next download simply resumes where it left
-            // off, no special handling needed (see _needs_download() in w2k2_download.py).
-            // The build and publish buttons end up here too: say which one was stopped.
-            val resultText = getString(
-                if (SyncState.runInitiator == RunInitiator.DOWNLOAD) R.string.status_sync_stopped else R.string.status_build_stopped,
-            )
-            SyncState.lastStatusText = resultText
-            handleLogLine("[info] $resultText")
-        } else {
-            // Same "no popup, auto-started or manual alike" carve-out as the earlier "hotspot
-            // staat uit" case (see runDownload()) -- "W2K-2 not found on this subnet" is the other
-            // half of that same expected, common not-at-the-boat outcome, so it gets the same
-            // calm treatment (existing logbook shown if there is one, a log line, a real
-            // notification in place of a popup) instead of the loud "Fout: ..." dialog, regardless
-            // of how the run was started; any other, genuinely unexpected error (a decode crash,
-            // HTTP 401, ...) still gets the normal treatment below, since that's worth surfacing
-            // loudly no matter what.
-            val isNotFoundError = result.error?.startsWith("No W2K-2 found") == true
-            if (isNotFoundError) {
+            "log" -> if (result.ok) {
+                // A publish that was attempted failed: the log, which already has its [error] line,
+                // stays in front instead of being covered by the logbook a moment after showing it.
+                setLogExpanded(true)
+                scrollLogToEnd()
+            }
+            "existing_logbook" -> {
+                // Not at the boat: the logbook that is already there is made ready. No system
+                // notification (asked for explicitly: only for long-running processes) -- discovery
+                // itself takes about a second.
                 val existing = File(filesDir, "logbook.html")
-                if (existing.exists()) {
-                    loadLogbookIntoWebView(existing.absolutePath)
-                }
-                // No system notification here either (asked for explicitly, "meldingen alleen
-                // gebruiken voor langdurige processen") -- the discover_w2k2() scan itself only
-                // takes about a second; not something worth learning about after walking away.
-                handleLogLine("[info] ${result.error}")
-                return
+                if (existing.exists()) loadLogbookIntoWebView(existing.absolutePath)
             }
-            // Same calm, dismissible treatment, not the loud dialog below -- asked for
-            // explicitly, found in practice: buildButton (🔧) reaching this with an empty
-            // Actisense folder showed the generic error dialog, whose only two options
-            // ("Logboek bouwen..."/"App sluiten") both make no sense here -- the first just
-            // repeats the exact same failing call, the second is a drastic overreaction to
-            // "there's nothing here yet". run_pipeline()'s own literal error string (see
-            // run_pipeline() in android_entry.py) is matched directly, same approach as
-            // isNotFoundError above -- there's no dedicated error code Chaquopy could carry
-            // across instead.
-            if (result.error == "No .ebl files given.") {
-                handleLogLine("[info] " + getString(R.string.log_no_ebl_files_to_build))
-                return
-            }
-            // Covers every non-cancelled failure, including the download never reaching a usable
-            // state at all (e.g. the W2K-2/host becoming unreachable partway through) -- Python's
-            // own android_entry.py never calls run_pipeline() in that case (see
-            // sync_from_w2k2()'s except clauses), so there's no stale/partial logbook.html to
-            // accidentally show; this dialog is the only thing the user sees (asked for
-            // explicitly).
-            val errorText = getString(R.string.error_generic_prefix, result.error ?: getString(R.string.error_unknown))
-            SyncState.lastStatusText = errorText
-            handleLogLine("[error] $errorText")
-            showOfflineOrCloseDialog(errorText)
+            "error" -> showOfflineOrCloseDialog(lastText)
         }
     }
+
+    private class OutcomeLine(val level: String, val key: String?, val params: List<Any?>, val text: String?)
+    private class RunOutcome(val lines: List<OutcomeLine>, val show: String)
+
+    /** nmea2log.run_outcome.describe_result() for [result]: the log lines (keys into the shared texts, which
+     * are the string resources of the same name) and what to show afterwards. */
+    private fun describeOutcome(result: SyncResult, publishFailed: Boolean): RunOutcome {
+        val resultJson = JSONObject()
+            .put("ok", result.ok && result.htmlPath != null)
+            .put("cancelled", result.cancelled)
+            .put("error", result.error ?: JSONObject.NULL)
+            .put("trip_count", result.tripCount ?: JSONObject.NULL)
+            .put("downloaded_count", result.downloadedCount ?: JSONObject.NULL)
+        val initiator = if (SyncState.runInitiator == RunInitiator.DOWNLOAD) "download" else "build"
+        val answer = JSONObject(
+            Python.getInstance().getModule("nmea2log.run_outcome")
+                .callAttr("describe_result_json", resultJson.toString(), initiator, publishFailed).toString(),
+        )
+        val lines = answer.getJSONArray("lines")
+        return RunOutcome(
+            (0 until lines.length()).map { index ->
+                val line = lines.getJSONObject(index)
+                val params = line.getJSONObject("params")
+                OutcomeLine(
+                    line.getString("level"),
+                    if (line.isNull("key")) null else line.getString("key"),
+                    params.keys().asSequence().map { name -> if (params.isNull(name)) null else params.get(name) }.toList(),
+                    if (line.isNull("text")) null else line.getString("text"),
+                )
+            },
+            answer.getString("show"),
+        )
+    }
+
+    private fun outcomeText(line: OutcomeLine): String {
+        line.text?.let { return it }
+        val id = resources.getIdentifier(line.key, "string", packageName)
+        val args = line.params.map { it ?: getString(R.string.error_unknown) }.toTypedArray()
+        return getString(id, *args)
+    }
+
+    /** nmea2log.run_outcome.publish_failed(): whether the publish after a build failed -- only an upload
+     * that was attempted (a destination is set up) and did not succeed. */
+    private fun publishFailedAfter(didPublish: Boolean): Boolean =
+        Python.getInstance().getModule("nmea2log.run_outcome")
+            .callAttr(
+                "publish_failed", didPublish, settingsStore.isRestUploadConfigComplete, settingsStore.isSftpConfigComplete,
+            ).toBoolean()
 
     /** Reads the freshly-written logbook and feeds its content to the WebView directly, instead
      * of webView.loadUrl("file://$htmlPath") -- found in practice, a real regression (this exact
@@ -1738,7 +1742,7 @@ class MainActivity : AppCompatActivity() {
                 var publishFailed = false
                 if (result.ok && result.htmlPath != null && (forcePublish || settingsStore.autoPublishAfterBuild)) {
                     didPublish = uploadIfConfigured(result.htmlPath)
-                    publishFailed = !didPublish && (settingsStore.isRestUploadConfigComplete || settingsStore.isSftpConfigComplete)
+                    publishFailed = publishFailedAfter(didPublish)
                 }
                 withActiveActivity { showSyncResult(result, publishFailed) }
                 if (syncSucceeded) {
