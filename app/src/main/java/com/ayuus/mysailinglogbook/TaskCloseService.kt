@@ -24,7 +24,9 @@ class TaskCloseService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        if (!SyncState.inProgress) {
+        // A run going on by itself keeps its notifications, and so does one that closing just interrupted: its
+        // "Onderbroken door sluiten" notification (SyncNotificationService.onTaskRemoved()) is meant to stay.
+        if (!SyncState.inProgress && !SyncState.cancelled) {
             val notifications = NotificationManagerCompat.from(this)
             notifications.cancel(SyncNotificationService.NOTIFICATION_ID)
             notifications.cancel(SyncNotificationService.REOPEN_NOTIFICATION_ID)
