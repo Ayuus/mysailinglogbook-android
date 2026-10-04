@@ -22,6 +22,10 @@ interface SyncController {
     fun isCancelled(): Boolean
     fun onLogLine(line: String)
 
+    /** Called for the log lines that stand for progress, as (phase, current, total): "decoding" with the
+     * number of logfiles decoded, "building_trips" with the step of the four. See nmea2log/progress.py. */
+    fun onProgress(phase: String, current: Int, total: Int)
+
     /** Called exactly once, right after the last file's download attempt and before
      * run_pipeline() (decode/build/write) starts -- originally dropped MainActivity's own
      * foreground sync notification here (no more network I/O left in this call at that point,

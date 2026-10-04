@@ -108,9 +108,6 @@ class MainActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK && treeUri != null) importFromRemovableMedia(treeUri)
         }
 
-    private val decodeProgressRegex = SyncProgress.decodeRegex
-    private val buildPhaseMarkers = SyncProgress.buildPhaseMarkers
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Replaces the theme's own (now-removed) android:statusBarColor -- deprecated as of
@@ -305,7 +302,7 @@ class MainActivity : AppCompatActivity() {
         // Bottom progress bar (asked for explicitly): a visual bar reads faster at a glance than
         // scanning the log's own text for the current "x/y" count, and shows the phase
         // (downloading vs. decoding) as its own label rather than folding it into a longer
-        // sentence -- see updateProgressBar(), fed from the exact same report()/decodeProgressRegex
+        // sentence -- see updateProgressBar(), fed from the exact same report()/handleProgress()
         // signals the notification already uses. Hidden (not just empty) whenever nothing is
         // running, rather than sitting there at 0/0.
         progressLabel = TextView(this).apply {
@@ -1216,10 +1213,12 @@ class MainActivity : AppCompatActivity() {
 
             override fun onLogLine(line: String) = handleLogLine(line)
 
+            override fun onProgress(phase: String, current: Int, total: Int) = handleProgress(phase, current, total)
+
             // No longer stops the notification here (decode/build is pure CPU, no more network
             // I/O left once this fires) -- tried that, found in practice it backfired: decoding
             // this app's real archives routinely takes long enough to need its own progress
-            // shown again anyway (see decodeProgressRegex below), so stopping here only meant a
+            // shown again anyway (see handleProgress()), so stopping here only meant a
             // *second* startForegroundService() eligibility check later in the same run, and on
             // Android 15+'s per-24h "dataSync" budget (see startSyncNotification()'s own doc
             // comment) that's a second chance to get refused instead of one. Leaving the service
@@ -1362,44 +1361,29 @@ class MainActivity : AppCompatActivity() {
             val warningIntent = Intent(this, SyncNotificationService::class.java)
                 .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
             startSyncNotification(warningIntent)
-        } else if (decodeProgressRegex.containsMatchIn(line)) {
-            // Found in practice: decoding logfiles not already in the sample cache is
-            // CPU-bound and, on a phone's much weaker CPU than a desktop's, can silently
-            // run for many minutes -- with the screen off there was nothing at all to show
-            // this wasn't just hung. The notification is left running continuously from the
-            // start of the sync now (see onDownloadComplete() above), so this is just a
-            // cheap content update most of the time, not a fresh eligibility-gated start.
-            val match = decodeProgressRegex.find(line)!!
-            val current = match.groupValues[1].toInt()
-            val total = match.groupValues[2].toInt()
-            val text = getString(R.string.status_building_logbook, current, total)
-            SyncState.lastNotificationText = text
-            val progressIntent = Intent(this, SyncNotificationService::class.java)
-                .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
-                .putExtra(SyncNotificationService.EXTRA_PROGRESS_CURRENT, current)
-                .putExtra(SyncNotificationService.EXTRA_PROGRESS_MAX, total)
-            startSyncNotification(progressIntent)
-            updateProgressBar(getString(R.string.phase_decoding), current, total)
-        } else {
-            val step = buildPhaseMarkers.indexOfFirst { it.containsMatchIn(line) }
-            if (step >= 0) {
-                val current = step + 1
-                val total = buildPhaseMarkers.size
-                val text = getString(R.string.status_building_trips, current, total)
-                SyncState.lastNotificationText = text
-                val progressIntent = Intent(this, SyncNotificationService::class.java)
-                    .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
-                    .putExtra(SyncNotificationService.EXTRA_PROGRESS_CURRENT, current)
-                    .putExtra(SyncNotificationService.EXTRA_PROGRESS_MAX, total)
-                startSyncNotification(progressIntent)
-                updateProgressBar(getString(R.string.phase_building_trips), current, total)
-            }
         }
     }
 
+    /** A progress report from Python (nmea2log/progress.py): decoding x of y logfiles, or step x of the
+     * four of building the trips. Found in practice: decoding logfiles not already in the sample cache is
+     * CPU-bound and, on a phone's much weaker CPU than a desktop's, can silently run for many minutes --
+     * with the screen off there was nothing at all to show this wasn't just hung. The notification is left
+     * running continuously from the start of the sync (see onDownloadComplete() above), so this is just a
+     * cheap content update most of the time, not a fresh eligibility-gated start. */
+    private fun handleProgress(phase: String, current: Int, total: Int) {
+        val text = SyncProgress.notificationText(this, phase, current, total) ?: return
+        SyncState.lastNotificationText = text
+        val progressIntent = Intent(this, SyncNotificationService::class.java)
+            .putExtra(SyncNotificationService.EXTRA_STATUS_TEXT, text)
+            .putExtra(SyncNotificationService.EXTRA_PROGRESS_CURRENT, current)
+            .putExtra(SyncNotificationService.EXTRA_PROGRESS_MAX, total)
+        startSyncNotification(progressIntent)
+        updateProgressBar(SyncProgress.phaseLabel(this, phase) ?: return, current, total)
+    }
+
     /** Bottom progress bar + "phase: x/y" label (see progressBar/progressLabel, asked for
-     * explicitly) -- fed from report() (download) and handleLogLine()'s own decodeProgressRegex
-     * match (decode), the same two signals the notification already shows as text. Hidden rather
+     * explicitly) -- fed from report() (download) and handleProgress()
+     * (decode, building the trips), the same two signals the notification already shows as text. Hidden rather
      * than shown at 0/0 for a total <= 0 (nothing meaningful to show yet, or the phase hasn't
      * started). */
     private fun updateProgressBar(phase: String, current: Int, total: Int) {
@@ -2317,6 +2301,8 @@ class MainActivity : AppCompatActivity() {
             override fun report(current: Int, total: Int, fileName: String) {}
             override fun isCancelled(): Boolean = SyncState.cancelled
             override fun onLogLine(line: String) = handleLogLine(line)
+
+            override fun onProgress(phase: String, current: Int, total: Int) = handleProgress(phase, current, total)
             override fun onDownloadComplete() {}
 
             // Only the boat mode needs the boat state (see W2kBootExecutor).
@@ -2400,7 +2386,7 @@ class MainActivity : AppCompatActivity() {
      * state (e.g. the screen just locked), even though the service is already legitimately
      * foreground and only needs its notification *text* updated, not a fresh foreground grant.
      * Before this, every decode-progress update (one every couple of seconds, see
-     * decodeProgressRegex) hit that refusal and appended its own copy of the failure message to
+     * handleProgress()) hit that refusal and appended its own copy of the failure message to
      * the on-screen status text of the day, flooding the screen with dozens of identical lines
      * within a minute.
      *

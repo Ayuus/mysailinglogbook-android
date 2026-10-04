@@ -88,19 +88,23 @@ class W2kBootExecutor(
         var outcome: SyncOutcome? = null
         var boatJson: String? = null
         val startedAt = System.currentTimeMillis()
+        val reportProgress = onProgress
         val controller = object : SyncController {
             override fun report(current: Int, total: Int, fileName: String) {
                 val now = System.currentTimeMillis()
                 if (now - lastProgressAt < PROGRESS_INTERVAL_MS && current < total) return
                 lastProgressAt = now
-                onProgress(context.getString(R.string.status_downloading, current, total, fileName))
+                reportProgress(context.getString(R.string.status_downloading, current, total, fileName))
             }
 
             override fun isCancelled(): Boolean = stopRequested
 
             override fun onLogLine(line: String) {
                 AppLog.show(line)
-                SyncProgress.notificationText(context, line)?.let(onProgress)
+            }
+
+            override fun onProgress(phase: String, current: Int, total: Int) {
+                SyncProgress.notificationText(context, phase, current, total)?.let(reportProgress)
             }
 
             override fun onDownloadComplete() = EblStorage.indexForPc(context, downloadDir, startedAt)
