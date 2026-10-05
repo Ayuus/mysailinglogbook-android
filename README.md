@@ -371,8 +371,6 @@ target) so they still read as plain icons rather than boxed buttons; tint applie
 - **Local `.ebl` cleanup** after a file is confirmed both decoded and backed up remotely -- the
   desktop CLI deliberately keeps every `.ebl` forever (its whole project directory is already
   backed up via OneDrive), but that reasoning doesn't hold on a phone's own storage.
-- **A cellular-data toggle** for geocoding/weather/marine lookups, for someone who'd rather spend
-  the data than see `NoGeocoder()`'s bare coordinates.
 
 There is a small Kotlin unit test suite (`app/src/test/`, run via `./gradlew test`), but it's
 deliberately scoped to pure logic only (currently: `HotspotDetectorTest`, covering the private-IPv4
