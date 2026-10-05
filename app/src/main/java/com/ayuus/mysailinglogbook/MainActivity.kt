@@ -1744,7 +1744,8 @@ class MainActivity : AppCompatActivity() {
             var syncSucceeded = false
             var didPublish = false
             try {
-                val result = buildFromLocalFiles()
+                // Publish (forcePublish) uploads an up-to-date logbook as it is, see nmea2log/logbook_state.py.
+                val result = buildFromLocalFiles(skipIfCurrent = forcePublish)
                 syncSucceeded = result.ok
                 // Before showing the logbook, not after -- see runDownload()'s own matching comment.
                 // Same "Automatisch publiceren na bouwen" gate as runDownload()'s own matching call,
@@ -2279,7 +2280,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Chaquopy call to android_entry.build_from_local_files() -- decode/build/write only, no
      * discovery or download, over every .ebl file already present under eblDownloadDir(). */
-    private fun buildFromLocalFiles(): SyncResult {
+    private fun buildFromLocalFiles(skipIfCurrent: Boolean = false): SyncResult {
         PythonStarter.ensureStarted(this)
         val androidEntry = Python.getInstance().getModule("nmea2log.android_entry")
 
@@ -2347,6 +2348,7 @@ class MainActivity : AppCompatActivity() {
             settingsStore.callSign,
             controller,
             settingsStore.minStopMinutes,
+            skipIfCurrent,
         )
 
         return capturedResult ?: SyncResult(

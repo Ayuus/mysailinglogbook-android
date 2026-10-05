@@ -111,7 +111,8 @@ Left to right: **download** (fetch new data from the W2K-2 and build the logbook
 straight from the instrument -- then build/publish exactly like a normal download would), **assemble**
 (build the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
-the current logbook to the website configured in Settings), **view logbook** (show the
+the logbook to the website configured in Settings; it is sent as it is when it is up to date, and assembled
+first when a .ebl file is newer than it or a setting that ends up in it has changed), **view logbook** (show the
 already-built logbook full-screen, toggles back to the log), **boat mode** (see below), and
 **settings**.
 
