@@ -87,8 +87,9 @@ Open Settings (the gear icon, top right of the toolbar) and fill in:
   `/wp-json/nmea2log/v1/logbook` itself; an address that already contains `/wp-json/` is used as typed), if you
   want the built logbook sent to your own website. Not the address of the logbook's own page: that gets redirected
   to a login page instead of uploading anything (the app reports that as an error). See the `nmea2log` README's own
-  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup. Leave it blank to
-  keep everything on the phone.
+  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup. Leave it blank, or pick
+  "Don't publish", to keep everything on the phone -- picking "Don't publish" keeps the WordPress details you typed, so
+  switching back finds them again.
 - **Local `.ebl` files** (Settings, at the bottom) -- a **Delete** button that removes the raw `.ebl`
   logfiles from the phone to free its storage, after a confirmation that says how many files and how
   much space. The logbook already built stays; a new download fetches the files from the W2K-2 again,

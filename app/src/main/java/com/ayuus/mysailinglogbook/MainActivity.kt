@@ -634,7 +634,7 @@ class MainActivity : AppCompatActivity() {
         buildButton.isEnabled = !running || initiator == RunInitiator.BUILD
         importButton.isEnabled = !running || initiator == RunInitiator.IMPORT
         setBusyAppearance(importButton, initiator == RunInitiator.IMPORT)
-        val configured = settingsStore.isRestUploadConfigComplete
+        val configured = settingsStore.isPublishConfigured
         val wasEnabled = publishButton.isEnabled
         publishButton.isEnabled = if (running) initiator == RunInitiator.PUBLISH else configured
         if (!running && !configured && wasEnabled) {
@@ -1073,7 +1073,7 @@ class MainActivity : AppCompatActivity() {
         if (SyncState.inProgress) return
         if (bootModeBusy()) return
         // Matches uploadIfConfigured()'s own check exactly.
-        if (!settingsStore.isRestUploadConfigComplete) {
+        if (!settingsStore.isPublishConfigured) {
             // Same fix as runDownload()'s own matching guard (asked for explicitly, "check ook bij
             // andere knoppen of dit goed gaat in alle gevallen") -- without this, tapping publish
             // while a logbook was already showing added this line to the log invisibly, since
@@ -1555,7 +1555,7 @@ class MainActivity : AppCompatActivity() {
     private fun publishFailedAfter(didPublish: Boolean): Boolean =
         Python.getInstance().getModule("nmea2log.run_outcome")
             .callAttr(
-                "publish_failed", didPublish, settingsStore.isRestUploadConfigComplete,
+                "publish_failed", didPublish, settingsStore.isPublishConfigured,
             ).toBoolean()
 
     /** Reads the freshly-written logbook and feeds its content to the WebView directly, instead

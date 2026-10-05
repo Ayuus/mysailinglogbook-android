@@ -101,6 +101,16 @@ class SettingsStore(context: Context) {
     val isRestUploadConfigComplete: Boolean
         get() = restUploadUrl.isNotBlank() && restUploadUser.isNotBlank() && restUploadPassword.isNotBlank()
 
+    // Whether publishing is switched on ("WordPress" picked in Settings), kept apart from the WordPress details above:
+    // picking "don't publish" must not wipe them (see nmea2log/app_settings.py's own comment on the default).
+    var publishEnabled: Boolean
+        get() = prefs.getBoolean(KEY_PUBLISH_ENABLED, SharedDefaults.PUBLISH_ENABLED)
+        set(value) = prefs.edit().putBoolean(KEY_PUBLISH_ENABLED, value).apply()
+
+    /** Publishing is on and the details are all there -- what every "can this be published" check asks. */
+    val isPublishConfigured: Boolean
+        get() = publishEnabled && isRestUploadConfigComplete
+
     // "light" / "dark" / "system" -- read by LogbookApplication.onCreate() (before any Activity,
     // so the app's DayNight resolution, including the launch splash screen's own background, is
     // already correct on the very first frame) and re-applied by SettingsActivity's Save button.
@@ -161,7 +171,7 @@ class SettingsStore(context: Context) {
         .put("final_on_left_boat", bootFinalOnLeftBoat)
         .put("left_boat_minutes", bootLeftBoatMinutes)
         .put("stop_after_final", bootStopAfterFinal)
-        .put("publish_configured", isRestUploadConfigComplete)
+        .put("publish_configured", isPublishConfigured)
         .toString()
 
     companion object {
@@ -178,6 +188,7 @@ class SettingsStore(context: Context) {
         private const val KEY_REST_UPLOAD_URL = "rest_upload_url"
         private const val KEY_REST_UPLOAD_USER = "rest_upload_user"
         private const val KEY_REST_UPLOAD_PASSWORD = "rest_upload_password"
+        private const val KEY_PUBLISH_ENABLED = "publish_enabled"
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_BOOT_ROUND_INTERVAL_MINUTES = "boot_round_interval_minutes"
         private const val KEY_BOOT_PUBLISH_EVERY_ROUND = "boot_publish_every_round"

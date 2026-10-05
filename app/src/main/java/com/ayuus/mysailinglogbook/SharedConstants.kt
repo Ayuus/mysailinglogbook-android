@@ -35,6 +35,7 @@ object SharedDefaults {
     const val REST_UPLOAD_URL = ""
     const val REST_UPLOAD_USER = ""
     const val REST_UPLOAD_PASSWORD = ""
+    const val PUBLISH_ENABLED = true
     const val BOOT_ROUND_INTERVAL_MINUTES = 60
     const val BOOT_PUBLISH_EVERY_ROUND = false
     const val BOOT_FINAL_ON_HARBOUR = true

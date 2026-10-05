@@ -27,7 +27,7 @@ import java.io.File
 /**
  * Plain form for the settings SettingsStore holds -- W2K-2 login, boat identity, and the WordPress
  * publish settings. Only W2K-2 user/password are required to Save -- the publish fields can stay empty
- * until the owner is ready to publish; that's checked separately (isRestUploadConfigComplete) when the
+ * until the owner is ready to publish; that's checked separately (isPublishConfigured) when the
  * ☁️ icon is tapped or a download's own auto-publish runs (see MainActivity.uploadIfConfigured()).
  */
 class SettingsActivity : AppCompatActivity() {
@@ -218,10 +218,9 @@ class SettingsActivity : AppCompatActivity() {
             autoPublishAfterBuildBox.isEnabled = !noPublishRadio.isChecked
         }
         publishMethodGroup.setOnCheckedChangeListener { _, _ -> updatePublishMethodVisibility() }
-        // Preselects WordPress when it is already actually configured (isRestUploadConfigComplete
-        // requires every field to be filled in, not just one); "don't publish" otherwise -- also the
-        // correct default on a brand new install.
-        if (store.isRestUploadConfigComplete) wordpressRadio.isChecked = true else noPublishRadio.isChecked = true
+        // Preselects WordPress when publishing is on and every field is filled in (isPublishConfigured);
+        // "don't publish" otherwise -- also the correct default on a brand new install.
+        if (store.isPublishConfigured) wordpressRadio.isChecked = true else noPublishRadio.isChecked = true
         updatePublishMethodVisibility()
 
         val bootFinalHarbourBox = checkbox(getString(R.string.checkbox_boat_final_harbour), store.bootFinalOnHarbour)
@@ -453,25 +452,18 @@ class SettingsActivity : AppCompatActivity() {
                         else -> AppCompatDelegate.MODE_NIGHT_YES
                     }
                 )
-                // Only saved when WordPress is the picked method -- otherwise the fields are cleared, so the
-                // radio choice is real and not just a display filter. Whatever is still typed into a
-                // currently-collapsed block on screen simply isn't saved.
-                if (wordpressRadio.isChecked) {
-                    // Stored exactly as typed, not expanded -- see RestUploader.kt's own
-                    // nmea2log.upload.normalize_rest_upload_url() call for where that happens
-                    // instead (only at actual upload time). Expanding it here would mean this
-                    // field shows something different from what was typed the next time Settings
-                    // opens -- confusing on its own, and found in practice on iOS (which had the
-                    // same save-time expansion until this was moved): the field, once holding a
-                    // full URL, got treated as a real saved website by autofill/suggestions.
-                    store.restUploadUrl = restUploadUrlField.text.toString().trim()
-                    store.restUploadUser = restUploadUserField.text.toString().trim()
-                    store.restUploadPassword = restUploadPasswordField.text.toString()
-                } else {
-                    store.restUploadUrl = ""
-                    store.restUploadUser = ""
-                    store.restUploadPassword = ""
-                }
+                // The details are always saved as typed, and the radio only says whether publishing is on --
+                // picking "don't publish" must not wipe them, or switching back finds the fields empty.
+                // Stored exactly as typed, not expanded -- see RestUploader.kt's own
+                // nmea2log.upload.normalize_rest_upload_url() call for where that happens instead (only at
+                // actual upload time). Expanding it here would mean this field shows something different from
+                // what was typed the next time Settings opens -- confusing on its own, and found in practice
+                // on iOS (which had the same save-time expansion until this was moved): the field, once
+                // holding a full URL, got treated as a real saved website by autofill/suggestions.
+                store.restUploadUrl = restUploadUrlField.text.toString().trim()
+                store.restUploadUser = restUploadUserField.text.toString().trim()
+                store.restUploadPassword = restUploadPasswordField.text.toString()
+                store.publishEnabled = wordpressRadio.isChecked
                 Toast.makeText(this@SettingsActivity, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
                 finish()
             }

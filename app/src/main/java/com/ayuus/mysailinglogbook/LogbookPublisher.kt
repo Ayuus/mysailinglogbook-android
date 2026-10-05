@@ -26,7 +26,7 @@ object LogbookPublisher {
         // straight after it in the same call chain), so it needs its own guard like every other
         // entry point, not a borrowed one from whichever caller happened to run first.
         PythonStarter.ensureStarted(context)
-        if (!settings.isRestUploadConfigComplete) {
+        if (!settings.isPublishConfigured) {
             log("[skip] " + context.getString(R.string.log_upload_not_configured))
             return false
         }
