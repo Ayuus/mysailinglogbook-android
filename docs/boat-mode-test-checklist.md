@@ -8,7 +8,7 @@ another language the text differs, the steps do not.
 
 ## Before leaving (at home, 5 minutes)
 
-- [ ] Settings: W2K-2 user and password filled in, publishing (WordPress or SFTP) filled in.
+- [ ] Settings: W2K-2 user and password filled in, publishing (WordPress) filled in.
 - [ ] Boat mode settings checked: round interval, harbour (stationary and engine off; defaults 30 and 10
       minutes), left the boat (default 20 minutes), "Start automatically when the app is opened at the W2K-2
       (hotspot on)" as wanted.

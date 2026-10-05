@@ -19,7 +19,7 @@ object SyncState {
     @Volatile
     var runInitiator: RunInitiator? = null
 
-    /** True only while MainActivity.uploadIfConfigured() is actually running (the REST/SFTP
+    /** True only while MainActivity.uploadIfConfigured() is actually running (the WordPress
      * publish step). Lets SyncNotificationService.onTaskRemoved() tell "safe to interrupt" --
      * discovery, download (resumes cleanly next run over HTTP Range, see w2k2_download.py), or
      * decode/build (re-runs from wherever it was, backed by the sample cache) -- apart from "let

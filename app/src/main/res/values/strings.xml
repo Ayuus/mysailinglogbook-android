@@ -32,7 +32,7 @@
     <string name="log_no_logbook_to_view">No logbook to view yet -- assemble one first.</string>
     <string name="log_no_ebl_files_to_build">No .ebl files on this device yet -- nothing to assemble.</string>
     <string name="log_publish_not_configured">No publish destination configured -- publish button disabled.</string>
-    <string name="log_fill_publish_settings">Fill in the publish settings (REST or SFTP) via Settings first.</string>
+    <string name="log_fill_publish_settings">Fill in the publish settings (WordPress) via Settings first.</string>
     <string name="log_ebl_files_location">The .ebl files are stored in: %1$s</string>
     <string name="status_downloading">Downloading: %1$d/%2$d (%3$s)</string>
     <string name="phase_downloading">Downloading</string>
@@ -81,14 +81,10 @@
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Uploading to ayuus.com (to WordPress)...</string>
-    <string name="status_uploading_sftp">Uploading to ayuus.com (via SFTP)...</string>
     <string name="notif_uploading">Uploading to ayuus.com...</string>
     <string name="log_upload_ok_wordpress">Uploaded to WordPress: %1$s</string>
-    <string name="log_upload_ok_sftp">Uploaded via SFTP to %1$s@%2$s:%3$s</string>
     <string name="log_upload_failed_wordpress">upload to WordPress failed: %1$s</string>
-    <string name="log_upload_failed_sftp">upload via SFTP failed: %1$s</string>
     <string name="log_upload_not_configured">Upload not configured</string>
-    <string name="error_sftp_connect_failed">Could not establish SFTP connection: %1$s</string>
     <string name="error_upload_failed">Uploading the logbook failed: %1$s</string>
 
     <!-- Notification-start fallback -->
@@ -118,7 +114,6 @@
     <string name="section_publish">Publish</string>
     <string name="checkbox_auto_publish_after_build">Publish automatically after assembling</string>
     <string name="radio_publish_wordpress">Publish via WordPress</string>
-    <string name="radio_publish_sftp">Publish via SFTP</string>
     <string name="radio_publish_none">Don\'t publish (local only)</string>
     <string name="label_rest_upload_url">WordPress site address</string>
     <!-- A URL example, not translated; same across every language (also matches the README's
@@ -127,12 +122,6 @@
     <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">WordPress username</string>
     <string name="label_rest_upload_password">WordPress application password</string>
-    <string name="label_sftp_host">SFTP host</string>
-    <string name="label_sftp_port">SFTP port</string>
-    <string name="label_sftp_user">SFTP username</string>
-    <string name="label_sftp_password">SFTP password</string>
-    <string name="label_sftp_remote_path">SFTP path on the server</string>
-    <string name="label_sftp_host_key_fingerprint">SFTP host key fingerprint (optional; empty = trust automatically on first connection)</string>
     <string name="section_appearance">Appearance</string>
     <string name="radio_theme_light">Light</string>
     <string name="radio_theme_dark">Dark</string>
@@ -194,4 +183,11 @@
     <string name="boat_notif_action_now">Round now</string>
     <string name="boat_notif_action_stop">Stop</string>
     <string name="boat_notif_text_starting">Turning on...</string>
+    <string name="section_ebl_files">Local .ebl files</string>
+    <string name="button_ebl_files">The raw logfiles (.ebl) on this device</string>
+    <string name="button_delete">Delete</string>
+    <string name="dialog_delete_ebl_message">Delete all %1$d .ebl files (%2$s) from this device? The logbook you have already built stays as it is. A new download fetches the files from the W2K-2 again (which can take a long time), and a new logbook cannot be assembled without them. Files that are no longer on the W2K-2 are lost for good.</string>
+    <string name="toast_ebl_files_deleted">%1$d .ebl files deleted (%2$s freed)</string>
+    <string name="toast_ebl_files_none">There are no .ebl files on this device</string>
+    <string name="toast_ebl_delete_busy">Not while a download or assemble is running</string>
 </resources>

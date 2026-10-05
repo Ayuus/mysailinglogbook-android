@@ -28,7 +28,7 @@
     <string name="log_no_logbook_to_view">Nog geen logboek om te bekijken -- stel er eerst een samen.</string>
     <string name="log_no_ebl_files_to_build">Nog geen .ebl-bestanden op dit toestel -- niets om samen te stellen.</string>
     <string name="log_publish_not_configured">Geen publicatiebestemming ingesteld -- publiceerknop uitgeschakeld.</string>
-    <string name="log_fill_publish_settings">Vul eerst de publiceer-instellingen (REST of SFTP) in via Instellingen.</string>
+    <string name="log_fill_publish_settings">Vul eerst de publiceer-instellingen (WordPress) in via Instellingen.</string>
     <string name="log_ebl_files_location">.ebl-bestanden staan in: %1$s</string>
     <string name="status_downloading">Downloaden: %1$d/%2$d (%3$s)</string>
     <string name="phase_downloading">Downloaden</string>
@@ -77,14 +77,10 @@
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Uploaden naar ayuus.com (naar WordPress)...</string>
-    <string name="status_uploading_sftp">Uploaden naar ayuus.com (via SFTP)...</string>
     <string name="notif_uploading">Uploaden naar ayuus.com...</string>
     <string name="log_upload_ok_wordpress">Geüpload naar WordPress: %1$s</string>
-    <string name="log_upload_ok_sftp">Geüpload via SFTP naar %1$s@%2$s:%3$s</string>
     <string name="log_upload_failed_wordpress">upload naar WordPress mislukt: %1$s</string>
-    <string name="log_upload_failed_sftp">upload via SFTP mislukt: %1$s</string>
     <string name="log_upload_not_configured">Upload niet ingesteld</string>
-    <string name="error_sftp_connect_failed">Kan geen SFTP-verbinding maken: %1$s</string>
     <string name="error_upload_failed">Uploaden van logboek mislukt: %1$s</string>
 
     <!-- Notification-start fallback -->
@@ -114,18 +110,11 @@
     <string name="section_publish">Publiceren</string>
     <string name="checkbox_auto_publish_after_build">Automatisch publiceren na samenstellen</string>
     <string name="radio_publish_wordpress">Publiceren via WordPress</string>
-    <string name="radio_publish_sftp">Publiceren via SFTP</string>
     <string name="radio_publish_none">Niet publiceren (alleen lokaal)</string>
     <string name="label_rest_upload_url">WordPress-siteadres</string>
     <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">WordPress gebruikersnaam</string>
     <string name="label_rest_upload_password">WordPress application password</string>
-    <string name="label_sftp_host">SFTP host</string>
-    <string name="label_sftp_port">SFTP poort</string>
-    <string name="label_sftp_user">SFTP gebruikersnaam</string>
-    <string name="label_sftp_password">SFTP wachtwoord</string>
-    <string name="label_sftp_remote_path">SFTP pad op de server</string>
-    <string name="label_sftp_host_key_fingerprint">SFTP host-key fingerprint (optioneel; leeg = automatisch vertrouwen bij eerste verbinding)</string>
     <string name="section_appearance">Weergave</string>
     <string name="radio_theme_light">Licht</string>
     <string name="radio_theme_dark">Donker</string>
@@ -185,4 +174,11 @@
     <string name="boat_notif_action_now">Nu</string>
     <string name="boat_notif_action_stop">Stop</string>
     <string name="boat_notif_text_starting">Inschakelen...</string>
+    <string name="section_ebl_files">Lokale .ebl-bestanden</string>
+    <string name="button_ebl_files">De ruwe logbestanden (.ebl) op dit toestel</string>
+    <string name="button_delete">Verwijderen</string>
+    <string name="dialog_delete_ebl_message">Alle %1$d .ebl-bestanden (%2$s) van dit toestel verwijderen? Het logboek dat je al hebt samengesteld blijft staan. Bij een nieuwe download worden de bestanden opnieuw van de W2K-2 gehaald (dat kan lang duren), en zonder deze bestanden kun je geen nieuw logboek samenstellen. Bestanden die niet meer op de W2K-2 staan, ben je voorgoed kwijt.</string>
+    <string name="toast_ebl_files_deleted">%1$d .ebl-bestanden verwijderd (%2$s vrijgemaakt)</string>
+    <string name="toast_ebl_files_none">Er staan geen .ebl-bestanden op dit toestel</string>
+    <string name="toast_ebl_delete_busy">Niet terwijl er een download of samenstellen loopt</string>
 </resources>

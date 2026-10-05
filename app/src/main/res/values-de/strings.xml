@@ -24,7 +24,7 @@
     <string name="log_no_logbook_to_view">Noch kein Bordbuch zum Ansehen -- zuerst eines zusammenstellen.</string>
     <string name="log_no_ebl_files_to_build">Noch keine .ebl-Dateien auf diesem Gerät -- nichts zusammenzustellen.</string>
     <string name="log_publish_not_configured">Kein Veröffentlichungsziel eingerichtet -- Veröffentlichen-Schaltfläche deaktiviert.</string>
-    <string name="log_fill_publish_settings">Trage zuerst die Veröffentlichungseinstellungen (REST oder SFTP) in den Einstellungen ein.</string>
+    <string name="log_fill_publish_settings">Trage zuerst die Veröffentlichungseinstellungen (WordPress) in den Einstellungen ein.</string>
     <string name="log_ebl_files_location">Die .ebl-Dateien befinden sich in: %1$s</string>
     <string name="status_downloading">Wird heruntergeladen: %1$d/%2$d (%3$s)</string>
     <string name="phase_downloading">Herunterladen</string>
@@ -73,14 +73,10 @@
 
     <!-- Publish -->
     <string name="status_uploading_wordpress">Wird auf ayuus.com hochgeladen (zu WordPress)...</string>
-    <string name="status_uploading_sftp">Wird auf ayuus.com hochgeladen (über SFTP)...</string>
     <string name="notif_uploading">Wird auf ayuus.com hochgeladen...</string>
     <string name="log_upload_ok_wordpress">Zu WordPress hochgeladen: %1$s</string>
-    <string name="log_upload_ok_sftp">Über SFTP hochgeladen zu %1$s@%2$s:%3$s</string>
     <string name="log_upload_failed_wordpress">Hochladen zu WordPress fehlgeschlagen: %1$s</string>
-    <string name="log_upload_failed_sftp">Hochladen über SFTP fehlgeschlagen: %1$s</string>
     <string name="log_upload_not_configured">Upload nicht konfiguriert</string>
-    <string name="error_sftp_connect_failed">SFTP-Verbindung konnte nicht hergestellt werden: %1$s</string>
     <string name="error_upload_failed">Hochladen des Bordbuchs fehlgeschlagen: %1$s</string>
 
     <!-- Notification-start fallback -->
@@ -110,18 +106,11 @@
     <string name="section_publish">Veröffentlichen</string>
     <string name="checkbox_auto_publish_after_build">Nach dem Zusammenstellen automatisch veröffentlichen</string>
     <string name="radio_publish_wordpress">Über WordPress veröffentlichen</string>
-    <string name="radio_publish_sftp">Über SFTP veröffentlichen</string>
     <string name="radio_publish_none">Nicht veröffentlichen (nur lokal)</string>
     <string name="label_rest_upload_url">WordPress-Website-Adresse</string>
     <string name="hint_rest_upload_url">your-site.example</string>
     <string name="label_rest_upload_user">WordPress-Benutzername</string>
     <string name="label_rest_upload_password">WordPress-Anwendungspasswort</string>
-    <string name="label_sftp_host">SFTP-Host</string>
-    <string name="label_sftp_port">SFTP-Port</string>
-    <string name="label_sftp_user">SFTP-Benutzername</string>
-    <string name="label_sftp_password">SFTP-Passwort</string>
-    <string name="label_sftp_remote_path">SFTP-Pfad auf dem Server</string>
-    <string name="label_sftp_host_key_fingerprint">SFTP-Hostschlüssel-Fingerabdruck (optional; leer = bei erster Verbindung automatisch vertrauen)</string>
     <string name="section_appearance">Darstellung</string>
     <string name="radio_theme_light">Hell</string>
     <string name="radio_theme_dark">Dunkel</string>
@@ -181,4 +170,11 @@
     <string name="boat_notif_action_now">Jetzt</string>
     <string name="boat_notif_action_stop">Stopp</string>
     <string name="boat_notif_text_starting">Wird eingeschaltet...</string>
+    <string name="section_ebl_files">Lokale .ebl-Dateien</string>
+    <string name="button_ebl_files">Die rohen Logdateien (.ebl) auf diesem Gerät</string>
+    <string name="button_delete">Löschen</string>
+    <string name="dialog_delete_ebl_message">Alle %1$d .ebl-Dateien (%2$s) von diesem Gerät löschen? Das bereits erstellte Logbuch bleibt erhalten. Ein neuer Download holt die Dateien erneut vom W2K-2 (das kann lange dauern), und ohne sie lässt sich kein neues Logbuch zusammenstellen. Dateien, die nicht mehr auf dem W2K-2 liegen, sind endgültig verloren.</string>
+    <string name="toast_ebl_files_deleted">%1$d .ebl-Dateien gelöscht (%2$s frei)</string>
+    <string name="toast_ebl_files_none">Auf diesem Gerät sind keine .ebl-Dateien</string>
+    <string name="toast_ebl_delete_busy">Nicht während ein Download oder eine Zusammenstellung läuft</string>
 </resources>

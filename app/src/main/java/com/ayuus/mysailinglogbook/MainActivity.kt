@@ -51,17 +51,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chaquo.python.Python
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.atomic.AtomicBoolean
-import java.security.Security
 
 /**
  * The full download flow: hotspot detection, download from the W2K-2, decode+build the logbook,
  * show it in-app, then (only if the owner filled in the "Publish to ayuus.com" settings) publish
- * it via REST or SFTP -- see RestUploader/SftpUploader. Runs automatically once per app
+ * it to WordPress -- see RestUploader. Runs automatically once per app
  * launch (see onCreate()'s own savedInstanceState check) and via the manual download button.
  * Boat mode (see BootModeService) covers periodic background work with no app open at all.
  */
@@ -128,11 +126,6 @@ class MainActivity : AppCompatActivity() {
         // WindowInsetsCompat listener below (unchanged) is what actually keeps content clear of
         // them, same as before.
         enableEdgeToEdge()
-
-        // Without this, sshj (used once Milestone B adds SFTP publishing) can't do Ed25519 key
-        // operations on Android -- see spike 4 in docs/android-app-plan.md for the full story.
-        Security.removeProvider("BC")
-        Security.insertProviderAt(BouncyCastleProvider(), 1)
 
         // Found in practice: the app sometimes closed immediately on launch with no visible error
         // at all -- SettingsStore's EncryptedSharedPreferences relies on the Android Keystore,
@@ -614,7 +607,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    /** ☁️ only makes sense once WordPress or SFTP is actually filled in (see SettingsStore) --
+    /** ☁️ only makes sense once WordPress is actually filled in (see SettingsStore) --
      * asked for explicitly: tapping it with neither configured used to just log "vul eerst de
      * publiceer-instellingen in" (see runPublish()), so the button looked usable when it never
      * could do anything. buildButton (see the iconButton() call site above) covers "no publish
@@ -641,7 +634,7 @@ class MainActivity : AppCompatActivity() {
         buildButton.isEnabled = !running || initiator == RunInitiator.BUILD
         importButton.isEnabled = !running || initiator == RunInitiator.IMPORT
         setBusyAppearance(importButton, initiator == RunInitiator.IMPORT)
-        val configured = settingsStore.isRestUploadConfigComplete || settingsStore.isSftpConfigComplete
+        val configured = settingsStore.isRestUploadConfigComplete
         val wasEnabled = publishButton.isEnabled
         publishButton.isEnabled = if (running) initiator == RunInitiator.PUBLISH else configured
         if (!running && !configured && wasEnabled) {
@@ -965,7 +958,7 @@ class MainActivity : AppCompatActivity() {
                 // practice: showing it first and then covering it back up with the log a moment
                 // later, once a publish problem turned up, looked like a glitch (the logbook
                 // flashing on screen and immediately disappearing again). Still on this same
-                // background Thread, not re-dispatched: SftpUploader's calls are blocking network
+                // background Thread, not re-dispatched: the upload's calls are blocking network
                 // I/O same as the download itself was. Gated on the setting (asked for explicitly)
                 // -- off, this sync only ever builds the logbook locally; the owner checks it via
                 // 📖 and publishes on their own terms via ☁️ (runPublish(), unaffected by this
@@ -1079,11 +1072,8 @@ class MainActivity : AppCompatActivity() {
     private fun runPublish() {
         if (SyncState.inProgress) return
         if (bootModeBusy()) return
-        // Both, not just SFTP -- found in practice, a real bug: an owner with only REST
-        // configured (no SFTP at all, the whole point of preferring REST) tapped ☁️ and got told
-        // to fill in "de publiceer-instellingen (SFTP)" even though publishing itself would have
-        // worked fine via REST. Matches uploadIfConfigured()'s own check exactly.
-        if (!settingsStore.isRestUploadConfigComplete && !settingsStore.isSftpConfigComplete) {
+        // Matches uploadIfConfigured()'s own check exactly.
+        if (!settingsStore.isRestUploadConfigComplete) {
             // Same fix as runDownload()'s own matching guard (asked for explicitly, "check ook bij
             // andere knoppen of dit goed gaat in alle gevallen") -- without this, tapping publish
             // while a logbook was already showing added this line to the log invisibly, since
@@ -1565,7 +1555,7 @@ class MainActivity : AppCompatActivity() {
     private fun publishFailedAfter(didPublish: Boolean): Boolean =
         Python.getInstance().getModule("nmea2log.run_outcome")
             .callAttr(
-                "publish_failed", didPublish, settingsStore.isRestUploadConfigComplete, settingsStore.isSftpConfigComplete,
+                "publish_failed", didPublish, settingsStore.isRestUploadConfigComplete,
             ).toBoolean()
 
     /** Reads the freshly-written logbook and feeds its content to the WebView directly, instead
@@ -1707,7 +1697,7 @@ class MainActivity : AppCompatActivity() {
      * otherwise a dead end: the
      * device can't be reached right now, but there's still real (if possibly not fully current)
      * data already on the phone worth seeing (asked for explicitly). Publishes it too, same as a
-     * normal sync's own auto-publish, if the SFTP settings are filled in. */
+     * normal sync's own auto-publish, if the WordPress settings are filled in. */
     private fun runOfflineBuild() {
         buildFromLocalFilesAndMaybePublish(forcePublish = false)
     }
@@ -2365,7 +2355,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    /** Uploads the fresh logbook (always, if SFTP or REST publish settings are filled in) --
+    /** Uploads the fresh logbook (always, if the WordPress publish settings are filled in) --
      * called after a successful build/sync, before that result is shown (see runDownload()/
      * buildFromLocalFilesAndMaybePublish()'s own comments on why that order, not the reverse),
      * still on the background Thread. Runs at most once per sync. The upload itself is
@@ -2375,7 +2365,7 @@ class MainActivity : AppCompatActivity() {
             // Also pushed to the OS notification itself, not just the log -- asked for explicitly:
             // SyncState.uploading means closing the app mid-upload no longer interrupts it, so the
             // notification is the only place this phase is visible at all while the owner is not
-            // looking at the app. Shorter than the log line, without "(naar WordPress)"/"(via SFTP)":
+            // looking at the app. Shorter than the log line, without "(naar WordPress)":
             // that detail belongs in the log.
             startSyncNotification(
                 Intent(this, SyncNotificationService::class.java)
@@ -2652,8 +2642,7 @@ class MainActivity : AppCompatActivity() {
 
         // The public, WordPress-gated view of whatever was just published (see uploadIfConfigured()
         // and the "Bekijk live site" notification action) -- not derived from SettingsStore's own
-        // sftpRemotePath, which is the *private* SFTP destination (outside the web root, see
-        // little_endian-index.php's own doc comment), not a browsable URL at all.
+        // restUploadUrl, which is the upload endpoint, not a browsable page.
         const val LIVE_SITE_URL = "https://ayuus.com/little_endian/"
 
         // How much of the log file to show when the boat mode is open in a process that has no log text yet.

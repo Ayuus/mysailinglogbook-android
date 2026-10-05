@@ -51,7 +51,7 @@ round of a stay -- one last download + build, then a publish if there is anywher
   `left_boat_minutes` (default 20) in a row. Measured from the first miss of an unbroken run, not
   from the last success -- one missed round after a long gap does not by itself count as leaving.
 
-Publishing on the final round only happens if a destination (WordPress or SFTP) is filled in in
+Publishing on the final round only happens if a destination (WordPress) is filled in in
 Settings. If nothing changed since the last publish and the trigger was "left the boat" (not
 "reached harbour", which always just rebuilt fresh data), nothing is sent and the mode says so
 instead. A failed publish is retried every `publish_retry_minutes` (default 15) until it works.

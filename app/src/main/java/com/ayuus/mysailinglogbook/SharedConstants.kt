@@ -22,9 +22,7 @@ object SharedConstants {
 
 object SharedDefaults {
     const val DEFAULT_MIN_STOP_MINUTES = 10.0
-    const val DEFAULT_SFTP_PORT = 22
     const val MINIMUM_MINUTES = 1
-    const val MINIMUM_PORT = 1
     val BOOT_INTERVAL_CHOICES = listOf(30, 60, 120, 180)
     const val W2K2_USER = ""
     const val W2K2_PASSWORD = ""
@@ -37,12 +35,6 @@ object SharedDefaults {
     const val REST_UPLOAD_URL = ""
     const val REST_UPLOAD_USER = ""
     const val REST_UPLOAD_PASSWORD = ""
-    const val SFTP_HOST = ""
-    const val SFTP_PORT = 22
-    const val SFTP_USER = ""
-    const val SFTP_PASSWORD = ""
-    const val SFTP_REMOTE_PATH = ""
-    const val SFTP_HOST_KEY_FINGERPRINT = ""
     const val BOOT_ROUND_INTERVAL_MINUTES = 60
     const val BOOT_PUBLISH_EVERY_ROUND = false
     const val BOOT_FINAL_ON_HARBOUR = true

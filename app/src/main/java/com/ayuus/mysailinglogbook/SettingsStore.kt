@@ -8,7 +8,7 @@ import org.json.JSONObject
 
 /**
  * Wraps EncryptedSharedPreferences for the handful of settings this app needs -- W2K-2 login,
- * boat identity, and the SFTP publish settings. Replaces nmea2log.ini on Android (see
+ * boat identity, and the WordPress publish settings. Replaces nmea2log.ini on Android (see
  * docs/android-app-plan.md): no config file, values entered once via SettingsActivity.
  */
 class SettingsStore(context: Context) {
@@ -78,17 +78,14 @@ class SettingsStore(context: Context) {
         get() = prefs.getFloat(KEY_MIN_STOP_MINUTES, DEFAULT_MIN_STOP_MINUTES).toDouble()
         set(value) = prefs.edit().putFloat(KEY_MIN_STOP_MINUTES, value.toFloat()).apply()
 
-    // Preferred over SFTP below when configured (see MainActivity.uploadIfConfigured()) -- posts
+    // Used for publishing (see MainActivity.uploadIfConfigured()) -- posts
     // straight to the WordPress REST endpoint (see wordpress-plugin/nmea2log-remarks.php's
     // /logbook route, and upload.py's own upload_via_rest() on the desktop side, which this calls
     // into over Chaquopy rather than reimplementing HTTP + Basic Auth here), so publishing needs
     // no SSH key/password on this device at all -- just a WordPress Application Password for an
-    // account in the logboek_editor role. Never defaulted, same reasoning as sftpHost/
-    // sftpRemotePath below -- a brand new install shouldn't show a real server hostname/path
-    // despite nothing ever being entered on that install (found in practice; also asked for
-    // explicitly for sftpHost/sftpRemotePath, which used to default to a real personal server --
-    // that value shipped inside every APK build, readable by decompiling it or reading the source
-    // in a public repo, not just something typed into this one screen).
+    // account in the logboek_editor role. Never defaulted -- a brand new install shouldn't show a
+    // real server hostname despite nothing ever being entered on that install (a default would ship
+    // inside every APK build, readable by decompiling it or reading the source in a public repo).
     var restUploadUrl: String
         get() = prefs.getString(KEY_REST_UPLOAD_URL, "") ?: ""
         set(value) = prefs.edit().putString(KEY_REST_UPLOAD_URL, value).apply()
@@ -104,29 +101,6 @@ class SettingsStore(context: Context) {
     val isRestUploadConfigComplete: Boolean
         get() = restUploadUrl.isNotBlank() && restUploadUser.isNotBlank() && restUploadPassword.isNotBlank()
 
-    var sftpHost: String
-        get() = prefs.getString(KEY_SFTP_HOST, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_SFTP_HOST, value).apply()
-
-    var sftpPort: Int
-        get() = prefs.getInt(KEY_SFTP_PORT, DEFAULT_SFTP_PORT)
-        set(value) = prefs.edit().putInt(KEY_SFTP_PORT, value).apply()
-
-    var sftpUser: String
-        get() = prefs.getString(KEY_SFTP_USER, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_SFTP_USER, value).apply()
-
-    var sftpPassword: String
-        get() = prefs.getString(KEY_SFTP_PASSWORD, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_SFTP_PASSWORD, value).apply()
-
-    var sftpRemotePath: String
-        get() = prefs.getString(KEY_SFTP_REMOTE_PATH, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_SFTP_REMOTE_PATH, value).apply()
-
-    val isSftpConfigComplete: Boolean
-        get() = sftpHost.isNotBlank() && sftpUser.isNotBlank() && sftpPassword.isNotBlank() && sftpRemotePath.isNotBlank()
-
     // "light" / "dark" / "system" -- read by LogbookApplication.onCreate() (before any Activity,
     // so the app's DayNight resolution, including the launch splash screen's own background, is
     // already correct on the very first frame) and re-applied by SettingsActivity's Save button.
@@ -138,15 +112,6 @@ class SettingsStore(context: Context) {
     var themeMode: String
         get() = prefs.getString(KEY_THEME_MODE, SharedDefaults.THEME_MODE) ?: SharedDefaults.THEME_MODE
         set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
-
-    // Optionally user-editable (see SettingsActivity): filled in, the very first SFTP connection
-    // is verified against it instead of blindly trusted; empty (the default), it's pinned
-    // automatically on that first connection (trust-on-first-use) instead. Either way, a later
-    // connection presenting a *different* key than what's stored here gets rejected (see
-    // SftpUploader) -- could mean a man-in-the-middle.
-    var sftpHostKeyFingerprint: String
-        get() = prefs.getString(KEY_SFTP_HOST_KEY_FINGERPRINT, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_SFTP_HOST_KEY_FINGERPRINT, value).apply()
 
     // Boat mode (see BootModeController and nmea2log/bootmode.py, whose BootModeConfig has the same
     // names in snake_case and the same defaults).
@@ -196,12 +161,11 @@ class SettingsStore(context: Context) {
         .put("final_on_left_boat", bootFinalOnLeftBoat)
         .put("left_boat_minutes", bootLeftBoatMinutes)
         .put("stop_after_final", bootStopAfterFinal)
-        .put("publish_configured", isRestUploadConfigComplete || isSftpConfigComplete)
+        .put("publish_configured", isRestUploadConfigComplete)
         .toString()
 
     companion object {
         // The defaults of both apps are defined once, in nmea2log/app_settings.py (see SharedConstants.kt).
-        const val DEFAULT_SFTP_PORT = SharedDefaults.DEFAULT_SFTP_PORT
         val DEFAULT_MIN_STOP_MINUTES = SharedDefaults.DEFAULT_MIN_STOP_MINUTES.toFloat()
         private const val KEY_W2K2_USER = "w2k2_user"
         private const val KEY_W2K2_PASSWORD = "w2k2_password"
@@ -214,12 +178,6 @@ class SettingsStore(context: Context) {
         private const val KEY_REST_UPLOAD_URL = "rest_upload_url"
         private const val KEY_REST_UPLOAD_USER = "rest_upload_user"
         private const val KEY_REST_UPLOAD_PASSWORD = "rest_upload_password"
-        private const val KEY_SFTP_HOST = "sftp_host"
-        private const val KEY_SFTP_PORT = "sftp_port"
-        private const val KEY_SFTP_USER = "sftp_user"
-        private const val KEY_SFTP_PASSWORD = "sftp_password"
-        private const val KEY_SFTP_REMOTE_PATH = "sftp_remote_path"
-        private const val KEY_SFTP_HOST_KEY_FINGERPRINT = "sftp_host_key_fingerprint"
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_BOOT_ROUND_INTERVAL_MINUTES = "boot_round_interval_minutes"
         private const val KEY_BOOT_PUBLISH_EVERY_ROUND = "boot_publish_every_round"

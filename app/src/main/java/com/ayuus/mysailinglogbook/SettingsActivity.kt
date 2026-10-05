@@ -21,13 +21,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
+import com.chaquo.python.Python
 import java.io.File
 
 /**
- * Plain form for the settings SettingsStore holds -- W2K-2 login, boat identity, and SFTP publish
- * settings. Only W2K-2 user/password are required to Save -- SFTP fields can stay empty until the
- * owner is ready to publish; that's checked separately (isSftpConfigComplete) when the ☁️ icon is
- * tapped or a download's own auto-publish runs (see MainActivity.uploadIfConfigured()).
+ * Plain form for the settings SettingsStore holds -- W2K-2 login, boat identity, and the WordPress
+ * publish settings. Only W2K-2 user/password are required to Save -- the publish fields can stay empty
+ * until the owner is ready to publish; that's checked separately (isRestUploadConfigComplete) when the
+ * ☁️ icon is tapped or a download's own auto-publish runs (see MainActivity.uploadIfConfigured()).
  */
 class SettingsActivity : AppCompatActivity() {
 
@@ -148,19 +149,13 @@ class SettingsActivity : AppCompatActivity() {
             store.autoPublishAfterBuild,
         )
 
-        // WordPress, SFTP, or not publishing at all -- exactly one at a time, never a
-        // combination (uploadIfConfigured() only ever uses one, REST/WordPress preferred
-        // whenever both happen to be filled in). All the relevant field blocks used to always
-        // show together with no hint that only one is actually used, which read as "fill in
-        // everything" -- asked for explicitly: make the choice explicit, expanding only the
-        // fields it needs (none, for "don't publish").
+        // WordPress or not publishing at all -- the WordPress fields only expand when it is
+        // picked (none, for "don't publish").
         val publishMethodGroup = RadioGroup(this).apply { orientation = LinearLayout.VERTICAL }
         val wordpressRadio = RadioButton(this).apply { text = getString(R.string.radio_publish_wordpress) }
-        val sftpRadio = RadioButton(this).apply { text = getString(R.string.radio_publish_sftp) }
         val noPublishRadio = RadioButton(this).apply { text = getString(R.string.radio_publish_none) }
         publishMethodGroup.addView(noPublishRadio)
         publishMethodGroup.addView(wordpressRadio)
-        publishMethodGroup.addView(sftpRadio)
         layout.addView(
             publishMethodGroup,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -168,11 +163,9 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         val wordpressFields = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val sftpFields = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         layout.addView(wordpressFields)
-        layout.addView(sftpFields)
 
-        // Needs no SSH key/password on this device at all, just a WordPress Application Password
+        // Needs just a WordPress Application Password
         // (Users > Profile > Application Passwords on the account's own profile page, not the
         // account's real login password) for an account in the logboek_editor role.
         val restUploadUrlField = field(
@@ -184,26 +177,6 @@ class SettingsActivity : AppCompatActivity() {
         val restUploadUserField = field(getString(R.string.label_rest_upload_user), store.restUploadUser, container = wordpressFields)
         val restUploadPasswordField = field(
             getString(R.string.label_rest_upload_password), store.restUploadPassword, isPassword = true, container = wordpressFields,
-        )
-
-        val sftpHostField = field(getString(R.string.label_sftp_host), store.sftpHost, container = sftpFields)
-        val sftpPortField = field(getString(R.string.label_sftp_port), store.sftpPort.toString(), container = sftpFields)
-        val sftpUserField = field(getString(R.string.label_sftp_user), store.sftpUser, container = sftpFields)
-        val sftpPasswordField = field(
-            getString(R.string.label_sftp_password), store.sftpPassword, isPassword = true, container = sftpFields,
-        )
-        val sftpRemotePathField = field(getString(R.string.label_sftp_remote_path), store.sftpRemotePath, container = sftpFields)
-
-        // The host-key fingerprint (see SftpUploader.kt) isn't a credential -- it's the server's
-        // own public key, used to reject a *later, different* key instead of silently trusting it
-        // (could mean a man-in-the-middle). Left empty (the default), it's pinned automatically on
-        // the very first connection (trust-on-first-use) -- filled in here instead, that first
-        // connection is verified against it too, rather than blindly trusted. sshj reports it in
-        // the same colon-separated-hex form ssh-keygen -lf/-E md5 shows.
-        val sftpHostKeyField = field(
-            getString(R.string.label_sftp_host_key_fingerprint),
-            store.sftpHostKeyFingerprint,
-            container = sftpFields,
         )
 
         // Boat mode: rounds while the W2K-2 is reachable, a final round in the harbour or on
@@ -229,12 +202,10 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(bootIntervalSpinner)
         val bootPublishEveryRoundBox = checkbox(getString(R.string.checkbox_boat_publish_every_round), store.bootPublishEveryRound)
 
-        // Only the picked method's fields are shown -- GONE, not just visually hidden, so the
-        // collapsed block doesn't leave a blank gap ("don't publish" shows neither). Whichever
-        // one is picked here also decides what Opslaan actually saves (see its click listener
-        // below) -- the other route(s) are cleared, not just left untouched, so a leftover,
-        // unpicked config from before can never silently win via uploadIfConfigured()'s own
-        // REST-preferred order once "don't publish" (or the other method) has been chosen instead.
+        // The WordPress fields are shown only when it is picked -- GONE, not just visually hidden,
+        // so the collapsed block doesn't leave a blank gap. What is picked here also decides what
+        // Opslaan actually saves (see its click listener below): with "don't publish" the
+        // fields are cleared, not just left untouched.
         // "Elke ronde publiceren" and "Automatisch publiceren na samenstellen" are disabled the
         // same way (asked for explicitly, found in practice: left enabled with "Niet publiceren"
         // picked, they read as real, live settings despite doing nothing at all in that state) --
@@ -243,21 +214,14 @@ class SettingsActivity : AppCompatActivity() {
         // configured to publish it.
         fun updatePublishMethodVisibility() {
             wordpressFields.visibility = if (wordpressRadio.isChecked) View.VISIBLE else View.GONE
-            sftpFields.visibility = if (sftpRadio.isChecked) View.VISIBLE else View.GONE
             bootPublishEveryRoundBox.isEnabled = !noPublishRadio.isChecked
             autoPublishAfterBuildBox.isEnabled = !noPublishRadio.isChecked
         }
         publishMethodGroup.setOnCheckedChangeListener { _, _ -> updatePublishMethodVisibility() }
-        // Preselects whatever is already actually configured (isRestUploadConfigComplete/
-        // isSftpConfigComplete require every field of that route to be filled in, not just one),
-        // matching uploadIfConfigured()'s own REST-preferred order. "Don't publish" if neither is
-        // complete yet -- also the correct default on a brand new install, replacing what used to
-        // incorrectly default to WordPress even with nothing filled in at all.
-        when {
-            store.isRestUploadConfigComplete -> wordpressRadio.isChecked = true
-            store.isSftpConfigComplete -> sftpRadio.isChecked = true
-            else -> noPublishRadio.isChecked = true
-        }
+        // Preselects WordPress when it is already actually configured (isRestUploadConfigComplete
+        // requires every field to be filled in, not just one); "don't publish" otherwise -- also the
+        // correct default on a brand new install.
+        if (store.isRestUploadConfigComplete) wordpressRadio.isChecked = true else noPublishRadio.isChecked = true
         updatePublishMethodVisibility()
 
         val bootFinalHarbourBox = checkbox(getString(R.string.checkbox_boat_final_harbour), store.bootFinalOnHarbour)
@@ -319,7 +283,7 @@ class SettingsActivity : AppCompatActivity() {
         // ("Cache: Data") read as an odd, oversized action compared to every checkbox/field row
         // around it. Now the descriptive text lives in a plain TextView on the left (like a
         // checkbox's own label), and the button itself is a small, compact "Legen" on the right.
-        fun clearCacheRow(label: String, confirmMessage: String, files: () -> List<File>) {
+        fun buttonRow(label: String, buttonText: String, onClick: () -> Unit) {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
@@ -341,7 +305,7 @@ class SettingsActivity : AppCompatActivity() {
                 // small/fiddly a tap target next to a checkbox's own much larger control on
                 // every other row.
                 MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
-                    text = getString(R.string.button_clear)
+                    text = buttonText
                     // MaterialButton's own default style forces all-caps regardless of the
                     // theme's android:textAllCaps=false (see themes.xml's own comment on why
                     // that's set app-wide) -- a style-level attribute wins over a theme-level one
@@ -351,23 +315,28 @@ class SettingsActivity : AppCompatActivity() {
                     // A bit more rounded than Material's own ~4dp default -- asked for
                     // explicitly, to look nicer -- same radius as the Opslaan button below.
                     cornerRadius = (16 * resources.displayMetrics.density).toInt()
+                    // At least 90dp, wider when the text needs it ("Verwijderen").
+                    minWidth = (90 * resources.displayMetrics.density).toInt()
                     layoutParams = LinearLayout.LayoutParams(
-                        (90 * resources.displayMetrics.density).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT,
                     )
-                    setOnClickListener {
-                        AlertDialog.Builder(this@SettingsActivity)
-                            .setMessage(confirmMessage)
-                            .setPositiveButton(getString(R.string.button_clear)) { _, _ ->
-                                files().forEach { it.deleteRecursively() }
-                                Toast.makeText(this@SettingsActivity, getString(R.string.toast_cache_cleared), Toast.LENGTH_SHORT).show()
-                            }
-                            .setNegativeButton(getString(R.string.button_cancel), null)
-                            .show()
-                    }
+                    setOnClickListener { onClick() }
                 },
             )
             layout.addView(row)
         }
+
+        fun clearCacheRow(label: String, confirmMessage: String, files: () -> List<File>) =
+            buttonRow(label, getString(R.string.button_clear)) {
+                AlertDialog.Builder(this@SettingsActivity)
+                    .setMessage(confirmMessage)
+                    .setPositiveButton(getString(R.string.button_clear)) { _, _ ->
+                        files().forEach { it.deleteRecursively() }
+                        Toast.makeText(this@SettingsActivity, getString(R.string.toast_cache_cleared), Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton(getString(R.string.button_cancel), null)
+                    .show()
+            }
 
         clearCacheRow(
             getString(R.string.button_cache_data),
@@ -384,6 +353,38 @@ class SettingsActivity : AppCompatActivity() {
                 File(filesDir, ".weather_cache.json"),
                 File(filesDir, ".marine_cache.json"),
             )
+        }
+
+        // The raw .ebl files themselves (the caches above never touch them): for freeing the phone's
+        // storage. Counted and deleted by nmea2log.ebl_storage, the same code the iOS app uses. Not
+        // while a run is busy with them.
+        sectionHeader(getString(R.string.section_ebl_files))
+        buttonRow(getString(R.string.button_ebl_files), getString(R.string.button_delete)) {
+            if (SyncState.inProgress || SyncState.bootBusy) {
+                Toast.makeText(this@SettingsActivity, getString(R.string.toast_ebl_delete_busy), Toast.LENGTH_SHORT).show()
+                return@buttonRow
+            }
+            PythonStarter.ensureStarted(this)
+            val storage = Python.getInstance().getModule("nmea2log.ebl_storage")
+            val folder = EblStorage.downloadDir(this).absolutePath
+            val found = storage.callAttr("describe", folder).asList()
+            val count = found[0].toInt()
+            if (count == 0) {
+                Toast.makeText(this@SettingsActivity, getString(R.string.toast_ebl_files_none), Toast.LENGTH_SHORT).show()
+                return@buttonRow
+            }
+            AlertDialog.Builder(this@SettingsActivity)
+                .setMessage(getString(R.string.dialog_delete_ebl_message, count, found[1].toString()))
+                .setPositiveButton(getString(R.string.button_delete)) { _, _ ->
+                    val deleted = storage.callAttr("delete_all", folder).asList()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        getString(R.string.toast_ebl_files_deleted, deleted[0].toInt(), deleted[1].toString()),
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+                .setNegativeButton(getString(R.string.button_cancel), null)
+                .show()
         }
 
         // Outlined, secondary-emphasis style (see clearCacheRow()'s own comment on this same
@@ -452,13 +453,9 @@ class SettingsActivity : AppCompatActivity() {
                         else -> AppCompatDelegate.MODE_NIGHT_YES
                     }
                 )
-                // Only the picked method's fields are actually saved -- the other route(s) are
-                // cleared instead of just left untouched, so the radio choice is a real,
-                // unambiguous either-or-or-neither rather than just a display filter (see
-                // updatePublishMethodVisibility()'s own comment on why). Whatever's still typed
-                // into a currently-collapsed block on screen simply isn't saved -- switching the
-                // choice without saving in between doesn't lose it, it's just not what gets
-                // stored once Opslaan is actually tapped.
+                // Only saved when WordPress is the picked method -- otherwise the fields are cleared, so the
+                // radio choice is real and not just a display filter. Whatever is still typed into a
+                // currently-collapsed block on screen simply isn't saved.
                 if (wordpressRadio.isChecked) {
                     // Stored exactly as typed, not expanded -- see RestUploader.kt's own
                     // nmea2log.upload.normalize_rest_upload_url() call for where that happens
@@ -470,32 +467,10 @@ class SettingsActivity : AppCompatActivity() {
                     store.restUploadUrl = restUploadUrlField.text.toString().trim()
                     store.restUploadUser = restUploadUserField.text.toString().trim()
                     store.restUploadPassword = restUploadPasswordField.text.toString()
-                    store.sftpHost = ""
-                    store.sftpPort = SettingsStore.DEFAULT_SFTP_PORT
-                    store.sftpUser = ""
-                    store.sftpPassword = ""
-                    store.sftpRemotePath = ""
-                    store.sftpHostKeyFingerprint = ""
-                } else if (sftpRadio.isChecked) {
-                    store.restUploadUrl = ""
-                    store.restUploadUser = ""
-                    store.restUploadPassword = ""
-                    store.sftpHost = sftpHostField.text.toString().trim()
-                    store.sftpPort = sftpPortField.text.toString().toIntOrNull()?.coerceAtLeast(SharedDefaults.MINIMUM_PORT) ?: SettingsStore.DEFAULT_SFTP_PORT
-                    store.sftpUser = sftpUserField.text.toString().trim()
-                    store.sftpPassword = sftpPasswordField.text.toString()
-                    store.sftpRemotePath = sftpRemotePathField.text.toString().trim()
-                    store.sftpHostKeyFingerprint = sftpHostKeyField.text.toString().trim()
                 } else {
                     store.restUploadUrl = ""
                     store.restUploadUser = ""
                     store.restUploadPassword = ""
-                    store.sftpHost = ""
-                    store.sftpPort = SettingsStore.DEFAULT_SFTP_PORT
-                    store.sftpUser = ""
-                    store.sftpPassword = ""
-                    store.sftpRemotePath = ""
-                    store.sftpHostKeyFingerprint = ""
                 }
                 Toast.makeText(this@SettingsActivity, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
                 finish()
@@ -503,8 +478,8 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Opslaan lives outside the ScrollView, not at the bottom of the scrolling field list --
-        // with this many fields (W2K-2, boat identity, and the whole SFTP section) the button used
-        // to only be reachable by scrolling all the way down, and a quick "fill in the SFTP fields,
+        // with this many fields (W2K-2, boat identity, the publish section) the button used
+        // to only be reachable by scrolling all the way down, and a quick "fill in the fields,
         // then just tap back" felt like it saved but silently didn't (found in practice, asked for
         // explicitly to fix: settings appeared not to be remembered at all). Now it's always
         // visible regardless of scroll position, so there's no way to miss it.

@@ -3,7 +3,7 @@
 Android app that syncs voyage data from a boat's [Actisense W2K-2](https://actisense.com) NMEA
 2000-to-WiFi gateway, builds the same HTML sailing logbook the desktop
 [nmea2log](https://github.com/Ayuus/nmea2log) CLI produces, shows it in-app, and (optionally)
-publishes it to a WordPress site or over SFTP. An optional "boat mode" can also do all of the
+publishes it to a WordPress site. An optional "boat mode" can also do all of the
 above on its own, on an interval, while the app stays closed -- see "Using the app" below.
 
 It does **not** reimplement any of the NMEA 2000 decoding, trip-building, or HTML-generation
@@ -87,9 +87,13 @@ Open Settings (the gear icon, top right of the toolbar) and fill in:
   -- **not** just your site's own homepage or the logbook's own page URL: that gets redirected to
   a login page instead of uploading anything, found in practice, since fixed to at least raise a
   clear error instead of silently reporting success -- see the `nmea2log` README's own
-  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup) or
-  SFTP host/user/password/remote path, if you want the built logbook sent to your own website.
-  Leave both blank to keep everything on the phone.
+  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup), if
+  you want the built logbook sent to your own website. Leave it blank to keep everything on the phone.
+- **Local `.ebl` files** (Settings, at the bottom) -- a **Delete** button that removes the raw `.ebl`
+  logfiles from the phone to free its storage, after a confirmation that says how many files and how
+  much space. The logbook already built stays; a new download fetches the files from the W2K-2 again,
+  and no new logbook can be assembled without them. (The Python side, `nmea2log.ebl_storage`, is shared
+  with the iOS app.)
 
 The phone needs to share a private network with the W2K-2 -- normally that means the phone runs
 its own hotspot and the W2K-2 joins it as a client (the setup the W2K-2's own app expects), but
@@ -212,15 +216,15 @@ MainActivity (manual "sync now" + auto-start on launch)
        -> w2k2_download.download_file()   downloads new/changed .ebl files
        -> run_pipeline()                  decode -> build_trips -> write_html_logbook()
   -> WebView shows the resulting logbook.html
-  -> SftpUploader (optional)      publishes logbook.html + backs up new .ebl files
+  -> RestUploader (optional)      publishes logbook.html to WordPress
 ```
 
 - **`android_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
-  what the desktop CLI's `_run()` does -- minus argument parsing and minus any SFTP upload, both of
+  what the desktop CLI's `_run()` does -- minus argument parsing and minus any upload, both of
   which are Kotlin's job on this platform -- and returns a plain `dict` a background thread can
   read, instead of relying on stderr text or an exit code the way the desktop CLI does.
 - **`SettingsStore`** wraps `EncryptedSharedPreferences` for everything `nmea2log.ini` holds on
-  desktop (W2K-2 login, boat identity, SFTP publish settings) -- there is no config file on
+  desktop (W2K-2 login, boat identity, WordPress publish settings) -- there is no config file on
   Android, values are entered once via `SettingsActivity`.
 - **`SyncController`** is the interface Kotlin implements and hands to
   `android_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
@@ -285,12 +289,6 @@ is on" is. This also rules out `ConnectivityManager.NetworkCallback` (which obse
 *this device* joins as a client, not its own AP state) as an event source for "is the hotspot
 back" -- see the reconnect logic below.
 
-**No SFTP anywhere was the original hard rule for the first milestone**, so that nothing on the
-live site could break while the sync pipeline itself was still being built and tested against the
-real device. SFTP publishing (password-authenticated, not key-based -- see below) was added once
-that milestone was confirmed working, and is opt-in: the app never uploads anything unless the
-"Publish to ayuus.com" settings are filled in.
-
 **Reconnect handling is poll-based, not event-based, and deliberately checks the real device, not
 just the local hotspot state.** When a sync fails, the user is offered "wait for connection" or
 "close the app" instead of an immediate retry (which, out of range of the boat, would just fail
@@ -316,23 +314,6 @@ actual network activity, and Android then simply refuses to start the service ag
 budget resets or the user brings the app to the foreground. `startSyncNotification()` also catches
 that refusal gracefully wherever it's used -- a sync still completes without a visible notification
 rather than crashing outright if the budget is ever actually exhausted.
-
-**SFTP uses password auth via [sshj](https://github.com/hierynomus/sshj), not the desktop CLI's
-key-based OpenSSH-CLI approach**, since there's no `sftp` binary to shell out to on Android and
-importing/storing a private key adds real complexity this project didn't need once password auth
-against the real server was confirmed to work. BouncyCastle is registered as a `Security` provider
-at startup (`MainActivity.onCreate()`) because Android's built-in "BC" provider is a cut-down one
-that's missing Ed25519/X25519 support, which sshj needs for the server's host key exchange even
-with password auth. The server's host key fingerprint is pinned on first connect
-(`SettingsStore.sftpHostKeyFingerprint`, trust-on-first-use) and checked on every later connection,
-the same protection `StrictHostKeyChecking=accept-new` gives the desktop CLI.
-
-**`.ebl` backup preserves each file's own `EBL000000/`-style subfolder on the remote server**,
-unlike the desktop CLI's own `--backup-ebl`, which uploads everything into one flat remote
-directory. Deliberately different: thousands of same-shaped filenames in one flat folder is much
-harder to browse than the same structure the files already have locally. Backing up is entirely
-optional -- it only happens if a remote backup folder is filled in in settings, checked by that
-field being non-blank rather than a separate on/off toggle.
 
 **The generated `logbook.html` renders server-side in Dutch by default, unchanged** -- but every
 translatable label also carries a `data-i18n`/`data-i18n-tpl` attribute, and all four supported
@@ -366,15 +347,9 @@ Borderless (no background box/shadow, `selectableItemBackgroundBorderless`, zero
 target) so they still read as plain icons rather than boxed buttons; tint applied at runtime by
 `iconButton()`, so each drawable's own `fillColor` is just a placeholder.
 
-## Not yet built
-
-- **Local `.ebl` cleanup** after a file is confirmed both decoded and backed up remotely -- the
-  desktop CLI deliberately keeps every `.ebl` forever (its whole project directory is already
-  backed up via OneDrive), but that reasoning doesn't hold on a phone's own storage.
-
 There is a small Kotlin unit test suite (`app/src/test/`, run via `./gradlew test`), but it's
 deliberately scoped to pure logic only (currently: `HotspotDetectorTest`, covering the private-IPv4
-range checks) -- notification handling, settings storage, the SFTP client, and the reconnect flow
+range checks) -- notification handling, settings storage, the WordPress client, and the reconnect flow
 all need real Android framework classes or real network I/O to exercise meaningfully, and aren't
 covered by anything automated yet. The Python side this app calls into is covered separately by
 nmea2log's own extensive pytest suite.

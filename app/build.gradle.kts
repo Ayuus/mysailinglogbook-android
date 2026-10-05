@@ -130,14 +130,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
-    // Spike 4 (docs/android-app-plan.md): SFTP replacement for upload.py's subprocess.run(["sftp",
-    // ...]), which has nothing to shell out to on Android. Not jsch (unmaintained, no Ed25519) --
-    // the real upload key here is Ed25519.
-    implementation("com.hierynomus:sshj:0.40.0")
-    // Registered as a Security provider at startup (see MainActivity) -- without it, sshj fails
-    // to authenticate with an Ed25519 key ("no such algorithm: X25519 for provider BC", found in
-    // practice), since Android's built-in crypto providers don't consistently support it.
-    implementation("org.bouncycastle:bcprov-jdk18on:1.79")
     // EncryptedSharedPreferences for SettingsStore -- W2K-2 credentials and boat identity,
     // replacing nmea2log.ini on Android (see docs/android-app-plan.md).
     implementation("androidx.security:security-crypto:1.1.0")
