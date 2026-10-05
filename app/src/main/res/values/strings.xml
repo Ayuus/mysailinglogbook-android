@@ -190,4 +190,5 @@
     <string name="toast_ebl_files_deleted">%1$d .ebl files deleted (%2$s freed)</string>
     <string name="toast_ebl_files_none">There are no .ebl files on this device</string>
     <string name="toast_ebl_delete_busy">Not while a download or assemble is running</string>
+    <string name="status_checking_logbook">Checking the logbook...</string>
 </resources>

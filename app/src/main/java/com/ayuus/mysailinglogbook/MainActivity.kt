@@ -1722,7 +1722,10 @@ class MainActivity : AppCompatActivity() {
         updatePublishButtonEnabled()
         // Log deliberately NOT cleared here (asked for explicitly, see runDownload()'s own matching
         // comment) -- it accumulates across every run this process makes instead.
-        SyncState.lastStatusText = getString(R.string.status_building_with_existing_data)
+        // Publish only checks first: it assembles when the logbook is out of date (nmea2log's logbook_state).
+        SyncState.lastStatusText = getString(
+            if (forcePublish) R.string.status_checking_logbook else R.string.status_building_with_existing_data,
+        )
         handleLogLine("[info] ${SyncState.lastStatusText}")
         // Shown immediately, same as runDownload()'s own startIntent -- asked for explicitly, found
         // in practice: listing every .ebl file and loading the trip cache can itself take well

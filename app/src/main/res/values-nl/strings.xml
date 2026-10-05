@@ -181,4 +181,5 @@
     <string name="toast_ebl_files_deleted">%1$d .ebl-bestanden verwijderd (%2$s vrijgemaakt)</string>
     <string name="toast_ebl_files_none">Er staan geen .ebl-bestanden op dit toestel</string>
     <string name="toast_ebl_delete_busy">Niet terwijl er een download of samenstellen loopt</string>
+    <string name="status_checking_logbook">Logboek controleren...</string>
 </resources>

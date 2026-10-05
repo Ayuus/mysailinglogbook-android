@@ -177,4 +177,5 @@
     <string name="toast_ebl_files_deleted">%1$d fichiers .ebl supprimés (%2$s libérés)</string>
     <string name="toast_ebl_files_none">Il n\'y a aucun fichier .ebl sur cet appareil</string>
     <string name="toast_ebl_delete_busy">Pas pendant un téléchargement ou une création en cours</string>
+    <string name="status_checking_logbook">Vérification du journal...</string>
 </resources>

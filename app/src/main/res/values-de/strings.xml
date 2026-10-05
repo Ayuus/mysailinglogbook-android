@@ -177,4 +177,5 @@
     <string name="toast_ebl_files_deleted">%1$d .ebl-Dateien gelöscht (%2$s frei)</string>
     <string name="toast_ebl_files_none">Auf diesem Gerät sind keine .ebl-Dateien</string>
     <string name="toast_ebl_delete_busy">Nicht während ein Download oder eine Zusammenstellung läuft</string>
+    <string name="status_checking_logbook">Bordbuch wird geprüft...</string>
 </resources>
