@@ -56,17 +56,6 @@ the start of the log of such a run: the .ebl files found, the trips built from t
 *Boat mode on: the sailboat button is filled and the log reports what it is doing -- the one-time question about battery
 optimisation when the mode is started.*
 
-To take pictures like these without touching your own logbook, install the **debug** build next to the real app
-(`./gradlew assembleDebug`: package `com.ayuus.mysailinglogbook.debug`, its own data, debuggable so
-`adb shell run-as com.ayuus.mysailinglogbook.debug` can put a logbook in `files/`) and set its language with
-`adb shell cmd locale set-app-locales com.ayuus.mysailinglogbook.debug --locales en-US`.
-
-The two pictures of an assemble were made from five invented day trips (made-up positions on the IJsselmeer, written as
-.ebl files into the debug build's own `files/Actisense/<year>/EBL000001/` folder by `run-as`), assembled by the app. The
-debug build's package name appears in two lines of its log; in the pictures it is cut out of the one line shown, so the
-path reads as the real app's (`.../com.ayuus.mysailinglogbook/files/logbook.html`), and the lines after the trip
-statistics (a place-name service that was down at the time) are left out of the full log.
-
 ## Installation
 
 **Play Store** (preferred): *pending review, link coming soon.* No install warnings, and updates
