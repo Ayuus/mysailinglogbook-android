@@ -114,6 +114,11 @@ class SyncNotificationService : Service() {
         } catch (e: Exception) {
             stopSelf()
         }
+        if (foregroundStartHandled()) {
+            // A run that ended before this first start command came in asked to stop (see stop()), and could not be
+            // allowed to until startForeground() above had been called.
+            stopSelf()
+        }
         return START_NOT_STICKY
     }
 
@@ -209,6 +214,54 @@ class SyncNotificationService : Service() {
         const val CHANNEL_ID = "sync_v2"
         const val NOTIFICATION_ID = 1
         const val REOPEN_NOTIFICATION_ID = 2
+
+        private val startLock = Any()
+
+        // startForegroundService() has been called, but the service has not yet been through startForeground().
+        private var startPending = false
+
+        // stop() came in while startPending: carried out as soon as the service has called startForeground().
+        private var stopWhenForeground = false
+
+        /** To be called right before the first ContextCompat.startForegroundService() of a run (see stop()). */
+        fun markStartRequested() = synchronized(startLock) {
+            startPending = true
+            stopWhenForeground = false
+        }
+
+        /** To be called when the start request did not go through after all (it was refused). */
+        fun markStartFailed() = synchronized(startLock) {
+            startPending = false
+            stopWhenForeground = false
+        }
+
+        /** Called by the service after its startForeground(): true when a stop() was waiting for it. */
+        private fun foregroundStartHandled(): Boolean = synchronized(startLock) {
+            startPending = false
+            val stopNow = stopWhenForeground
+            stopWhenForeground = false
+            stopNow
+        }
+
+        /**
+         * Stops the service -- every place that used to call stopService() on it calls this instead.
+         *
+         * Found in practice (Android 16): a run that ends within a few milliseconds of its notification being
+         * started -- "no .ebl files", W2K-2 not found, a quick error -- called stopService() before the service
+         * had got as far as startForeground(). Android then treats it as a service that was started with
+         * startForegroundService() and never called startForeground(), and kills the whole app with
+         * ForegroundServiceDidNotStartInTimeException. So until the service has been through startForeground(),
+         * the stop is only noted, and the service carries it out itself right after.
+         */
+        fun stop(context: Context) {
+            synchronized(startLock) {
+                if (startPending) {
+                    stopWhenForeground = true
+                    return
+                }
+            }
+            context.stopService(Intent(context, SyncNotificationService::class.java))
+        }
 
         // Handled by the system's own NotificationManagerService, not this app's process -- found
         // in practice, asked for explicitly: MainActivity's own cleanup (onDestroy(),

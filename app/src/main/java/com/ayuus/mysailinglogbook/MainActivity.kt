@@ -485,7 +485,7 @@ class MainActivity : AppCompatActivity() {
             // service immediately removes the notification right away regardless of how long the
             // sync itself takes to actually wind down in the background; the Thread's own
             // stopService() call later is a harmless no-op against an already-stopped service.
-            stopService(Intent(this, SyncNotificationService::class.java))
+            SyncNotificationService.stop(this)
             if (!SyncState.inProgress) {
                 // Nothing running -- SyncNotificationService.onTaskRemoved()'s own cleanup only
                 // fires for a service that's actually running, but autoStartSyncWithSettingsRetry()'s
@@ -904,7 +904,7 @@ class MainActivity : AppCompatActivity() {
                 // equivalent until now, so it's added explicitly here to match.
                 handleLogLine("[info] $message")
                 withActiveActivity {
-                    stopService(Intent(this, SyncNotificationService::class.java))
+                    SyncNotificationService.stop(this)
                     SyncState.notificationForegrounded = false
                     SyncState.notificationStartFailed = false
                     // No popup, and no system notification either (asked for explicitly,
@@ -996,7 +996,7 @@ class MainActivity : AppCompatActivity() {
                 // would block every later download attempt, and this instance is a valid Context for
                 // stopService()/postCompletionNotification() regardless of whether it's the
                 // currently active one.
-                stopService(Intent(this, SyncNotificationService::class.java))
+                SyncNotificationService.stop(this)
                 if (syncSucceeded) {
                     val timeText = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                         .format(java.util.Date())
@@ -1638,7 +1638,7 @@ class MainActivity : AppCompatActivity() {
      * Activity (found in practice, for the app-close case this was originally written for). */
     private fun cancelSync() {
         SyncState.cancelled = true
-        stopService(Intent(this, SyncNotificationService::class.java))
+        SyncNotificationService.stop(this)
         SyncState.notificationForegrounded = false
         SyncState.notificationStartFailed = false
     }
@@ -1780,7 +1780,7 @@ class MainActivity : AppCompatActivity() {
                 // this run (see startSyncNotification()'s own eligibility check) -- this path,
                 // Only posted if a notification was ever actually shown for this run (see
                 // startSyncNotification()'s own eligibility check).
-                stopService(Intent(this, SyncNotificationService::class.java))
+                SyncNotificationService.stop(this)
                 if (syncSucceeded && SyncState.notificationForegrounded) {
                     val timeText = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                         .format(java.util.Date())
@@ -2271,7 +2271,7 @@ class MainActivity : AppCompatActivity() {
                 // what reads as one action from the owner's side. Still stopped/reset here so that
                 // fresh notification actually starts fresh, instead of trying to update this
                 // (about to be pointless) one.
-                stopService(Intent(this, SyncNotificationService::class.java))
+                SyncNotificationService.stop(this)
                 SyncState.notificationForegrounded = false
                 SyncState.notificationStartFailed = false
                 SyncState.inProgress = false
@@ -2426,10 +2426,12 @@ class MainActivity : AppCompatActivity() {
             if (SyncState.notificationForegrounded) {
                 startService(intent)
             } else {
+                SyncNotificationService.markStartRequested()
                 ContextCompat.startForegroundService(this, intent)
                 SyncState.notificationForegrounded = true
             }
         } catch (e: Exception) {
+            SyncNotificationService.markStartFailed()
             SyncState.notificationStartFailed = true
             // A short, plain message, not the raw exception -- found in practice: dumping
             // "android.app.ForegroundServiceStartNotAllowedException: startForegroundService()
