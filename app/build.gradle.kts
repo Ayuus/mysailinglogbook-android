@@ -48,8 +48,8 @@ android {
         applicationId = "com.ayuus.mysailinglogbook"
         minSdk = 24
         targetSdk = 37
-        versionCode = 13
-        versionName = "1.1.9"
+        versionCode = 14
+        versionName = "1.1.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
