@@ -41,6 +41,14 @@ one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](http
 the start of the log of such a run: the .ebl files found, the trips built from them.*
 
 <p>
+<img src="docs/screenshots/map-trip.png" width="230" alt="The map of one trip, opened from the Map button in the trip list">
+<img src="docs/screenshots/trip-log.png" width="230" alt="The log of one trip, opened from the Log button">
+<img src="docs/screenshots/map-overview.png" width="230" alt="The overview map of the year, opened from the Overview link">
+</p>
+
+*The maps in the logbook (OpenStreetMap): the **Map** button of a trip shows its route -- its **Log** button the positions, course and speed along the way, with the water temperature and the boat's motion -- the **Overview** link of a year puts all trips of that year on one map.*
+
+<p>
 <img src="docs/screenshots/boat-mode.png" width="230" alt="Boat mode on: the filled sailboat button and its status in the log">
 <img src="docs/screenshots/boat-battery.png" width="230" alt="The question about battery optimisation when the boat mode is started for the first time">
 </p>
