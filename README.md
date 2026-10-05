@@ -194,8 +194,8 @@ MainActivity (manual "sync now" + auto-start on launch)
 ## The log file
 
 The app's log (every level, also the debug lines the log view does not show) is `nmea2log.log` in the app's
-private storage: not reachable from outside a release build, 90 days of lines kept (pruned when a run starts),
-no size limit. What is in it, how it grows (a download or boat-mode round writes a debug line per file) and where
+external files folder (`Android/data/com.ayuus.mysailinglogbook/files/`, next to the `Actisense` folder), so you can
+read it from a PC over USB; 30 days of lines kept (pruned when a run starts), no size limit. What is in it, how it grows (a download or boat-mode round writes a debug line per file) and where
 the iOS app keeps it: [nmea2log/docs/log-file.md](https://github.com/Ayuus/nmea2log/blob/main/docs/log-file.md).
 
 ## Texts shared with the iOS app

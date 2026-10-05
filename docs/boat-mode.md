@@ -112,7 +112,7 @@ Two separate notifications exist, and they behave differently on purpose:
   a download's notification (appear only while a round/publish is actively running, gone in between),
   that is a real, considered option for later, not something ruled out technically.
 
-Everything the mode does is also written to `nmea2log.log` (private to the app, 90 days kept, no size limit):
+Everything the mode does is also written to `nmea2log.log` (in the app's external files folder, reachable from a PC; 30 days kept, no size limit):
 each round's download writes one debug line per file the W2K-2 holds, so with the mode on for months the file can
 get large -- see [nmea2log/docs/log-file.md](https://github.com/Ayuus/nmea2log/blob/main/docs/log-file.md).
 

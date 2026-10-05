@@ -538,7 +538,7 @@ class MainActivity : AppCompatActivity() {
         showingLocalLogbook = false
         setLogExpanded(true)
         if (LogBuffer.isEmpty()) {
-            val logFile = File(filesDir, SharedConstants.LOG_FILE_NAME)
+            val logFile = LogFile.file(this)
             if (logFile.exists()) {
                 LogBuffer.replaceAll(logFile.readLines(Charsets.UTF_8).takeLast(BOOT_LOG_TAIL_LINES))
             }

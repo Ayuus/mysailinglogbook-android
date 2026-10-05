@@ -29,7 +29,7 @@ object AppLog {
     fun appendToFile(context: Context, stampedLine: String) {
         try {
             synchronized(fileLock) {
-                File(context.filesDir, SharedConstants.LOG_FILE_NAME).appendText(stampedLine + "\n", Charsets.UTF_8)
+                LogFile.file(context).appendText(stampedLine + "\n", Charsets.UTF_8)
             }
         } catch (e: Exception) {
             // best effort only

@@ -20,6 +20,10 @@ object PythonStarter {
     fun ensureStarted(context: Context) {
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(context.applicationContext))
+            // The log goes where the owner can reach it from a PC (see LogFile).
+            LogFile.migrateFromPrivateStorage(context.applicationContext)
+            Python.getInstance().getModule("nmea2log.android_entry")
+                .callAttr("set_log_directory", LogFile.directory(context.applicationContext).absolutePath)
         }
     }
 }
