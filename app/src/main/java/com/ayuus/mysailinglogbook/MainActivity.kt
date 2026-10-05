@@ -2548,6 +2548,10 @@ class MainActivity : AppCompatActivity() {
         updatePublishButtonEnabled()
         updateSyncButtonAvailability()
         updateBootButton()
+        // The lines onCreate() made itself (e.g. "no publish destination configured") were logged while no Activity was
+        // the active one yet, so nothing showed them: with no sync running the block below does not touch the log either,
+        // and the log view stayed empty although the lines were in the log file. Cheap and coalesced, so always.
+        refreshLogView()
         // Brings the log/the progress bar up to date with whatever a download -- still in
         // progress, or one that already finished while this Activity wasn't the active one --
         // has produced so far. Not gated on SyncState.inProgress alone: found in practice, a
