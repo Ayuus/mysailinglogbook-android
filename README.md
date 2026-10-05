@@ -160,6 +160,23 @@ falls back to coordinates instead of retrying forever.
 (The sections below are for building this app from source instead -- not needed just to install
 it.)
 
+### Backing up your data
+
+What is worth keeping is the **`.ebl` archive**: the logbook and the caches are rebuilt from it with one tap on
+assemble. The settings are small -- keep your W2K-2 and WordPress logins in a password manager.
+
+- **The archive** is the folder `Android/data/com.ayuus.mysailinglogbook/files/Actisense/` on the phone. Connect the
+  phone to a PC with a USB cable (file transfer) and copy that folder to the PC, best into a folder that your cloud
+  storage (OneDrive, Dropbox, Google Drive, ...) keeps in sync. Do it after every trip or season -- only the new
+  `EBL000nnn` folders need copying -- and **before** you use Settings > Local .ebl files > Delete. On recent Android
+  versions the phone's own file-manager apps often cannot open `Android/data`; a PC over USB can.
+- **Restoring**: install the app, start it once, copy the folder back to the same place and tap assemble. The first
+  assemble takes longer, as the caches are rebuilt too.
+- **The built logbook** is also on your WordPress site when you publish.
+- **Do not count on Android's automatic (Google) backup.** It is switched on for the app with Android's default rules,
+  but it takes at most 25 MB per app -- the archive is far larger -- and the settings are encrypted with a key that stays
+  in the phone, so they cannot be read on another phone.
+
 ## Requirements
 
 - **The [nmea2log](https://github.com/Ayuus/nmea2log) repo, checked out separately on the same
