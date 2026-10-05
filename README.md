@@ -33,6 +33,14 @@ one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](http
 *The logbook (what the app shows when it is opened) -- settings (top and bottom).*
 
 <p>
+<img src="docs/screenshots/run.png" width="230" alt="After an assemble: the logbook with the log as a strip above it">
+<img src="docs/screenshots/log.png" width="230" alt="The log">
+</p>
+
+*After an assemble: the logbook with the log as a strip above it (scroll it, or tap the log button for the whole log) --
+the start of the log of such a run: the .ebl files found, the trips built from them.*
+
+<p>
 <img src="docs/screenshots/boat-mode.png" width="230" alt="Boat mode on: the filled sailboat button and its status in the log">
 <img src="docs/screenshots/boat-battery.png" width="230" alt="The question about battery optimisation when the boat mode is started for the first time">
 </p>
@@ -44,6 +52,12 @@ To take pictures like these without touching your own logbook, install the **deb
 (`./gradlew assembleDebug`: package `com.ayuus.mysailinglogbook.debug`, its own data, debuggable so
 `adb shell run-as com.ayuus.mysailinglogbook.debug` can put a logbook in `files/`) and set its language with
 `adb shell cmd locale set-app-locales com.ayuus.mysailinglogbook.debug --locales en-US`.
+
+The two pictures of an assemble were made from five invented day trips (made-up positions on the IJsselmeer, written as
+.ebl files into the debug build's own `files/Actisense/<year>/EBL000001/` folder by `run-as`), assembled by the app. The
+debug build's package name appears in two lines of its log; in the pictures it is cut out of the one line shown, so the
+path reads as the real app's (`.../com.ayuus.mysailinglogbook/files/logbook.html`), and the lines after the trip
+statistics (a place-name service that was down at the time) are left out of the full log.
 
 ## Installation
 
