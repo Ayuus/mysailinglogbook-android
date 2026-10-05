@@ -82,13 +82,13 @@ Open Settings (the gear icon, top right of the toolbar) and fill in:
 - **W2K-2 username/password** -- the same login the W2K-2's own web interface uses.
 - **Boat name, MMSI, call sign** -- shown in the logbook's header, not sent anywhere by
   themselves.
-- **Publishing** (optional) -- either a WordPress Application Password (for an account in the
-  `logboek_editor` role) plus the REST URL (`https://your-site.example/wp-json/nmea2log/v1/logbook`
-  -- **not** just your site's own homepage or the logbook's own page URL: that gets redirected to
-  a login page instead of uploading anything, found in practice, since fixed to at least raise a
-  clear error instead of silently reporting success -- see the `nmea2log` README's own
-  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup), if
-  you want the built logbook sent to your own website. Leave it blank to keep everything on the phone.
+- **Publishing** (optional) -- a WordPress Application Password (for an account in the `logboek_editor`
+  role) plus your site's address (`your-site.example` is enough: the app adds `https://` and the REST route
+  `/wp-json/nmea2log/v1/logbook` itself; an address that already contains `/wp-json/` is used as typed), if you
+  want the built logbook sent to your own website. Not the address of the logbook's own page: that gets redirected
+  to a login page instead of uploading anything (the app reports that as an error). See the `nmea2log` README's own
+  "Per-trip remarks, login-gated, via WordPress" section for the WordPress side of this setup. Leave it blank to
+  keep everything on the phone.
 - **Local `.ebl` files** (Settings, at the bottom) -- a **Delete** button that removes the raw `.ebl`
   logfiles from the phone to free its storage, after a confirmation that says how many files and how
   much space. The logbook already built stays; a new download fetches the files from the W2K-2 again,
@@ -107,7 +107,7 @@ the signal it uses to tell "I'm on the boat" from any other network the phone mi
 
 Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **import**
 (copy `.ebl` files from an SD card or USB drive instead -- no W2K-2 needed, e.g. a card pulled
-straight from the instrument -- then build/publish exactly like a normal download would), **build**
+straight from the instrument -- then build/publish exactly like a normal download would), **assemble**
 (build the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
 the current logbook to the website configured in Settings), **view logbook** (show the
@@ -120,22 +120,22 @@ screen, with a real progress bar.
 
 ### Boat mode
 
-Turned on/off via the sailboat button (or the matching checkbox in Settings, which can also
-start it automatically whenever the app opens with the boat's hotspot up). Once on, it keeps
-running in the background -- the app doesn't need to stay open -- and:
+Turned on/off via the sailboat button (Settings has a checkbox "Turn on automatically on launch", which
+starts it whenever the app opens with the boat's hotspot up). Once on, it keeps running in the background --
+the app doesn't need to stay open -- and:
 
 1. **Searches** for the W2K-2 every 5 minutes (`search_interval_minutes` in the Python
    `BootModeConfig` default -- not yet exposed as its own Settings field), without downloading
    anything yet.
 2. Once found, runs a **round**: downloads new data and builds the logbook, then waits for the
-   configured interval ("A round (download + build) every ...") before the next one.
+   configured interval ("A round (download + assemble) every ...") before the next one.
 3. Recognises being **in harbour** (stationary + engine off, both for a configurable number of
    minutes) and **having left the boat** (the W2K-2 stops answering for a configurable number of
    minutes) as two different "the voyage is over for now" signals, each independently switchable
    to trigger a **final round** (and, if publishing is configured, an actual publish) --
    see the checkboxes under "Boat mode" in Settings.
-4. Can optionally switch itself back off after that final round ("Switch boat mode off after the
-   final round"), or keep running and simply start searching again.
+4. Can optionally switch itself back off after that final round ("Turn off after final round"), or
+   keep running and simply start searching again.
 
 Android's own battery optimisation can hold back a background app's timers while the phone lies
 still (e.g. moored in a marina) -- boat mode asks, once, to be exempted from that the first time
@@ -157,9 +157,6 @@ working internet connection on the phone at build/publish time (not from the W2K
 never needs internet at all); a lookup that keeps failing gives up for the rest of that run and
 falls back to coordinates instead of retrying forever.
 
-(The sections below are for building this app from source instead -- not needed just to install
-it.)
-
 ### Backing up your data
 
 What is worth keeping is the **`.ebl` archive**: the logbook and the caches are rebuilt from it with one tap on
@@ -176,6 +173,9 @@ assemble. The settings are small -- keep your W2K-2 and WordPress logins in a pa
 - **Do not count on Android's automatic (Google) backup.** It is switched on for the app with Android's default rules,
   but it takes at most 25 MB per app -- the archive is far larger -- and the settings are encrypted with a key that stays
   in the phone, so they cannot be read on another phone.
+
+(The sections below are for building this app from source instead -- not needed just to install
+it.)
 
 ## Requirements
 
@@ -219,8 +219,8 @@ assemble. The settings are small -- keep your W2K-2 and WordPress logins in a pa
    ```
    or just open the project in Android Studio and run it.
 
-There is no CI here. A small Kotlin unit test suite exists (see "Not yet built" below for its
-current scope) -- run it with `./gradlew test`. The Python side's own extensive test suite lives
+There is no CI here. A small Kotlin unit test suite exists (its scope is described at the end of this file) -- run it with
+`./gradlew test`. The Python side's own extensive test suite lives
 in the nmea2log repo and covers everything this app calls into.
 
 ## How it fits together
@@ -268,6 +268,9 @@ python -m nmea2log.export_android_strings app/src/main/res      # run from the n
 Edit such a string in `app_texts.py` and export, never by hand in `strings.xml` (the next export would
 overwrite it). Strings that only exist on Android stay here. `--check` reports drift.
 
+The defaults and constants both apps share (`app_settings.py`, `app_constants.py`) are written into
+`SharedConstants.kt` the same way: `python -m nmea2log.export_android_constants <path to SharedConstants.kt>`.
+
 ## Design choices worth knowing before changing this code
 
 **`autoStartSyncWithSettingsRetry()`'s own "vul W2K-2-gegevens in" line is not a startup nag --
@@ -304,20 +307,14 @@ needs a reliable "I'm on the boat" signal, and "joined to some WiFi network" (wh
 easily be a cafe or the owner's own home) isn't specific enough for that, the way "my own hotspot
 is on" is. This also rules out `ConnectivityManager.NetworkCallback` (which observes networks
 *this device* joins as a client, not its own AP state) as an event source for "is the hotspot
-back" -- see the reconnect logic below.
+back".
 
-**Reconnect handling is poll-based, not event-based, and deliberately checks the real device, not
-just the local hotspot state.** When a sync fails, the user is offered "wait for connection" or
-"close the app" instead of an immediate retry (which, out of range of the boat, would just fail
-again immediately and show the same dialog again -- reads as nagging). "Wait for connection" polls
-in the background (interval: the existing sync-interval setting, reused rather than adding a
-second interval setting) and, on each tick, re-runs the real `discover_w2k2()` scan -- not just a
-check of whether the phone's own hotspot toggle is on. The hotspot commonly stays on the whole time
-while the W2K-2 itself drops off it (e.g. walking away from the boat), so hotspot-state alone
-would never notice the actual problem. A clean, officially-supported "a client (re)joined my own
-tethering hotspot" event does not exist on modern Android for a third-party app (the old
-`WIFI_AP_STATE_CHANGED` broadcast is unofficial/undocumented and unreliable across OEMs/versions),
-so polling the actual target is the honest option here, not a shortcut.
+**There is no automatic reconnect or polling after a failed sync.** When a sync cannot find the W2K-2 (or fails), a
+dialog offers to build the logbook from what is already on the phone, or to close the app -- not an immediate retry,
+which out of range of the boat would just fail again and show the same dialog again. Finding the W2K-2 means
+scanning for the real device (`discover_w2k2()`), not just checking that the phone's own hotspot is on: the hotspot
+commonly stays on while the W2K-2 itself drops off it (e.g. walking away from the boat). Boat mode does that scan on
+its own timer (its searches and rounds); the manual sync does it once per tap.
 
 **The sync notification is stopped as soon as downloading finishes, before decode/build runs.**
 `SyncController.onDownloadComplete()` fires once, right after the last file's download attempt and
@@ -347,8 +344,7 @@ indication anywhere on the page of where the boat actually last was. Built from 
 GPS fix across the *whole* dataset, not the last completed trip's own arrival -- those can disagree
 by hours or days if the boat has been anchored/idle (still logging position) since the last trip
 closed. Reverse-geocoded into a place name the same way every trip's own depart/arrive place
-already is; falls back to plain coordinates when geocoding is off, which Android always keeps off
-(see below).
+already is; falls back to plain coordinates when a lookup fails (see the geocoding paragraph below).
 
 **Geocoding, weather, and marine (wave/current) lookups are enabled by default on Android too**,
 same as the desktop CLI (see `android_entry.run_pipeline()`'s own doc comment) -- this changed
