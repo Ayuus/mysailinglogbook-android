@@ -19,6 +19,32 @@ support in particular is on the wishlist but untested so far -- see the same not
 [nmea2log README](https://github.com/Ayuus/nmea2log#readme) for why. Feedback is very welcome via
 [GitHub issues](https://github.com/Ayuus/mysailinglogbook-android/issues).
 
+## Screenshots
+
+Taken on a phone in English, with the fictional trips of the demo logbook (a made-up boat, "Sea Swallow", not a real
+one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](https://github.com/Ayuus/nmea2log) repo).
+
+<p>
+<img src="docs/screenshots/logbook.png" width="230" alt="The logbook">
+<img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
+<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: boat mode, appearance, clearing the caches">
+</p>
+
+*The logbook (what the app shows when it is opened) -- settings (top and bottom).*
+
+<p>
+<img src="docs/screenshots/boat-mode.png" width="230" alt="Boat mode on: the filled sailboat button and its status in the log">
+<img src="docs/screenshots/boat-battery.png" width="230" alt="The question about battery optimisation when the boat mode is started for the first time">
+</p>
+
+*Boat mode on: the sailboat button is filled and the log reports what it is doing -- the one-time question about battery
+optimisation when the mode is started.*
+
+To take pictures like these without touching your own logbook, install the **debug** build next to the real app
+(`./gradlew assembleDebug`: package `com.ayuus.mysailinglogbook.debug`, its own data, debuggable so
+`adb shell run-as com.ayuus.mysailinglogbook.debug` can put a logbook in `files/`) and set its language with
+`adb shell cmd locale set-app-locales com.ayuus.mysailinglogbook.debug --locales en-US`.
+
 ## Installation
 
 **Play Store** (preferred): *pending review, link coming soon.* No install warnings, and updates

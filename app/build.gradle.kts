@@ -61,6 +61,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Installs next to the release app (own package, own data), so it can be tried -- or photographed for the docs
+            // with fictional data -- without touching the real app's logbook; also debuggable, so `adb shell run-as` can
+            // reach its files.
+            applicationIdSuffix = ".debug"
+        }
         release {
             optimization {
                 enable = false
