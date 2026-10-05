@@ -191,6 +191,13 @@ MainActivity (manual "sync now" + auto-start on launch)
   app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
   messages verbatim in the UI, and `onDownloadComplete()` (see below).
 
+## The log file
+
+The app's log (every level, also the debug lines the log view does not show) is `nmea2log.log` in the app's
+private storage: not reachable from outside a release build, 90 days of lines kept (pruned when a run starts),
+no size limit. What is in it, how it grows (a download or boat-mode round writes a debug line per file) and where
+the iOS app keeps it: [nmea2log/docs/log-file.md](https://github.com/Ayuus/nmea2log/blob/main/docs/log-file.md).
+
 ## Texts shared with the iOS app
 
 The strings both apps show are not edited here: they live in the nmea2log repo's `src/nmea2log/app_texts.py`
