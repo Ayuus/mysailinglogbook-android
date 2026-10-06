@@ -1,7 +1,7 @@
 # My Sailing Logbook
 
-Android app that syncs voyage data from a boat's [Actisense W2K-2](https://actisense.com) NMEA
-2000-to-WiFi gateway, builds the same HTML sailing logbook the desktop
+Android app that downloads voyage data from a boat's [Actisense W2K-2](https://actisense.com) NMEA
+2000-to-WiFi gateway, assembles the same HTML sailing logbook the desktop
 [nmea2log](https://github.com/Ayuus/nmea2log) CLI produces, shows it in-app, and (optionally)
 publishes it to a WordPress site. An optional "boat mode" can also do all of the
 above on its own, on an interval, while the app stays closed -- see "Using the app" below.
@@ -106,17 +106,17 @@ the signal it uses to tell "I'm on the boat" from any other network the phone mi
 
 ### The toolbar
 
-Left to right: **download** (fetch new data from the W2K-2 and build the logbook), **import**
+Left to right: **download** (fetch new data from the W2K-2 and assemble the logbook), **import**
 (copy `.ebl` files from an SD card or USB drive instead -- no W2K-2 needed, e.g. a card pulled
-straight from the instrument -- then build/publish exactly like a normal download would), **assemble**
-(build the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
+straight from the instrument -- then assemble/publish exactly like a normal download would), **assemble**
+(assemble the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
 the logbook to the website configured in Settings; it is sent as it is when it is up to date, and assembled
 first when a .ebl file is newer than it or a setting that ends up in it has changed), **view logbook** (show the
 already-built logbook full-screen, toggles back to the log), **boat mode** (see below), and
 **settings**.
 
-A long-running action (download/build/publish) shows a pulsing version of its own button --
+A long-running action (download/assemble/publish) shows a pulsing version of its own button --
 tap it again to cancel. The notification shade shows the same thing while the app isn't on
 screen, with a real progress bar.
 
@@ -129,7 +129,7 @@ the app doesn't need to stay open -- and:
 1. **Searches** for the W2K-2 every 5 minutes (`search_interval_minutes` in the Python
    `BootModeConfig` default -- not yet exposed as its own Settings field), without downloading
    anything yet.
-2. Once found, runs a **round**: downloads new data and builds the logbook, then waits for the
+2. Once found, runs a **round**: downloads new data and assembles the logbook, then waits for the
    configured interval ("A round (download + assemble) every ...") before the next one.
 3. Recognises being **in harbour** (stationary + engine off, both for a configurable number of
    minutes) and **having left the boat** (the W2K-2 stops answering for a configurable number of
@@ -155,7 +155,7 @@ This uses OpenStreetMap's [Overpass API](https://overpass-api.de/) to find the n
 landmark, falling back to [Nominatim](https://nominatim.org/) for a plain address when nothing
 suitable is nearby -- the same two-step lookup the desktop `nmea2log` CLI does, see the
 [nmea2log README](https://github.com/Ayuus/nmea2log#readme) for the full explanation. Both need a
-working internet connection on the phone at build/publish time (not from the W2K-2 -- that part
+working internet connection on the phone at assemble/publish time (not from the W2K-2 -- that part
 never needs internet at all); a lookup that keeps failing gives up for the rest of that run and
 falls back to coordinates instead of retrying forever.
 
@@ -192,7 +192,7 @@ it.)
   must match the version configured in `app/build.gradle.kts`'s `chaquopy { defaultConfig { version
   = "3.14" } }`.
 - A real Actisense W2K-2 (or a network host that answers the same undocumented HTTP API -- see
-  `w2k2_download.py` in the nmea2log repo) to actually test the sync flow against. There is no
+  `w2k2_download.py` in the nmea2log repo) to actually test the download flow against. There is no
   simulator/mock for it.
 
 ## Building
@@ -228,8 +228,8 @@ in the nmea2log repo and covers everything this app calls into.
 ## How it fits together
 
 ```
-MainActivity (manual "sync now" + auto-start on launch)
-  -> HotspotDetector           finds the phone's own private-network subnet (NetworkInterface enumeration)
+MainActivity (manual download + auto-start on launch)
+  -> HotspotDetector           network detection: finds the phone's own private-network subnet (NetworkInterface enumeration)
   -> android_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
        -> w2k2_download.discover_w2k2()   scans that subnet for the W2K-2's HTTP API
        -> w2k2_download.download_file()   downloads new/changed .ebl files
@@ -237,6 +237,10 @@ MainActivity (manual "sync now" + auto-start on launch)
   -> WebView shows the resulting logbook.html
   -> RestUploader (optional)      publishes logbook.html to WordPress
 ```
+
+The app calls these actions **download**, **assemble**, **publish** and **import**. Some names in the code still say
+sync or build (`SyncController`, `SyncState`, `sync_from_w2k2()`, `build_from_local_files()`, `HotspotDetector`): they are
+identifiers, not wording, and are not changed for the sake of it.
 
 - **`android_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
   what the desktop CLI's `_run()` does -- minus argument parsing and minus any upload, both of
@@ -247,7 +251,7 @@ MainActivity (manual "sync now" + auto-start on launch)
   Android, values are entered once via `SettingsActivity`.
 - **`SyncController`** is the interface Kotlin implements and hands to
   `android_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
-  Python object: `report()` for per-file progress, `isCancelled()` to stop a sync cleanly when the
+  Python object: `report()` for per-file progress, `isCancelled()` to stop a download cleanly when the
   app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
   messages verbatim in the UI, and `onDownloadComplete()` (see below).
 
@@ -294,8 +298,8 @@ fresh data, not whatever's cached; that fallback belongs solely to the
 `settingsStore.autoSyncOnLaunch == false` branch in `onCreate()`, which calls `viewLocalLogbook()`
 unconditionally.
 
-**`HotspotDetector` has two different checks, deliberately not interchangeable.**
-`detectSubnetPrefix()` -- used everywhere the app actually reaches the W2K-2 (manual sync, boat
+**The network detection (`HotspotDetector`) has two different checks, deliberately not interchangeable.**
+`detectSubnetPrefix()` -- used everywhere the app actually reaches the W2K-2 (manual download, boat
 mode's own search/probe) -- takes *any* interface with a private IPv4 address up, preferring an
 AP-named one if more than one is up at once but falling back to whatever matched otherwise. That's
 what makes phone-and-W2K-2-on-the-same-external-WiFi work exactly as well as the phone's own
@@ -311,24 +315,24 @@ is on" is. This also rules out `ConnectivityManager.NetworkCallback` (which obse
 *this device* joins as a client, not its own AP state) as an event source for "is the hotspot
 back".
 
-**There is no automatic reconnect or polling after a failed sync.** When a sync cannot find the W2K-2 (or fails), a
-dialog offers to build the logbook from what is already on the phone, or to close the app -- not an immediate retry,
+**There is no automatic reconnect or polling after a failed download.** When a download cannot find the W2K-2 (or fails), a
+dialog offers to assemble the logbook from what is already on the phone, or to close the app -- not an immediate retry,
 which out of range of the boat would just fail again and show the same dialog again. Finding the W2K-2 means
 scanning for the real device (`discover_w2k2()`), not just checking that the phone's own hotspot is on: the hotspot
 commonly stays on while the W2K-2 itself drops off it (e.g. walking away from the boat). Boat mode does that scan on
-its own timer (its searches and rounds); the manual sync does it once per tap.
+its own timer (its searches and rounds); a manual download does it once per tap.
 
-**The sync notification is stopped as soon as downloading finishes, before decode/build runs.**
+**The download notification is stopped as soon as downloading finishes, before decode/assemble runs.**
 `SyncController.onDownloadComplete()` fires once, right after the last file's download attempt and
-before Python's decode/build/write pipeline starts. Kotlin uses it to stop the foreground
-notification service at that point rather than keeping it running for the whole call: decode/build
+before Python's decode/assemble/write pipeline starts. Kotlin uses it to stop the foreground
+notification service at that point rather than keeping it running for the whole call: decode/assemble
 is pure CPU, no network I/O, so there's no reason to keep paying for a "dataSync" foreground
 service during it. This matters because Android 15+ (this app targets SDK 37) caps a `dataSync`
 foreground service at **6 cumulative hours per rolling 24h period**; a long day of intermittent
 connectivity could otherwise burn through that budget on wait time and idle CPU work rather than
 actual network activity, and Android then simply refuses to start the service again until the
 budget resets or the user brings the app to the foreground. `startSyncNotification()` also catches
-that refusal gracefully wherever it's used -- a sync still completes without a visible notification
+that refusal gracefully wherever it's used -- a download still completes without a visible notification
 rather than crashing outright if the budget is ever actually exhausted.
 
 **The generated `logbook.html` renders server-side in Dutch by default, unchanged** -- but every

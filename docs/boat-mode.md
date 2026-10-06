@@ -1,6 +1,6 @@
 # Boat mode: how it works
 
-Boat mode is the clock button in the toolbar. Turned on, it downloads and builds the logbook by
+Boat mode is the sailboat button in the toolbar. Turned on, it downloads and assembles the logbook by
 itself at intervals while the boat is out, and publishes it once the boat is back in harbour or the
 phone has left the boat -- without anyone tapping anything. This document describes exactly what it
 does and why; `boat-mode-test-checklist.md` in this same folder is the field-test checklist that goes
@@ -29,7 +29,7 @@ OFF --Start--> SEARCHING --W2K-2 found--> ABOARD --harbour / left the boat--> ID
   (normally the phone's own hotspot, but any shared network the W2K-2 is also on works -- see the
   main README's own note on this), every `search_interval_minutes` (default 5). As soon as it
   answers, the first round starts right away.
-- **ABOARD** -- a round (download + build) every `round_interval_minutes` (default 60). After each
+- **ABOARD** -- a round (download + assemble) every `round_interval_minutes` (default 60). After each
   round the boat's state at the end of the data (`BoatState`, from the trip-building pipeline: under
   way or not, stationary since when, engine off since when) decides what happens next.
 - **IDLE** -- in harbour, or the W2K-2 has not answered for a while: waiting, checking every
@@ -39,7 +39,7 @@ OFF --Start--> SEARCHING --W2K-2 found--> ABOARD --harbour / left the boat--> ID
 ### What ends a stay (the final round)
 
 A round's result is checked against two independent triggers, either of which starts the *final*
-round of a stay -- one last download + build, then a publish if there is anywhere to publish to:
+round of a stay -- one last download + assemble, then a publish if there is anywhere to publish to:
 
 - **Reached harbour** (`final_on_harbour`, default on): the boat has been stationary for at least
   `harbour_stationary_minutes` (default 30) and the engine off for at least
@@ -80,24 +80,24 @@ All in Settings, under "Boat mode":
 ## What a round actually does
 
 A round is the exact same work a manual download does -- find the W2K-2, download new `.ebl` files,
-decode and build the logbook -- through the same `nmea2log.android_entry.sync_from_w2k2()` call and
-the same log lines, notification progress text (`Downloading: x/y (...)`, `Building logbook: x/y`,
-`Building trips: x/4`) and string resources a manual download uses (see `W2kBootExecutor.kt`). It is
+decode and assemble the logbook -- through the same `nmea2log.android_entry.sync_from_w2k2()` call and
+the same log lines, notification progress text (`Downloading: x/y (...)`, `Assembling logbook: x/y`,
+`Assembling trips: x/4`) and string resources a manual download uses (see `W2kBootExecutor.kt`). It is
 not a separate, differently-worded implementation. What *is* boat-mode-specific is the framing around
 it -- when a round starts, how long until the next one, and the harbour/left-the-boat/publish
 decisions above -- which the Python machine reports as its own status lines (`Boat mode: round
-started (download and build)...`, `...round done, next round at HH:MM.`, `...the boat is in
+started (download and assemble)...`, `...round done, next round at HH:MM.`, `...the boat is in
 harbour, final round.`, etc., see `BootStatusText.kt`).
 
 ## Notifications and logging
 
 Two separate notifications exist, and they behave differently on purpose:
 
-- **Download/build/publish** (`SyncNotificationService`, channel "Download"): tied to one run.
+- **Download/assemble/publish** (`SyncNotificationService`, channel "Download"): tied to one run.
   Appears when the run starts, updates as it goes, then either turns into a dismissible "Done: ..."
   notification (with "View live site" if it published) or disappears, depending on how the run
-  ended. Closing the app while a download or build is running cancels it (it resumes cleanly next
-  time, over HTTP Range for the download and from the sample cache for decode/build) and posts
+  ended. Closing the app while a download or assemble is running cancels it (it resumes cleanly next
+  time, over HTTP Range for the download and from the sample cache for decode/assemble) and posts
   "Interrupted by closing -- will resume next time." instead -- except an upload in progress, which
   is left to finish first (not safely resumable mid-request) and only then reports the close.
 - **Boat mode** (`BootModeService`, channel "Boat mode"): tied to the whole time the mode is on, not
