@@ -2,6 +2,36 @@
 
 What to know before changing this code. The README is the user manual; this is the part for whoever changes the app.
 
+## How it fits together
+
+```
+MainActivity (manual download + auto-start on launch)
+  -> HotspotDetector           network detection: finds the phone's own private-network subnet (NetworkInterface enumeration)
+  -> android_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
+       -> w2k2_download.discover_w2k2()   scans that subnet for the W2K-2's HTTP API
+       -> w2k2_download.download_file()   downloads new/changed .ebl files
+       -> run_pipeline()                  decode -> build_trips -> write_html_logbook()
+  -> WebView shows the resulting logbook.html
+  -> RestUploader (optional)      publishes logbook.html to WordPress
+```
+
+The app calls these actions **download**, **assemble**, **publish** and **import**. Some names in the code still say
+sync or build (`SyncController`, `SyncState`, `sync_from_w2k2()`, `build_from_local_files()`, `HotspotDetector`): they are
+identifiers, not wording, and are not changed for the sake of it.
+
+- **`android_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
+  what the desktop CLI's `_run()` does -- minus argument parsing and minus any upload, both of
+  which are Kotlin's job on this platform -- and returns a plain `dict` a background thread can
+  read, instead of relying on stderr text or an exit code the way the desktop CLI does.
+- **`SettingsStore`** wraps `EncryptedSharedPreferences` for everything `nmea2log.ini` holds on
+  desktop (W2K-2 login, boat identity, WordPress publish settings) -- there is no config file on
+  Android, values are entered once via `SettingsActivity`.
+- **`SyncController`** is the interface Kotlin implements and hands to
+  `android_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
+  Python object: `report()` for per-file progress, `isCancelled()` to stop a download cleanly when the
+  app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
+  messages verbatim in the UI, and `onDownloadComplete()` (see "The download notification is stopped as soon as downloading finishes" below).
+
 ## Texts shared with the iOS app
 
 The strings both apps show are not edited here: they live in the nmea2log repo's `src/nmea2log/app_texts.py`

@@ -25,6 +25,14 @@ Taken on a phone in English, with the fictional trips of the demo logbook (a mad
 one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](https://github.com/Ayuus/nmea2log) repo).
 
 <p>
+<img src="docs/screenshots/map-trip.png" width="230" alt="The map of one trip, opened from the Map button in the trip list">
+<img src="docs/screenshots/trip-log.png" width="230" alt="The log of one trip, opened from the Log button">
+<img src="docs/screenshots/map-overview.png" width="230" alt="The overview map of the year, opened from the Overview link">
+</p>
+
+*The maps in the logbook (OpenStreetMap): the **Map** button of a trip shows its route -- its **Log** button the positions, course and speed along the way, with the water temperature and the boat's motion -- the **Overview** link of a year puts all trips of that year on one map.*
+
+<p>
 <img src="docs/screenshots/logbook.png" width="230" alt="The logbook">
 <img src="docs/screenshots/run.png" width="230" alt="After an assemble: the logbook with the log as a strip above it">
 <img src="docs/screenshots/log.png" width="230" alt="The log">
@@ -33,14 +41,6 @@ one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](http
 *The logbook (what the app shows when it is opened) -- after an assemble, the logbook with the log as a strip above it
 (scroll it, or tap the log button for the whole log) -- the start of the log of such a run: the .ebl files found, the
 trips assembled from them.*
-
-<p>
-<img src="docs/screenshots/map-trip.png" width="230" alt="The map of one trip, opened from the Map button in the trip list">
-<img src="docs/screenshots/trip-log.png" width="230" alt="The log of one trip, opened from the Log button">
-<img src="docs/screenshots/map-overview.png" width="230" alt="The overview map of the year, opened from the Overview link">
-</p>
-
-*The maps in the logbook (OpenStreetMap): the **Map** button of a trip shows its route -- its **Log** button the positions, course and speed along the way, with the water temperature and the boat's motion -- the **Overview** link of a year puts all trips of that year on one map.*
 
 <p>
 <img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
@@ -229,42 +229,12 @@ it.)
    ```
    or just open the project in Android Studio and run it.
 
-There is no CI here. A small Kotlin unit test suite exists (its scope is described in [docs/design-choices.md](docs/design-choices.md)) -- run it with
+There is no CI here. A small Kotlin unit test suite exists (its scope is described in [docs/developer-notes.md](docs/developer-notes.md)) -- run it with
 `./gradlew test`. The Python side's own extensive test suite lives
 in the nmea2log repo and covers everything this app calls into.
 
-Before changing the code, read [docs/design-choices.md](docs/design-choices.md): the texts both apps share,
-and the choices and gotchas worth knowing.
-
-## How it fits together
-
-```
-MainActivity (manual download + auto-start on launch)
-  -> HotspotDetector           network detection: finds the phone's own private-network subnet (NetworkInterface enumeration)
-  -> android_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
-       -> w2k2_download.discover_w2k2()   scans that subnet for the W2K-2's HTTP API
-       -> w2k2_download.download_file()   downloads new/changed .ebl files
-       -> run_pipeline()                  decode -> build_trips -> write_html_logbook()
-  -> WebView shows the resulting logbook.html
-  -> RestUploader (optional)      publishes logbook.html to WordPress
-```
-
-The app calls these actions **download**, **assemble**, **publish** and **import**. Some names in the code still say
-sync or build (`SyncController`, `SyncState`, `sync_from_w2k2()`, `build_from_local_files()`, `HotspotDetector`): they are
-identifiers, not wording, and are not changed for the sake of it.
-
-- **`android_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
-  what the desktop CLI's `_run()` does -- minus argument parsing and minus any upload, both of
-  which are Kotlin's job on this platform -- and returns a plain `dict` a background thread can
-  read, instead of relying on stderr text or an exit code the way the desktop CLI does.
-- **`SettingsStore`** wraps `EncryptedSharedPreferences` for everything `nmea2log.ini` holds on
-  desktop (W2K-2 login, boat identity, WordPress publish settings) -- there is no config file on
-  Android, values are entered once via `SettingsActivity`.
-- **`SyncController`** is the interface Kotlin implements and hands to
-  `android_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
-  Python object: `report()` for per-file progress, `isCancelled()` to stop a download cleanly when the
-  app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
-  messages verbatim in the UI, and `onDownloadComplete()` (see [docs/design-choices.md](docs/design-choices.md)).
+Before changing the code, read [docs/developer-notes.md](docs/developer-notes.md): how the app fits together, the texts
+both apps share, and the choices and gotchas worth knowing.
 
 ## Related repos
 
