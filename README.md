@@ -26,19 +26,13 @@ one -- generated with `examples/generate_demo_logbook.py` in the [nmea2log](http
 
 <p>
 <img src="docs/screenshots/logbook.png" width="230" alt="The logbook">
-<img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
-<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: boat mode, appearance, clearing the caches">
-</p>
-
-*The logbook (what the app shows when it is opened) -- settings (top and bottom).*
-
-<p>
 <img src="docs/screenshots/run.png" width="230" alt="After an assemble: the logbook with the log as a strip above it">
 <img src="docs/screenshots/log.png" width="230" alt="The log">
 </p>
 
-*After an assemble: the logbook with the log as a strip above it (scroll it, or tap the log button for the whole log) --
-the start of the log of such a run: the .ebl files found, the trips built from them.*
+*The logbook (what the app shows when it is opened) -- after an assemble, the logbook with the log as a strip above it
+(scroll it, or tap the log button for the whole log) -- the start of the log of such a run: the .ebl files found, the
+trips assembled from them.*
 
 <p>
 <img src="docs/screenshots/map-trip.png" width="230" alt="The map of one trip, opened from the Map button in the trip list">
@@ -47,6 +41,13 @@ the start of the log of such a run: the .ebl files found, the trips built from t
 </p>
 
 *The maps in the logbook (OpenStreetMap): the **Map** button of a trip shows its route -- its **Log** button the positions, course and speed along the way, with the water temperature and the boat's motion -- the **Overview** link of a year puts all trips of that year on one map.*
+
+<p>
+<img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
+<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: boat mode, appearance, clearing the caches, deleting the local .ebl files">
+</p>
+
+*Settings (top and bottom).*
 
 <p>
 <img src="docs/screenshots/boat-mode.png" width="230" alt="Boat mode on: the filled sailboat button and its status in the log">
