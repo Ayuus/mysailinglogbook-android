@@ -44,7 +44,7 @@ trips assembled from them.*
 
 <p>
 <img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
-<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: boat mode, appearance, clearing the caches, deleting the local .ebl files">
+<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: appearance and the layout of the logbook, clearing the caches, deleting the local .ebl files">
 </p>
 
 *Settings (top and bottom).*
