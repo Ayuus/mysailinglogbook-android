@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The full download flow: hotspot detection, download from the W2K-2, decode+build the logbook,
- * show it in-app, then (only if the owner filled in the "Publish to ayuus.com" settings) publish
+ * show it in-app, then (only if the owner filled in the publish settings) publish
  * it to WordPress -- see RestUploader. Runs automatically once per app
  * launch (see onCreate()'s own savedInstanceState check) and via the manual download button.
  * Boat mode (see BootModeService) covers periodic background work with no app open at all.
@@ -254,7 +254,7 @@ class MainActivity : AppCompatActivity() {
         // Loads whatever logbook.html is already on the phone into the WebView, without
         // downloading or publishing anything -- asked for explicitly, for when the owner just wants to check
         // the already-built logbook (e.g. after switching "Automatisch publiceren na bouwen" off
-        // in Instellingen) without that also sending it to ayuus.com. Material's "article" icon
+        // in Instellingen) without that also sending it to the website. Material's "article" icon
         // (ic_article_24), not the 📖 emoji it replaced -- asked for explicitly, found in
         // practice: an open book read as too old-fashioned.
         val viewLocalButton = iconButton(getString(R.string.tooltip_view_local), iconRes = R.drawable.ic_article_24) {
@@ -1615,13 +1615,13 @@ class MainActivity : AppCompatActivity() {
         lastLoadedHtmlMtime = File(htmlPath).lastModified()
     }
 
-    /** The website the logbook was just published to (what the "View live site" notification action opens): the site's own
-     * address, from the publish address in Settings -- the upload address itself is an endpoint, not a page to browse. Null
-     * when there is none. */
+    /** Where the logbook that was just published can be read (what the "View live site" notification action opens): the site's
+     * address from the publish address in Settings and the boat's own page on it, made from the boat name (the upload address
+     * itself is an endpoint, not a page to browse). Null when there is no site address. */
     private fun liveSiteUrl(): String? =
         try {
             Python.getInstance().getModule("nmea2log.upload")
-                .callAttr("site_address", settingsStore.restUploadUrl).toString().ifBlank { null }
+                .callAttr("logbook_page_address", settingsStore.restUploadUrl, settingsStore.boatName).toString().ifBlank { null }
         } catch (e: Exception) {
             null
         }
