@@ -16,10 +16,11 @@ class RestUploadError(message: String, cause: Throwable? = null) : Exception(mes
  * authenticated HTTP POST has nothing platform-specific about it worth duplicating.
  */
 object RestUploader {
-    fun uploadLogbook(context: Context, url: String, user: String, appPassword: String, localFile: File) {
+    /** Returns the address of the page the logbook can be read at, as the plugin reports it ("" when it does not). */
+    fun uploadLogbook(context: Context, url: String, user: String, appPassword: String, localFile: File): String {
         val uploadModule = Python.getInstance().getModule("nmea2log.upload")
         try {
-            uploadModule.callAttr("upload_via_rest", localFile.readBytes(), url, user, appPassword)
+            return uploadModule.callAttr("upload_via_rest", localFile.readBytes(), url, user, appPassword).toString()
         } catch (e: PyException) {
             throw RestUploadError(context.getString(R.string.error_upload_failed, e.message), e)
         }

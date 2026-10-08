@@ -44,7 +44,9 @@ object LogbookPublisher {
             val url = Python.getInstance().getModule("nmea2log.upload")
                 .callAttr("normalize_rest_upload_url", settings.restUploadUrl)
                 .toString()
-            RestUploader.uploadLogbook(context, url, settings.restUploadUser, settings.restUploadPassword, htmlFile)
+            val page = RestUploader.uploadLogbook(context, url, settings.restUploadUser, settings.restUploadPassword, htmlFile)
+            // Kept for the "View live site" action; a plugin from before it said so leaves no such action.
+            settings.logbookPageUrl = page
             log("[ok] " + context.getString(R.string.log_upload_ok_wordpress, url))
         } catch (e: RestUploadError) {
             log("[error] " + context.getString(R.string.log_upload_failed_wordpress, e.message))

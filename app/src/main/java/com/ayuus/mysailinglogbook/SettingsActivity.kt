@@ -471,7 +471,10 @@ class SettingsActivity : AppCompatActivity() {
                 // what was typed the next time Settings opens -- confusing on its own, and found in practice
                 // on iOS (which had the same save-time expansion until this was moved): the field, once
                 // holding a full URL, got treated as a real saved website by autofill/suggestions.
-                store.restUploadUrl = restUploadUrlField.text.toString().trim()
+                val newUploadUrl = restUploadUrlField.text.toString().trim()
+                // The page the last publish reported belongs to the site it was published to.
+                if (newUploadUrl != store.restUploadUrl) store.logbookPageUrl = ""
+                store.restUploadUrl = newUploadUrl
                 store.restUploadUser = restUploadUserField.text.toString().trim()
                 store.restUploadPassword = restUploadPasswordField.text.toString()
                 store.publishEnabled = wordpressRadio.isChecked

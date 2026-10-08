@@ -1615,16 +1615,10 @@ class MainActivity : AppCompatActivity() {
         lastLoadedHtmlMtime = File(htmlPath).lastModified()
     }
 
-    /** Where the logbook that was just published can be read (what the "View live site" notification action opens): the site's
-     * address from the publish address in Settings and the boat's own page on it, made from the boat name (the upload address
-     * itself is an endpoint, not a page to browse). Null when there is no site address. */
-    private fun liveSiteUrl(): String? =
-        try {
-            Python.getInstance().getModule("nmea2log.upload")
-                .callAttr("logbook_page_address", settingsStore.restUploadUrl, settingsStore.boatName).toString().ifBlank { null }
-        } catch (e: Exception) {
-            null
-        }
+    /** Where the logbook that was just published can be read (what the "View live site" notification action opens): the address
+     * the plugin on the website reported with the upload, which is the one place that knows how a boat's page is named. Null when
+     * it did not say, which leaves no such action. */
+    private fun liveSiteUrl(): String? = settingsStore.logbookPageUrl.ifBlank { null }
 
     /** Tells the logbook page the theme (Appearance) chosen in Settings; the page's own buttons, which would store the choice
      * in localStorage, are for browsers -- this WebView does not keep that between runs. (The layout is always automatic.)

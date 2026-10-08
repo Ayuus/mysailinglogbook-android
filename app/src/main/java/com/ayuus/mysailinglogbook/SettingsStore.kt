@@ -123,6 +123,12 @@ class SettingsStore(context: Context) {
         get() = prefs.getString(KEY_THEME_MODE, SharedDefaults.THEME_MODE) ?: SharedDefaults.THEME_MODE
         set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
 
+    // Where the logbook can be read on the website, as the last publish reported it (the plugin's reply carries it): what the
+    // "View live site" notification action opens. Empty when unknown -- no such action then.
+    var logbookPageUrl: String
+        get() = prefs.getString(KEY_LOGBOOK_PAGE_URL, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_LOGBOOK_PAGE_URL, value).apply()
+
     // Whether the welcome that offers the help has been dealt with (MainActivity.maybeShowHelpWelcome).
     var helpSeen: Boolean
         get() = prefs.getBoolean(KEY_HELP_SEEN, SharedDefaults.HELP_SEEN)
@@ -196,6 +202,7 @@ class SettingsStore(context: Context) {
         private const val KEY_PUBLISH_ENABLED = "publish_enabled"
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_HELP_SEEN = "help_seen"
+        private const val KEY_LOGBOOK_PAGE_URL = "logbook_page_url"
         private const val KEY_BOOT_ROUND_INTERVAL_MINUTES = "boot_round_interval_minutes"
         private const val KEY_BOOT_PUBLISH_EVERY_ROUND = "boot_publish_every_round"
         private const val KEY_BOOT_FINAL_ON_HARBOUR = "boot_final_on_harbour"
