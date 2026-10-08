@@ -1,7 +1,7 @@
 <resources>
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Herunterladen</string>
-    <string name="tooltip_publish">Auf ayuus.com veröffentlichen</string>
+    <string name="tooltip_publish">Veröffentlichen</string>
     <string name="tooltip_publish_not_configured">Kein Host konfiguriert</string>
     <string name="tooltip_build_local">Bordbuch zusammenstellen</string>
     <string name="tooltip_cancel">Abbrechen</string>
@@ -72,8 +72,8 @@
     <string name="phase_importing">Importieren</string>
 
     <!-- Publish -->
-    <string name="status_uploading_wordpress">Wird auf ayuus.com hochgeladen (zu WordPress)...</string>
-    <string name="notif_uploading">Wird auf ayuus.com hochgeladen...</string>
+    <string name="status_uploading_wordpress">Wird zu WordPress hochgeladen...</string>
+    <string name="notif_uploading">Wird hochgeladen...</string>
     <string name="log_upload_ok_wordpress">Zu WordPress hochgeladen: %1$s</string>
     <string name="log_upload_failed_wordpress">Hochladen zu WordPress fehlgeschlagen: %1$s</string>
     <string name="log_upload_not_configured">Upload nicht konfiguriert</string>
@@ -115,10 +115,12 @@
     <string name="radio_theme_light">Hell</string>
     <string name="radio_theme_dark">Dunkel</string>
     <string name="radio_theme_system">Gerät folgen</string>
-    <string name="label_logbook_layout">Logbuch-Layout</string>
-    <string name="radio_layout_auto">Automatisch (Karten auf einem Telefon)</string>
-    <string name="radio_layout_cards">Karten</string>
-    <string name="radio_layout_table">Tabelle</string>
+    <string name="button_help">Hilfe und Anleitung</string>
+    <string name="help_activity_title">Hilfe</string>
+    <string name="dialog_help_title">Willkommen</string>
+    <string name="dialog_help_message">Eine kurze Anleitung erklärt, wie man sich mit dem W2K-2 verbindet und was die Schaltflächen tun. Jetzt öffnen? Sie finden sie später immer in den Einstellungen.</string>
+    <string name="dialog_help_read">Anleitung lesen</string>
+    <string name="dialog_help_later">Später</string>
     <string name="section_cache">Cache leeren</string>
     <string name="button_clear">Leeren</string>
     <string name="toast_cache_cleared">Cache geleert</string>

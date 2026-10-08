@@ -120,6 +120,17 @@ class SettingsActivity : AppCompatActivity() {
             return box
         }
 
+        // The help (shared with the iOS app, see HelpActivity): there is no room for an icon in the toolbar.
+        layout.addView(
+            MaterialButton(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                text = getString(R.string.button_help)
+                isAllCaps = false
+                cornerRadius = (16 * resources.displayMetrics.density).toInt()
+                setOnClickListener { startActivity(android.content.Intent(this@SettingsActivity, HelpActivity::class.java)) }
+            },
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT),
+        )
+
         sectionHeader(getString(R.string.section_w2k2_boat))
         val userField = field(getString(R.string.label_w2k2_user), store.w2k2User)
         val passwordField = field(getString(R.string.label_w2k2_password), store.w2k2Password, isPassword = true)
@@ -260,31 +271,6 @@ class SettingsActivity : AppCompatActivity() {
             "light" -> themeLightRadio.isChecked = true
             "system" -> themeSystemRadio.isChecked = true
             else -> themeDarkRadio.isChecked = true
-        }
-
-        // How the logbook page lays out its trips (cards / table); the page's own two buttons are for browsers, here the
-        // choice is made in Settings and handed to the page (MainActivity.applyLogbookPrefs).
-        layout.addView(
-            TextView(this).apply { text = getString(R.string.label_logbook_layout) },
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                .apply { topMargin = padding },
-        )
-        val viewGroup = RadioGroup(this).apply { orientation = LinearLayout.VERTICAL }
-        val viewAutoRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_auto) }
-        val viewCardsRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_cards) }
-        val viewTableRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_table) }
-        viewGroup.addView(viewAutoRadio)
-        viewGroup.addView(viewCardsRadio)
-        viewGroup.addView(viewTableRadio)
-        layout.addView(
-            viewGroup,
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                .apply { topMargin = padding },
-        )
-        when (store.logbookView) {
-            "cards" -> viewCardsRadio.isChecked = true
-            "table" -> viewTableRadio.isChecked = true
-            else -> viewAutoRadio.isChecked = true
         }
 
         // Cache-legen: two separate buttons rather than one "clear everything" -- the two caches
@@ -469,11 +455,6 @@ class SettingsActivity : AppCompatActivity() {
                     themeLightRadio.isChecked -> "light"
                     themeSystemRadio.isChecked -> "system"
                     else -> "dark"
-                }
-                store.logbookView = when {
-                    viewCardsRadio.isChecked -> "cards"
-                    viewTableRadio.isChecked -> "table"
-                    else -> "auto"
                 }
                 AppCompatDelegate.setDefaultNightMode(
                     when (store.themeMode) {

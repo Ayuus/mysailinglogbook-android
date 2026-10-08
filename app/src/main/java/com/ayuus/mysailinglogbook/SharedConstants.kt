@@ -46,5 +46,5 @@ object SharedDefaults {
     const val BOOT_STOP_AFTER_FINAL = false
     const val BOOT_AUTO_START = false
     const val THEME_MODE = "system"
-    const val LOGBOOK_VIEW = "auto"
+    const val HELP_SEEN = false
 }

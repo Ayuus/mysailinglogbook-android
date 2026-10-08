@@ -55,6 +55,10 @@
         </activity>
 
         <activity
+            android:name=".HelpActivity"
+            android:exported="false"
+            android:label="@string/help_activity_title" />
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/settings_activity_title"

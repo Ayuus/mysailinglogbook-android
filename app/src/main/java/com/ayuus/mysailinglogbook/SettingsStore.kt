@@ -123,11 +123,10 @@ class SettingsStore(context: Context) {
         get() = prefs.getString(KEY_THEME_MODE, SharedDefaults.THEME_MODE) ?: SharedDefaults.THEME_MODE
         set(value) = prefs.edit().putString(KEY_THEME_MODE, value).apply()
 
-    // How the logbook page lays out its trips: "auto" (cards on a narrow screen), "cards" or "table". Handed to the page
-    // after it has loaded (MainActivity.applyLogbookPrefs): the WebView does not keep what the page's own buttons store.
-    var logbookView: String
-        get() = prefs.getString(KEY_LOGBOOK_VIEW, SharedDefaults.LOGBOOK_VIEW) ?: SharedDefaults.LOGBOOK_VIEW
-        set(value) = prefs.edit().putString(KEY_LOGBOOK_VIEW, value).apply()
+    // Whether the welcome that offers the help has been dealt with (MainActivity.maybeShowHelpWelcome).
+    var helpSeen: Boolean
+        get() = prefs.getBoolean(KEY_HELP_SEEN, SharedDefaults.HELP_SEEN)
+        set(value) = prefs.edit().putBoolean(KEY_HELP_SEEN, value).apply()
 
     // Boat mode (see BootModeController and nmea2log/bootmode.py, whose BootModeConfig has the same
     // names in snake_case and the same defaults).
@@ -196,7 +195,7 @@ class SettingsStore(context: Context) {
         private const val KEY_REST_UPLOAD_PASSWORD = "rest_upload_password"
         private const val KEY_PUBLISH_ENABLED = "publish_enabled"
         private const val KEY_THEME_MODE = "theme_mode"
-        private const val KEY_LOGBOOK_VIEW = "logbook_view"
+        private const val KEY_HELP_SEEN = "help_seen"
         private const val KEY_BOOT_ROUND_INTERVAL_MINUTES = "boot_round_interval_minutes"
         private const val KEY_BOOT_PUBLISH_EVERY_ROUND = "boot_publish_every_round"
         private const val KEY_BOOT_FINAL_ON_HARBOUR = "boot_final_on_harbour"

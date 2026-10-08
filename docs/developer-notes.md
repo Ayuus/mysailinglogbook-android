@@ -142,3 +142,10 @@ range checks) -- notification handling, settings storage, the WordPress client, 
 all need real Android framework classes or real network I/O to exercise meaningfully, and aren't
 covered by anything automated yet. The Python side this app calls into is covered separately by
 nmea2log's own extensive pytest suite.
+
+## The help
+
+The help (Settings > Help and manual, and a welcome the first time) is a page shared with the other app, kept in nmea2log:
+`assets/help/help.html`, shown by `HelpActivity` / `help_screen.py` and refreshed from GitHub by `nmea2log.help_page`. How it
+works, how to change the text, and which screenshots each app brings along:
+[nmea2log/docs/app-help.md](https://github.com/Ayuus/nmea2log/blob/main/docs/app-help.md).

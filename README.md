@@ -44,13 +44,13 @@ trips assembled from them.*
 
 <p>
 <img src="docs/screenshots/settings.png" width="230" alt="Settings: W2K-2, boat, trips, publish">
-<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: appearance and the layout of the logbook, clearing the caches, deleting the local .ebl files">
+<img src="docs/screenshots/settings-more.png" width="230" alt="Settings: appearance, clearing the caches, deleting the local .ebl files">
 </p>
 
 *Settings (top and bottom).*
 
-Under Appearance you choose light, dark or following the device, and the layout of the logbook: a card per trip (what
-"automatic" picks on a phone held upright) or the table (what it picks on a wide screen).
+Under Appearance you choose light, dark or following the device (the default); the logbook follows it. On a phone held
+upright the logbook shows a card per trip, on a wide screen (a tablet in landscape) the table.
 
 <p>
 <img src="docs/screenshots/boat-mode.png" width="230" alt="Boat mode on: the filled sailboat button and its status in the log">
@@ -78,6 +78,10 @@ expected for any app installed outside a store.
 Requires Android 7.0 (API 24) or newer.
 
 ## Using the app
+
+The app has its own **help** (the same text in both apps, in English, Dutch, French and German): a short welcome offers it the first time
+the app starts, and it is under **Settings > Help and manual** (the button at the top). It is kept on the phone, so it works at
+sea, and refreshes itself from GitHub when there is internet.
 
 ### First-time setup
 

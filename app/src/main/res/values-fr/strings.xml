@@ -1,7 +1,7 @@
 <resources>
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Télécharger</string>
-    <string name="tooltip_publish">Publier sur ayuus.com</string>
+    <string name="tooltip_publish">Publier</string>
     <string name="tooltip_publish_not_configured">Aucun hôte configuré</string>
     <string name="tooltip_build_local">Assembler le journal</string>
     <string name="tooltip_cancel">Annuler</string>
@@ -72,8 +72,8 @@
     <string name="phase_importing">Importation</string>
 
     <!-- Publish -->
-    <string name="status_uploading_wordpress">Envoi vers ayuus.com (vers WordPress)...</string>
-    <string name="notif_uploading">Envoi vers ayuus.com...</string>
+    <string name="status_uploading_wordpress">Envoi vers WordPress...</string>
+    <string name="notif_uploading">Envoi...</string>
     <string name="log_upload_ok_wordpress">Envoyé vers WordPress : %1$s</string>
     <string name="log_upload_failed_wordpress">l\'envoi vers WordPress a échoué : %1$s</string>
     <string name="log_upload_not_configured">Envoi non configuré</string>
@@ -115,10 +115,12 @@
     <string name="radio_theme_light">Clair</string>
     <string name="radio_theme_dark">Sombre</string>
     <string name="radio_theme_system">Suivre l\'appareil</string>
-    <string name="label_logbook_layout">Présentation du journal</string>
-    <string name="radio_layout_auto">Automatique (cartes sur un téléphone)</string>
-    <string name="radio_layout_cards">Cartes</string>
-    <string name="radio_layout_table">Tableau</string>
+    <string name="button_help">Aide et mode d\'emploi</string>
+    <string name="help_activity_title">Aide</string>
+    <string name="dialog_help_title">Bienvenue</string>
+    <string name="dialog_help_message">Un court guide explique comment se connecter au W2K-2 et à quoi servent les boutons. Ouvrir maintenant ? Vous le retrouverez toujours dans les réglages.</string>
+    <string name="dialog_help_read">Lire le guide</string>
+    <string name="dialog_help_later">Plus tard</string>
     <string name="section_cache">Vider le cache</string>
     <string name="button_clear">Vider</string>
     <string name="toast_cache_cleared">Cache vidé</string>

@@ -615,6 +615,22 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    /** The first time the app is opened: a short welcome that offers the help (also reachable from Settings, at the top). Not
+     * for someone who has already filled in the W2K-2 login -- an update must not greet them as a newcomer. Marked as
+     * dealt with straight away, so it is shown once whatever the answer. */
+    private fun maybeShowHelpWelcome() {
+        val store = SettingsStore(this)
+        if (store.helpSeen) return
+        store.helpSeen = true
+        if (store.w2k2User.isNotBlank()) return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_help_title)
+            .setMessage(R.string.dialog_help_message)
+            .setPositiveButton(R.string.dialog_help_read) { _, _ -> startActivity(Intent(this, HelpActivity::class.java)) }
+            .setNegativeButton(R.string.dialog_help_later, null)
+            .show()
+    }
+
     /** Filled sailboat while the boat mode runs, outline while it is off. */
     fun updateBootButton() {
         val active = BootModeStateStore(this).isActive
@@ -1599,19 +1615,18 @@ class MainActivity : AppCompatActivity() {
         lastLoadedHtmlMtime = File(htmlPath).lastModified()
     }
 
-    /** Tells the logbook page the theme (Appearance) and layout (cards/table) chosen in Settings; the page's own buttons,
-     * which would store the choice in localStorage, are for browsers -- this WebView does not keep that between runs.
+    /** Tells the logbook page the theme (Appearance) chosen in Settings; the page's own buttons, which would store the choice
+     * in localStorage, are for browsers -- this WebView does not keep that between runs. (The layout is always automatic.)
      * The script comes from nmea2log (app_settings.logbook_prefs_script), shared with the iOS app. */
     private fun applyLogbookPrefs() {
         val theme = settingsStore.themeMode
-        val view = settingsStore.logbookView
         // Off the main thread: Python may still have to be started (on a fresh launch the page loads before anything
         // else has needed it).
         Thread {
             try {
                 PythonStarter.ensureStarted(this)
                 val script = Python.getInstance().getModule("nmea2log.app_settings")
-                    .callAttr("logbook_prefs_script", theme, view).toString()
+                    .callAttr("logbook_prefs_script", theme).toString()
                 runOnUiThread { webView.evaluateJavascript(script, null) }
             } catch (e: Exception) {
                 Log.w("LogbookWebView", "could not hand the logbook page its settings", e)
@@ -2633,6 +2648,9 @@ class MainActivity : AppCompatActivity() {
                 applyLogbookPrefs()
             }
         }
+        maybeShowHelpWelcome()
+        // A newer help page from GitHub, when there is internet (at most once a day, quietly).
+        Thread { HelpActivity.refreshFromGitHub(applicationContext) }.start()
         // Covers being brought back via the launcher icon (or the task switcher) while a sync is
         // still genuinely running but its notification isn't up right now -- e.g. the brief
         // download-to-decode transition gap, or an earlier startForegroundService() refusal while

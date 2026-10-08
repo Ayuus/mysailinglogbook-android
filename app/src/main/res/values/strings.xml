@@ -6,7 +6,7 @@
 
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Download</string>
-    <string name="tooltip_publish">Publish to ayuus.com</string>
+    <string name="tooltip_publish">Publish</string>
     <string name="tooltip_publish_not_configured">No host configured</string>
     <string name="tooltip_build_local">Assemble logbook</string>
     <string name="tooltip_cancel">Cancel</string>
@@ -80,8 +80,8 @@
     <string name="phase_importing">Importing</string>
 
     <!-- Publish -->
-    <string name="status_uploading_wordpress">Uploading to ayuus.com (to WordPress)...</string>
-    <string name="notif_uploading">Uploading to ayuus.com...</string>
+    <string name="status_uploading_wordpress">Uploading to WordPress...</string>
+    <string name="notif_uploading">Uploading...</string>
     <string name="log_upload_ok_wordpress">Uploaded to WordPress: %1$s</string>
     <string name="log_upload_failed_wordpress">upload to WordPress failed: %1$s</string>
     <string name="log_upload_not_configured">Upload not configured</string>
@@ -126,10 +126,12 @@
     <string name="radio_theme_light">Light</string>
     <string name="radio_theme_dark">Dark</string>
     <string name="radio_theme_system">Follow device</string>
-    <string name="label_logbook_layout">Logbook layout</string>
-    <string name="radio_layout_auto">Automatic (cards on a phone)</string>
-    <string name="radio_layout_cards">Cards</string>
-    <string name="radio_layout_table">Table</string>
+    <string name="button_help">Help and manual</string>
+    <string name="help_activity_title">Help</string>
+    <string name="dialog_help_title">Welcome</string>
+    <string name="dialog_help_message">A short guide explains how to connect to the W2K-2 and what the buttons do. Open it now? You can always find it later in Settings.</string>
+    <string name="dialog_help_read">Read the guide</string>
+    <string name="dialog_help_later">Later</string>
     <string name="section_cache">Clear cache</string>
     <string name="button_clear">Clear</string>
     <string name="toast_cache_cleared">Cache cleared</string>
