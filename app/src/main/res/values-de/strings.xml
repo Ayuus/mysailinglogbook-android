@@ -115,6 +115,10 @@
     <string name="radio_theme_light">Hell</string>
     <string name="radio_theme_dark">Dunkel</string>
     <string name="radio_theme_system">Gerät folgen</string>
+    <string name="label_logbook_layout">Logbuch-Layout</string>
+    <string name="radio_layout_auto">Automatisch (Karten auf einem Telefon)</string>
+    <string name="radio_layout_cards">Karten</string>
+    <string name="radio_layout_table">Tabelle</string>
     <string name="section_cache">Cache leeren</string>
     <string name="button_clear">Leeren</string>
     <string name="toast_cache_cleared">Cache geleert</string>

@@ -262,6 +262,31 @@ class SettingsActivity : AppCompatActivity() {
             else -> themeDarkRadio.isChecked = true
         }
 
+        // How the logbook page lays out its trips (cards / table); the page's own two buttons are for browsers, here the
+        // choice is made in Settings and handed to the page (MainActivity.applyLogbookPrefs).
+        layout.addView(
+            TextView(this).apply { text = getString(R.string.label_logbook_layout) },
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = padding },
+        )
+        val viewGroup = RadioGroup(this).apply { orientation = LinearLayout.VERTICAL }
+        val viewAutoRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_auto) }
+        val viewCardsRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_cards) }
+        val viewTableRadio = RadioButton(this).apply { text = getString(R.string.radio_layout_table) }
+        viewGroup.addView(viewAutoRadio)
+        viewGroup.addView(viewCardsRadio)
+        viewGroup.addView(viewTableRadio)
+        layout.addView(
+            viewGroup,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = padding },
+        )
+        when (store.logbookView) {
+            "cards" -> viewCardsRadio.isChecked = true
+            "table" -> viewTableRadio.isChecked = true
+            else -> viewAutoRadio.isChecked = true
+        }
+
         // Cache-legen: two separate buttons rather than one "clear everything" -- the two caches
         // are cleared for different reasons (a decode/trip-build bug vs. a wrong/stale place
         // name or weather value) and clearing the wrong one is real, avoidable extra network/CPU
@@ -444,6 +469,11 @@ class SettingsActivity : AppCompatActivity() {
                     themeLightRadio.isChecked -> "light"
                     themeSystemRadio.isChecked -> "system"
                     else -> "dark"
+                }
+                store.logbookView = when {
+                    viewCardsRadio.isChecked -> "cards"
+                    viewTableRadio.isChecked -> "table"
+                    else -> "auto"
                 }
                 AppCompatDelegate.setDefaultNightMode(
                     when (store.themeMode) {

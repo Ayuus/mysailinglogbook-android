@@ -126,6 +126,10 @@
     <string name="radio_theme_light">Light</string>
     <string name="radio_theme_dark">Dark</string>
     <string name="radio_theme_system">Follow device</string>
+    <string name="label_logbook_layout">Logbook layout</string>
+    <string name="radio_layout_auto">Automatic (cards on a phone)</string>
+    <string name="radio_layout_cards">Cards</string>
+    <string name="radio_layout_table">Table</string>
     <string name="section_cache">Clear cache</string>
     <string name="button_clear">Clear</string>
     <string name="toast_cache_cleared">Cache cleared</string>

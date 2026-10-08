@@ -30,7 +30,9 @@ import android.view.Gravity
 import android.view.View
 import android.util.Log
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.webkit.ConsoleMessage
 import android.widget.Button
 import android.widget.LinearLayout
@@ -296,6 +298,24 @@ class MainActivity : AppCompatActivity() {
 
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true // the logbook's own trip map (Leaflet) needs this
+            // The logbook page's theme and layout come from Settings, handed over once the page has loaded (see
+            // applyLogbookPrefs); a reload (Build, Download) loads a new page that has to be told again.
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView, url: String?) {
+                    applyLogbookPrefs()
+                }
+
+                // Without a WebViewClient a link in the page (the map's OpenStreetMap credit) opens in the browser; with
+                // one it would navigate this WebView away from the logbook, so hand it to the browser explicitly.
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, request.url))
+                    } catch (e: Exception) {
+                        Log.w("LogbookWebView", "no app to open ${request.url}", e)
+                    }
+                    return true
+                }
+            }
             webChromeClient = object : WebChromeClient() {
                 override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
                     Log.d("LogbookWebView", "${msg.messageLevel()} ${msg.message()} (${msg.sourceId()}:${msg.lineNumber()})")
@@ -1579,6 +1599,26 @@ class MainActivity : AppCompatActivity() {
         lastLoadedHtmlMtime = File(htmlPath).lastModified()
     }
 
+    /** Tells the logbook page the theme (Appearance) and layout (cards/table) chosen in Settings; the page's own buttons,
+     * which would store the choice in localStorage, are for browsers -- this WebView does not keep that between runs.
+     * The script comes from nmea2log (app_settings.logbook_prefs_script), shared with the iOS app. */
+    private fun applyLogbookPrefs() {
+        val theme = settingsStore.themeMode
+        val view = settingsStore.logbookView
+        // Off the main thread: Python may still have to be started (on a fresh launch the page loads before anything
+        // else has needed it).
+        Thread {
+            try {
+                PythonStarter.ensureStarted(this)
+                val script = Python.getInstance().getModule("nmea2log.app_settings")
+                    .callAttr("logbook_prefs_script", theme, view).toString()
+                runOnUiThread { webView.evaluateJavascript(script, null) }
+            } catch (e: Exception) {
+                Log.w("LogbookWebView", "could not hand the logbook page its settings", e)
+            }
+        }.start()
+    }
+
     // Tracks which version of logbook.html is currently showing (see onResume()'s own reload
     // guard) -- lastModified(), not a content hash: cheap, and this file is only ever written
     // whole by write_html_logbook(), never appended to, so its mtime alone is enough to tell
@@ -2588,6 +2628,9 @@ class MainActivity : AppCompatActivity() {
             val htmlFile = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)
             if (htmlFile.exists() && htmlFile.lastModified() != lastLoadedHtmlMtime) {
                 loadLogbookIntoWebView(htmlFile.absolutePath)
+            } else if (htmlFile.exists()) {
+                // Settings may just have changed the theme or layout of the page already showing.
+                applyLogbookPrefs()
             }
         }
         // Covers being brought back via the launcher icon (or the task switcher) while a sync is

@@ -119,6 +119,10 @@
     <string name="radio_theme_light">Licht</string>
     <string name="radio_theme_dark">Donker</string>
     <string name="radio_theme_system">Apparaat volgen</string>
+    <string name="label_logbook_layout">Layout logboek</string>
+    <string name="radio_layout_auto">Automatisch (kaarten op een telefoon)</string>
+    <string name="radio_layout_cards">Kaarten</string>
+    <string name="radio_layout_table">Tabel</string>
     <string name="section_cache">Cache legen</string>
     <string name="button_clear">Legen</string>
     <string name="toast_cache_cleared">Cache geleegd</string>

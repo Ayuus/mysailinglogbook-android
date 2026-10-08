@@ -115,6 +115,10 @@
     <string name="radio_theme_light">Clair</string>
     <string name="radio_theme_dark">Sombre</string>
     <string name="radio_theme_system">Suivre l\'appareil</string>
+    <string name="label_logbook_layout">Présentation du journal</string>
+    <string name="radio_layout_auto">Automatique (cartes sur un téléphone)</string>
+    <string name="radio_layout_cards">Cartes</string>
+    <string name="radio_layout_table">Tableau</string>
     <string name="section_cache">Vider le cache</string>
     <string name="button_clear">Vider</string>
     <string name="toast_cache_cleared">Cache vidé</string>
