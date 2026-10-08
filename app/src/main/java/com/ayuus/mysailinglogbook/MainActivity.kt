@@ -1032,7 +1032,7 @@ class MainActivity : AppCompatActivity() {
                     SyncNotificationService.postCompletionNotification(
                         this,
                         getString(R.string.notif_sync_done_at, timeText),
-                        if (didPublish) MainActivity.LIVE_SITE_URL else null,
+                        if (didPublish) liveSiteUrl() else null,
                         R.drawable.ic_download_24,
                     )
                 }
@@ -1615,6 +1615,17 @@ class MainActivity : AppCompatActivity() {
         lastLoadedHtmlMtime = File(htmlPath).lastModified()
     }
 
+    /** The website the logbook was just published to (what the "View live site" notification action opens): the site's own
+     * address, from the publish address in Settings -- the upload address itself is an endpoint, not a page to browse. Null
+     * when there is none. */
+    private fun liveSiteUrl(): String? =
+        try {
+            Python.getInstance().getModule("nmea2log.upload")
+                .callAttr("site_address", settingsStore.restUploadUrl).toString().ifBlank { null }
+        } catch (e: Exception) {
+            null
+        }
+
     /** Tells the logbook page the theme (Appearance) chosen in Settings; the page's own buttons, which would store the choice
      * in localStorage, are for browsers -- this WebView does not keep that between runs. (The layout is always automatic.)
      * The script comes from nmea2log (app_settings.logbook_prefs_script), shared with the iOS app. */
@@ -1836,7 +1847,7 @@ class MainActivity : AppCompatActivity() {
                     SyncNotificationService.postCompletionNotification(
                         this,
                         getString(R.string.notif_sync_done_at, timeText),
-                        if (didPublish) MainActivity.LIVE_SITE_URL else null,
+                        if (didPublish) liveSiteUrl() else null,
                         R.drawable.ic_refresh_24,
                     )
                 }
@@ -2709,11 +2720,6 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val ACTION_TOGGLE_FROM_NOTIFICATION = "com.ayuus.mysailinglogbook.ACTION_TOGGLE_FROM_NOTIFICATION"
-
-        // The public, WordPress-gated view of whatever was just published (see uploadIfConfigured()
-        // and the "Bekijk live site" notification action) -- not derived from SettingsStore's own
-        // restUploadUrl, which is the upload endpoint, not a browsable page.
-        const val LIVE_SITE_URL = "https://ayuus.com/little_endian/"
 
         // How much of the log file to show when the boat mode is open in a process that has no log text yet.
         private const val BOOT_LOG_TAIL_LINES = 60
