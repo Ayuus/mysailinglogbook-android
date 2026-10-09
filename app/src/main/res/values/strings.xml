@@ -11,7 +11,7 @@
     <string name="tooltip_build_local">Assemble logbook</string>
     <string name="tooltip_cancel">Cancel</string>
     <string name="tooltip_view_local">View logbook locally (don\'t publish)</string>
-    <string name="tooltip_import">Import .ebl files from SD/USB</string>
+    <string name="tooltip_import">Import .ebl files from a folder (phone, SD card, USB drive)</string>
     <string name="tooltip_settings">Settings</string>
 
     <!-- Startup -->
@@ -60,7 +60,6 @@
     <string name="error_unexpected">Unexpected error: %1$s</string>
 
     <!-- Import from SD/USB -->
-    <string name="log_import_no_media">No SD card or USB drive detected.</string>
     <string name="status_importing">Importing .ebl files...</string>
     <string name="status_searching_files">Searching for .ebl files...</string>
     <string name="status_copying_progress">Copying: %1$d/%2$d (%3$s)</string>

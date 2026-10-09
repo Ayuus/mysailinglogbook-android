@@ -13,6 +13,7 @@ import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.hardware.usb.UsbManager
 import android.os.PowerManager
+import android.provider.DocumentsContract
 import android.provider.Settings
 import androidx.activity.enableEdgeToEdge
 import android.content.pm.PackageManager
@@ -97,7 +98,8 @@ class MainActivity : AppCompatActivity() {
     private val notificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op either way */ }
 
-    // The system's own folder picker (Storage Access Framework): surfaces internal storage, any
+    // The system's own folder picker (Storage Access Framework): surfaces internal storage (from Android 11 on not its
+    // top-level folders themselves, such as Download, but anything inside them), any
     // mounted SD card and any mounted USB drive alike, whichever the OS itself exposes -- no
     // separate "browse USB" path needed. A plain StartActivityForResult, not the narrower
     // OpenDocumentTree contract (asked for explicitly): importButton's own onClick needs to hand
@@ -180,12 +182,12 @@ class MainActivity : AppCompatActivity() {
             if (SyncState.inProgress) cancelSyncStayInApp() else runDownload()
         }
         // A second way to get .ebl files onto the device besides downloadButton's own W2K-2 download
-        // (asked for explicitly): picks a folder from an SD card or USB drive via the system's own
-        // document picker, copies whatever .ebl files it finds anywhere in there (any nesting --
-        // SD/USB layouts don't have to match Actisense's own folder structure) into the app's own
+        // (asked for explicitly): picks a folder (on an SD card or USB drive, or on the phone itself) via the
+        // system's own document picker, copies whatever .ebl files it finds anywhere in there (any nesting --
+        // layouts don't have to match Actisense's own folder structure) into the app's own
         // Actisense folder, then builds/publishes exactly like a normal download would. Placed
         // right next to downloadButton (asked for explicitly): this is a download too in the end, just
-        // from SD/USB instead of the W2K-2.
+        // from a folder instead of the W2K-2.
         importButton = iconButton(getString(R.string.tooltip_import), iconRes = R.drawable.ic_folder_download_24) {
             if (SyncState.inProgress) return@iconButton
             if (bootModeBusy()) return@iconButton
@@ -198,25 +200,27 @@ class MainActivity : AppCompatActivity() {
             // all) was the odd one out.
             showingLocalLogbook = false
             setLogExpanded(true)
-            // Checked before ever opening the system picker (asked for explicitly): with nothing
-            // removable attached, that picker only ever offers internal folders, which can never
-            // hold anything an import needs -- a log line here is more honest about why than
-            // making the owner navigate a picker just to find that out for themselves.
+            // Any folder will do, on the phone itself too (asked for explicitly: the demo files, or .ebl files copied
+            // over from a computer, sit in a folder of the phone, and a picker that offered only an SD card or USB drive
+            // left the owner with no way to import them). With exactly one SD card or USB drive attached, though, jump
+            // the picker straight into its own root (asked for explicitly: "kun je die dan meteen openen?") instead of
+            // its usual "This device" starting point -- the owner still has to tap the system's own one-time "Allow
+            // access" confirmation (Android itself never skips that, no way around it), but no longer has to navigate
+            // there by hand first. With no drive attached, the picker starts in the phone's Download folder (asked for
+            // explicitly: that is where a downloaded and unzipped folder, such as the demo files, ends up); with two or
+            // more attached at once, it falls back to the plain picker instead of guessing which one is meant.
             val volumes = removableStorageVolumes()
-            if (volumes.isEmpty()) {
-                handleLogLine("[info] " + getString(R.string.log_import_no_media))
-                return@iconButton
-            }
-            // With exactly one SD card or USB drive attached, jump the picker straight into its
-            // own root (asked for explicitly: "kun je die dan meteen openen?") instead of its
-            // usual "This device" starting point -- the owner still has to tap the system's own
-            // one-time "Allow access" confirmation (Android itself never skips that, no way around
-            // it), but no longer has to navigate there by hand first. Two or more attached at once
-            // falls back to the plain picker instead of guessing which one is meant.
             val intent = if (volumes.size == 1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 volumes.single().createOpenDocumentTreeIntent()
             } else {
-                Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).also { picker ->
+                    if (volumes.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        picker.putExtra(
+                            DocumentsContract.EXTRA_INITIAL_URI,
+                            Uri.parse("content://com.android.externalstorage.documents/document/primary%3ADownload"),
+                        )
+                    }
+                }
             }
             importFolderLauncher.launch(intent)
         }
@@ -1859,9 +1863,9 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    /** Every SD card or USB drive currently mounted -- checked before importButton ever opens the
-     * system folder picker (see its own onClick above), both to skip the picker entirely with
-     * nothing attached and to jump straight into the one that is. StorageManager's own volume
+    /** Every SD card or USB drive currently mounted -- checked before importButton opens the
+     * system folder picker (see its own onClick above), to jump straight into the one that is
+     * attached (with none, or several, the plain picker opens). StorageManager's own volume
      * list, not just Environment.getExternalStorageDirectory() (that one only ever covers
      * internal/primary storage): every non-primary entry here is removable media the OS itself
      * knows about, SD card or USB drive alike, regardless of how the picker will label it. */

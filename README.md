@@ -115,7 +115,7 @@ the signal it uses to tell "I'm on the boat" from any other network the phone mi
 ### The toolbar
 
 Left to right: **download** (fetch new data from the W2K-2 and assemble the logbook), **import**
-(copy `.ebl` files from an SD card or USB drive instead -- no W2K-2 needed, e.g. a card pulled
+(copy `.ebl` files from a folder you pick -- on the phone, an SD card or a USB drive -- instead; no W2K-2 needed, e.g. a card pulled
 straight from the instrument -- then assemble/publish exactly like a normal download would), **assemble**
 (assemble the logbook again from whatever's already on the phone, no W2K-2 needed -- useful to pick
 up a settings change, or just to see the logbook without being near the boat), **publish** (send
@@ -131,12 +131,11 @@ screen, with a real progress bar.
 ### Try it without a boat
 
 Download [`demo-ebl.zip`](https://github.com/Ayuus/nmea2log/releases/download/demo-data/demo-ebl.zip) -- the `.ebl` files of a made-up
-cruise on the Wadden Sea, nothing real in them -- and unzip it on a computer. Connect the phone with a USB cable (file transfer),
-copy the folder `Actisense` into `Android/data/com.ayuus.mysailinglogbook/files/` (the folder of the app, where it keeps its own
-`.ebl` files; start the app once first so that it exists) and tap **Assemble**: the app builds a logbook of five trips, the same as the
+cruise on the Wadden Sea, nothing real in them -- and unzip it (in the Files app, open the zip and tap *Extract*; it makes a folder
+`demo-ebl` in Downloads). In the app tap **Import** and pick that folder (Android does not let an app pick Downloads itself, only a
+folder inside it): the app copies the files and builds a logbook of five trips, the same as the
 [demo logbook](https://ayuus.github.io/nmea2log/examples/demo-logbook.html). Settings > Local .ebl files > Delete removes the files
-again. (The **Import** button is for an SD card or USB drive: it offers only those, not a folder on the phone itself.)
-More about the files: [examples/demo-data](https://github.com/Ayuus/nmea2log/tree/main/examples/demo-data).
+again. More about the files: [examples/demo-data](https://github.com/Ayuus/nmea2log/tree/main/examples/demo-data).
 
 ### Boat mode
 

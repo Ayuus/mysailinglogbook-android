@@ -6,7 +6,7 @@
     <string name="tooltip_build_local">Bordbuch zusammenstellen</string>
     <string name="tooltip_cancel">Abbrechen</string>
     <string name="tooltip_view_local">Bordbuch lokal ansehen (nicht veröffentlichen)</string>
-    <string name="tooltip_import">.ebl-Dateien von SD/USB importieren</string>
+    <string name="tooltip_import">.ebl-Dateien aus einem Ordner importieren (Telefon, SD-Karte, USB-Speicher)</string>
     <string name="tooltip_settings">Einstellungen</string>
 
     <!-- Startup -->
@@ -52,7 +52,6 @@
     <string name="error_unexpected">Unerwarteter Fehler: %1$s</string>
 
     <!-- Import von SD/USB -->
-    <string name="log_import_no_media">Keine SD-Karte oder USB-Speicher gefunden.</string>
     <string name="status_importing">.ebl-Dateien werden importiert...</string>
     <string name="status_searching_files">Suche nach .ebl-Dateien...</string>
     <string name="status_copying_progress">Kopieren: %1$d/%2$d (%3$s)</string>
