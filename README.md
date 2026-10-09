@@ -131,10 +131,12 @@ screen, with a real progress bar.
 ### Try it without a boat
 
 Download [`demo-ebl.zip`](https://github.com/Ayuus/nmea2log/releases/download/demo-data/demo-ebl.zip) -- the `.ebl` files of a made-up
-cruise on the Wadden Sea, nothing real in them -- and unzip it (in the Files app, open the zip and tap *Extract*). In the app tap **Import** and pick the unzipped `Actisense`
-folder: the app copies the files and builds a logbook of five trips, the same as the
-[demo logbook](https://ayuus.github.io/nmea2log/examples/demo-logbook.html). Settings > Local .ebl files > Delete removes the files again.
-More about them: [examples/demo-data](https://github.com/Ayuus/nmea2log/tree/main/examples/demo-data).
+cruise on the Wadden Sea, nothing real in them -- and unzip it on a computer. Connect the phone with a USB cable (file transfer),
+copy the folder `Actisense` into `Android/data/com.ayuus.mysailinglogbook/files/` (the folder of the app, where it keeps its own
+`.ebl` files; start the app once first so that it exists) and tap **Assemble**: the app builds a logbook of five trips, the same as the
+[demo logbook](https://ayuus.github.io/nmea2log/examples/demo-logbook.html). Settings > Local .ebl files > Delete removes the files
+again. (The **Import** button is for an SD card or USB drive: it offers only those, not a folder on the phone itself.)
+More about the files: [examples/demo-data](https://github.com/Ayuus/nmea2log/tree/main/examples/demo-data).
 
 ### Boat mode
 
