@@ -132,7 +132,8 @@ screen, with a real progress bar.
 
 Download [`demo-ebl.zip`](https://github.com/Ayuus/nmea2log/releases/download/demo-data/demo-ebl.zip) -- the `.ebl` files of a made-up
 cruise on the Wadden Sea, nothing real in them -- and unzip it (in the Files app, open the zip and tap *Extract*; it makes a folder
-`demo-ebl` in Downloads). In the app tap **Import** and pick that folder (Android does not let an app pick Downloads itself, only a
+`demo-ebl` in the phone's **Download** folder, which some apps call "Downloads"). In the app tap **Import** and pick that folder
+(Android does not let an app pick the Download folder itself, only a
 folder inside it): the app copies the files and builds a logbook of five trips, the same as the
 [demo logbook](https://ayuus.github.io/nmea2log/examples/demo-logbook.html). Settings > Local .ebl files > Delete removes the files
 again. More about the files: [examples/demo-data](https://github.com/Ayuus/nmea2log/tree/main/examples/demo-data).
