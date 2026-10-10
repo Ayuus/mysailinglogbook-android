@@ -180,6 +180,13 @@
     <string name="button_delete">Supprimer</string>
     <string name="dialog_delete_ebl_message">Supprimer les %1$d fichiers .ebl (%2$s) de cet appareil ? Le livre de bord déjà créé reste tel quel. Un nouveau téléchargement récupère à nouveau les fichiers depuis le W2K-2 (ce qui peut prendre longtemps), et sans eux on ne peut pas créer un nouveau livre de bord. Les fichiers qui ne sont plus sur le W2K-2 sont perdus définitivement.</string>
     <string name="toast_ebl_files_deleted">%1$d fichiers .ebl supprimés (%2$s libérés)</string>
+    <string name="label_ebl_backup">Copier les fichiers journaux bruts dans un dossier de votre choix (clé USB, cloud, ...)</string>
+    <string name="button_copy">Copier</string>
+    <string name="dialog_ebl_backup_copying">Copie des fichiers .ebl... %1$d/%2$d</string>
+    <string name="toast_ebl_backup_done">%1$d fichiers .ebl copiés (%2$d y étaient déjà)</string>
+    <string name="toast_ebl_backup_errors">%1$d fichiers .ebl n\'ont pas pu être copiés -- reste-t-il de la place sur le support ?</string>
+    <string name="toast_ebl_backup_failed">La copie a échoué : %1$s</string>
+    <string name="error_backup_no_folder">Impossible de créer le dossier à l\'endroit choisi</string>
     <string name="toast_ebl_files_none">Il n\'y a aucun fichier .ebl sur cet appareil</string>
     <string name="toast_ebl_delete_busy">Pas pendant un téléchargement ou une création en cours</string>
     <string name="status_checking_logbook">Vérification du journal...</string>

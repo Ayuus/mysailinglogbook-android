@@ -193,6 +193,13 @@
     <string name="button_delete">Delete</string>
     <string name="dialog_delete_ebl_message">Delete all %1$d .ebl files (%2$s) from this device? The logbook you have already built stays as it is. A new download fetches the files from the W2K-2 again (which can take a long time), and a new logbook cannot be assembled without them. Files that are no longer on the W2K-2 are lost for good.</string>
     <string name="toast_ebl_files_deleted">%1$d .ebl files deleted (%2$s freed)</string>
+    <string name="label_ebl_backup">Copy the raw logfiles to a folder you pick (USB drive, cloud, ...)</string>
+    <string name="button_copy">Copy</string>
+    <string name="dialog_ebl_backup_copying">Copying .ebl files... %1$d/%2$d</string>
+    <string name="toast_ebl_backup_done">%1$d .ebl files copied (%2$d were already there)</string>
+    <string name="toast_ebl_backup_errors">%1$d .ebl files could not be copied -- is there room on the drive?</string>
+    <string name="toast_ebl_backup_failed">Copying failed: %1$s</string>
+    <string name="error_backup_no_folder">Could not make the folder in the place you picked</string>
     <string name="toast_ebl_files_none">There are no .ebl files on this device</string>
     <string name="toast_ebl_delete_busy">Not while a download or assemble is running</string>
     <string name="status_checking_logbook">Checking the logbook...</string>

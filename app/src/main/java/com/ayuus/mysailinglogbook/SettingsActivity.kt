@@ -1,5 +1,6 @@
 package com.ayuus.mysailinglogbook
 
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.View
@@ -14,11 +15,13 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.documentfile.provider.DocumentFile
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import com.chaquo.python.Python
@@ -31,6 +34,13 @@ import java.io.File
  * ☁️ icon is tapped or a download's own auto-publish runs (see MainActivity.uploadIfConfigured()).
  */
 class SettingsActivity : AppCompatActivity() {
+
+    // The folder the .ebl files are copied to (the "Copy" button of Local .ebl files): the system's folder picker, see FolderPicker.
+    private val backupFolderLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val treeUri = result.data?.data
+            if (result.resultCode == RESULT_OK && treeUri != null) copyEblFilesTo(treeUri)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -369,6 +379,22 @@ class SettingsActivity : AppCompatActivity() {
         // storage. Counted and deleted by nmea2log.ebl_storage, the same code the iOS app uses. Not
         // while a run is busy with them.
         sectionHeader(getString(R.string.section_ebl_files))
+        // Copy them to a folder the owner picks (a USB drive, an SD card, a cloud folder): the archive sits in Android/data, which
+        // the phone's own file apps cannot open, so this is the way to back it up from the phone itself.
+        buttonRow(getString(R.string.label_ebl_backup), getString(R.string.button_copy)) {
+            if (SyncState.inProgress || SyncState.bootBusy) {
+                Toast.makeText(this@SettingsActivity, getString(R.string.toast_ebl_delete_busy), Toast.LENGTH_SHORT).show()
+                return@buttonRow
+            }
+            PythonStarter.ensureStarted(this)
+            val count = Python.getInstance().getModule("nmea2log.ebl_storage")
+                .callAttr("describe", EblStorage.downloadDir(this).absolutePath).asList()[0].toInt()
+            if (count == 0) {
+                Toast.makeText(this@SettingsActivity, getString(R.string.toast_ebl_files_none), Toast.LENGTH_SHORT).show()
+                return@buttonRow
+            }
+            backupFolderLauncher.launch(FolderPicker.intent(this))
+        }
         buttonRow(getString(R.string.button_ebl_files), getString(R.string.button_delete)) {
             if (SyncState.inProgress || SyncState.bootBusy) {
                 Toast.makeText(this@SettingsActivity, getString(R.string.toast_ebl_delete_busy), Toast.LENGTH_SHORT).show()
@@ -531,5 +557,70 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
         setContentView(root)
+    }
+
+    /** Copies every .ebl file of the archive into ``Actisense/`` of the picked folder (same rules as nmea2log's
+     * ebl_storage.backup_to, which cannot be used here: the folder is a content:// tree, not a path): the sub-folders are kept,
+     * so the copy can be imported again as it is; a file already there with the same size is left alone; a file is written
+     * under a temporary name and renamed, so a drive pulled halfway leaves no half file under the real name. A dialog shows the
+     * progress, and a toast the result. */
+    private fun copyEblFilesTo(treeUri: Uri) {
+        val root = EblStorage.downloadDir(this)
+        val files = root.walkTopDown().filter { it.isFile && it.extension.equals("ebl", ignoreCase = true) }.sortedBy { it.path }.toList()
+        val dialog = AlertDialog.Builder(this)
+            .setMessage(getString(R.string.dialog_ebl_backup_copying, 0, files.size))
+            .setCancelable(false)
+            .show()
+        Thread {
+            var copied = 0
+            var skipped = 0
+            val errors = mutableListOf<String>()
+            var failure: String? = null
+            try {
+                val target = DocumentFile.fromTreeUri(this, treeUri) ?: throw java.io.FileNotFoundException("no folder")
+                val archive = target.findFile(SharedConstants.EBL_DIR_NAME)?.takeIf { it.isDirectory }
+                    ?: target.createDirectory(SharedConstants.EBL_DIR_NAME)
+                    ?: throw java.io.IOException(getString(R.string.error_backup_no_folder))
+                for ((index, file) in files.withIndex()) {
+                    try {
+                        var folder = archive
+                        for (part in file.relativeTo(root).parentFile?.path.orEmpty().split(File.separatorChar).filter { it.isNotEmpty() }) {
+                            folder = folder.findFile(part)?.takeIf { it.isDirectory }
+                                ?: folder.createDirectory(part)
+                                ?: throw java.io.IOException(part)
+                        }
+                        val existing = folder.findFile(file.name)
+                        if (existing != null && existing.isFile && existing.length() == file.length()) {
+                            skipped++
+                        } else {
+                            existing?.delete()
+                            val temporary = folder.createFile("application/octet-stream", file.name + ".part")
+                                ?: throw java.io.IOException(file.name)
+                            contentResolver.openOutputStream(temporary.uri)?.use { output ->
+                                file.inputStream().use { it.copyTo(output) }
+                            } ?: throw java.io.IOException(file.name)
+                            if (!temporary.renameTo(file.name)) throw java.io.IOException(file.name)
+                            // Some providers add an extension of their own to a name made for an unknown type.
+                            if (folder.findFile(file.name) == null) throw java.io.IOException(file.name)
+                            copied++
+                        }
+                    } catch (e: Exception) {
+                        errors += file.name
+                    }
+                    runOnUiThread { dialog.setMessage(getString(R.string.dialog_ebl_backup_copying, index + 1, files.size)) }
+                }
+            } catch (e: Exception) {
+                failure = e.message ?: e.javaClass.simpleName
+            }
+            runOnUiThread {
+                dialog.dismiss()
+                val message = when {
+                    failure != null -> getString(R.string.toast_ebl_backup_failed, failure)
+                    errors.isNotEmpty() -> getString(R.string.toast_ebl_backup_errors, errors.size)
+                    else -> getString(R.string.toast_ebl_backup_done, copied, skipped)
+                }
+                Toast.makeText(this@SettingsActivity, message, Toast.LENGTH_LONG).show()
+            }
+        }.start()
     }
 }

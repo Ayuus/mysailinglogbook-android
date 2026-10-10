@@ -184,6 +184,13 @@
     <string name="button_delete">Verwijderen</string>
     <string name="dialog_delete_ebl_message">Alle %1$d .ebl-bestanden (%2$s) van dit toestel verwijderen? Het logboek dat je al hebt samengesteld blijft staan. Bij een nieuwe download worden de bestanden opnieuw van de W2K-2 gehaald (dat kan lang duren), en zonder deze bestanden kun je geen nieuw logboek samenstellen. Bestanden die niet meer op de W2K-2 staan, ben je voorgoed kwijt.</string>
     <string name="toast_ebl_files_deleted">%1$d .ebl-bestanden verwijderd (%2$s vrijgemaakt)</string>
+    <string name="label_ebl_backup">De ruwe logbestanden kopiëren naar een map die je kiest (USB-stick, cloud, ...)</string>
+    <string name="button_copy">Kopiëren</string>
+    <string name="dialog_ebl_backup_copying">Bezig met kopiëren van .ebl-bestanden... %1$d/%2$d</string>
+    <string name="toast_ebl_backup_done">%1$d .ebl-bestanden gekopieerd (%2$d stonden er al)</string>
+    <string name="toast_ebl_backup_errors">%1$d .ebl-bestanden konden niet worden gekopieerd -- is er ruimte op de schijf?</string>
+    <string name="toast_ebl_backup_failed">Kopiëren mislukt: %1$s</string>
+    <string name="error_backup_no_folder">Kon de map niet aanmaken op de plek die je koos</string>
     <string name="toast_ebl_files_none">Er staan geen .ebl-bestanden op dit toestel</string>
     <string name="toast_ebl_delete_busy">Niet terwijl er een download of samenstellen loopt</string>
     <string name="status_checking_logbook">Logboek controleren...</string>

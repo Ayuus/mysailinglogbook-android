@@ -186,13 +186,16 @@ falls back to coordinates instead of retrying forever.
 What is worth keeping is the **`.ebl` archive**: the logbook and the caches are rebuilt from it with one tap on
 assemble. The settings are small -- keep your W2K-2 and WordPress logins in a password manager.
 
-- **The archive** is the folder `Android/data/com.ayuus.mysailinglogbook/files/Actisense/` on the phone. Connect the
-  phone to a PC with a USB cable (file transfer) and copy that folder to the PC, best into a folder that your cloud
-  storage (OneDrive, Dropbox, Google Drive, ...) keeps in sync. Do it after every trip or season -- only the new
-  `EBL000nnn` folders need copying -- and **before** you use Settings > Local .ebl files > Delete. On recent Android
-  versions the phone's own file-manager apps often cannot open `Android/data`; a PC over USB can.
-- **Restoring**: install the app, start it once, copy the folder back to the same place and tap assemble. The first
-  assemble takes longer, as the caches are rebuilt too.
+- **The archive** is the folder `Android/data/com.ayuus.mysailinglogbook/files/Actisense/` on the phone. The phone's own
+  file-manager apps often cannot open `Android/data` on recent Android versions, so the app can copy it for you:
+  **Settings > Local .ebl files > Copy** asks for a folder -- on a USB drive or SD card (it opens there when one is
+  attached), or a folder of a cloud app such as Google Drive -- and copies the archive into a folder `Actisense` there,
+  with the same sub-folders. A second copy only adds what is new. Do it after every trip or season, and **before** you
+  use Settings > Local .ebl files > Delete. Or connect the phone to a PC with a USB cable (file transfer) and copy the
+  folder yourself, best into a folder that your cloud storage keeps in sync.
+- **Restoring**: install the app, then tap **Import** and pick the folder you copied to (the one with the `EBL000nnn`
+  folders in it, or `Actisense` itself) -- or copy the folder back by PC to the same place -- and the app assembles the
+  logbook. The first assemble takes longer, as the caches are rebuilt too.
 - **The built logbook** is also on your WordPress site when you publish.
 - **Do not count on Android's automatic (Google) backup.** It is switched on for the app with Android's default rules,
   but it takes at most 25 MB per app -- the archive is far larger -- and the settings are encrypted with a key that stays
