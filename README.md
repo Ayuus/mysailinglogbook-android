@@ -1,6 +1,6 @@
 # My Sailing Logbook (Android)
 
-Android app that downloads voyage data from a boat's [Actisense W2K-2](https://actisense.com) NMEA
+Android app that downloads voyage data from a boat's [Actisense W2K-2](https://actisense.com/products/w2k-2-nmea-2000-wifi-gateway/) NMEA
 2000-to-WiFi gateway, assembles the same HTML sailing logbook the desktop
 [nmea2log](https://github.com/Ayuus/nmea2log) CLI produces, shows it in-app, and (optionally)
 publishes it to a WordPress site. An optional "boat mode" can also do all of the
