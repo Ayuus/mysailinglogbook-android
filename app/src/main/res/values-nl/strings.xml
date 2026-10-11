@@ -5,6 +5,7 @@
 
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Downloaden</string>
+    <string name="tooltip_w2k2_not_configured">Vul eerst de inlog van de Actisense W2K-2 in</string>
     <string name="tooltip_publish">Publiceren</string>
     <string name="tooltip_publish_not_configured">Geen host geconfigureerd</string>
     <string name="tooltip_build_local">Logboek samenstellen</string>
@@ -18,7 +19,7 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Geen privénetwerk gevonden (snelle controle) -- automatisch downloaden overgeslagen.</string>
-    <string name="log_fill_w2k2_credentials">Vul eerst de W2K-2 gebruikersnaam en het wachtwoord in via Instellingen.</string>
+    <string name="log_fill_w2k2_credentials">Vul eerst de gebruikersnaam en het wachtwoord van de Actisense W2K-2 in via Instellingen.</string>
     <string name="status_checking_hotspot">Netwerk controleren...</string>
     <string name="status_hotspot_off">Geen privénetwerk gevonden (of de W2K-2 zit er niet op) -- zet je hotspot aan, of verbind met hetzelfde netwerk als de W2K-2, om te downloaden.</string>
     <string name="status_listing_files">Bestandenlijst ophalen (subnet %1$s0/24)...</string>
@@ -28,6 +29,7 @@
     <string name="log_no_logbook_to_view">Nog geen logboek om te bekijken -- stel er eerst een samen.</string>
     <string name="log_no_ebl_files_to_build">Nog geen .ebl-bestanden op dit toestel -- niets om samen te stellen.</string>
     <string name="log_publish_not_configured">Geen publicatiebestemming ingesteld -- publiceerknop uitgeschakeld.</string>
+    <string name="log_w2k2_not_configured">Gebruikersnaam en wachtwoord van de Actisense W2K-2 niet ingevuld (zie Instellingen) -- download- en bootknop uitgeschakeld.</string>
     <string name="log_fill_publish_settings">Vul eerst de publiceer-instellingen (WordPress) in via Instellingen.</string>
     <string name="log_ebl_files_location">.ebl-bestanden staan in: %1$s</string>
     <string name="status_downloading">Downloaden: %1$d/%2$d (%3$s)</string>
@@ -97,9 +99,9 @@
 
     <!-- Settings screen -->
     <string name="settings_activity_title">Instellingen</string>
-    <string name="section_w2k2_boat">W2K-2 &amp; boot</string>
-    <string name="label_w2k2_user">W2K-2 gebruikersnaam</string>
-    <string name="label_w2k2_password">W2K-2 wachtwoord</string>
+    <string name="section_w2k2_boat">Actisense W2K-2 &amp; boot</string>
+    <string name="label_w2k2_user">Gebruikersnaam van de Actisense W2K-2 (van het apparaat zelf)</string>
+    <string name="label_w2k2_password">Wachtwoord van de Actisense W2K-2 (van het apparaat zelf)</string>
     <string name="label_boat_name">Bootnaam</string>
     <string name="label_mmsi">MMSI</string>
     <string name="label_call_sign">Roepnaam</string>
@@ -121,7 +123,7 @@
     <string name="button_help">Help en handleiding</string>
     <string name="help_activity_title">Help</string>
     <string name="dialog_help_title">Welkom</string>
-    <string name="dialog_help_message">Een korte handleiding legt uit hoe je verbinding maakt met de W2K-2 en wat de knoppen doen. Nu openen? Je vindt hem later altijd in Instellingen.</string>
+    <string name="dialog_help_message">Een korte handleiding legt uit hoe je verbinding maakt met de Actisense W2K-2 en wat de knoppen doen. Nu openen? Je vindt hem later altijd in Instellingen.</string>
     <string name="dialog_help_read">Lees de handleiding</string>
     <string name="dialog_help_later">Later</string>
     <string name="section_cache">Cache legen</string>

@@ -6,6 +6,7 @@
 
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Download</string>
+    <string name="tooltip_w2k2_not_configured">Fill in the Actisense W2K-2 login first</string>
     <string name="tooltip_publish">Publish</string>
     <string name="tooltip_publish_not_configured">No host configured</string>
     <string name="tooltip_build_local">Assemble logbook</string>
@@ -22,7 +23,7 @@
          English in every language, matching the untranslated tags log.py's own Python-side log
          lines always use (see translations.py's module docstring on CSV/GPX staying English). -->
     <string name="log_hotspot_precheck_skipped">No private network detected (cheap pre-check) -- automatic download skipped.</string>
-    <string name="log_fill_w2k2_credentials">Fill in the W2K-2 username and password via Settings first.</string>
+    <string name="log_fill_w2k2_credentials">Fill in the Actisense W2K-2 username and password via Settings first.</string>
     <string name="status_checking_hotspot">Checking network...</string>
     <string name="status_hotspot_off">No private network detected (or the W2K-2 isn\'t on it) -- turn on your hotspot, or join the same network as the W2K-2, to download.</string>
     <string name="status_listing_files">Fetching file list (subnet %1$s0/24)...</string>
@@ -32,6 +33,7 @@
     <string name="log_no_logbook_to_view">No logbook to view yet -- assemble one first.</string>
     <string name="log_no_ebl_files_to_build">No .ebl files on this device yet -- nothing to assemble.</string>
     <string name="log_publish_not_configured">No publish destination configured -- publish button disabled.</string>
+    <string name="log_w2k2_not_configured">Actisense W2K-2 username and password not filled in (see Settings) -- download and boat mode buttons disabled.</string>
     <string name="log_fill_publish_settings">Fill in the publish settings (WordPress) via Settings first.</string>
     <string name="log_ebl_files_location">The .ebl files are stored in: %1$s</string>
     <string name="status_downloading">Downloading: %1$d/%2$d (%3$s)</string>
@@ -101,9 +103,9 @@
 
     <!-- Settings screen -->
     <string name="settings_activity_title">Settings</string>
-    <string name="section_w2k2_boat">W2K-2 &amp; boat</string>
-    <string name="label_w2k2_user">W2K-2 username</string>
-    <string name="label_w2k2_password">W2K-2 password</string>
+    <string name="section_w2k2_boat">Actisense W2K-2 &amp; boat</string>
+    <string name="label_w2k2_user">Actisense W2K-2 username (of the device itself)</string>
+    <string name="label_w2k2_password">Actisense W2K-2 password (of the device itself)</string>
     <string name="label_boat_name">Boat name</string>
     <string name="label_mmsi">MMSI</string>
     <string name="label_call_sign">Call sign</string>
@@ -128,7 +130,7 @@
     <string name="button_help">Help and manual</string>
     <string name="help_activity_title">Help</string>
     <string name="dialog_help_title">Welcome</string>
-    <string name="dialog_help_message">A short guide explains how to connect to the W2K-2 and what the buttons do. Open it now? You can always find it later in Settings.</string>
+    <string name="dialog_help_message">A short guide explains how to connect to the Actisense W2K-2 and what the buttons do. Open it now? You can always find it later in Settings.</string>
     <string name="dialog_help_read">Read the guide</string>
     <string name="dialog_help_later">Later</string>
     <string name="section_cache">Clear cache</string>

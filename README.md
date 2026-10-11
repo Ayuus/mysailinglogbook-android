@@ -91,7 +91,7 @@ sea, and refreshes itself from GitHub when there is internet.
 
 Open Settings (the gear icon, top right of the toolbar) and fill in:
 
-- **W2K-2 username/password** -- the same login the W2K-2's own web interface uses.
+- **Actisense W2K-2 username/password** -- the login of the W2K-2 itself (the same one its own web interface uses), not an account with Actisense or any cloud service. The download and boat mode buttons stay disabled until both are filled in.
 - **Boat name, MMSI, call sign** -- shown in the logbook's header, not sent anywhere by
   themselves.
 - **Publishing** (optional) -- a WordPress Application Password (for an account in the `logboek_editor`

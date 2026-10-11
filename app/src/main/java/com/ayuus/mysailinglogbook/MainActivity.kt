@@ -614,15 +614,26 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    /** Filled sailboat while the boat mode runs, outline while it is off. */
+    /** Filled sailboat while the boat mode runs, outline while it is off. Like the download button it needs the Actisense
+     * W2K-2's own login, so it is disabled without it (updateSyncButtonAvailability() says why in the log). A mode that is
+     * still running when the login has been cleared (in Settings) is stopped by onResume(); until the service has reported
+     * that, the button stays usable. */
     fun updateBootButton() {
         val active = BootModeStateStore(this).isActive
+        val usable = active || settingsStore.isW2k2ConfigComplete
+        bootButton.isEnabled = usable
         bootButton.setCompoundDrawablesWithIntrinsicBounds(
             if (active) R.drawable.ic_sailboat_filled_24 else R.drawable.ic_sailboat_24, 0, 0, 0,
         )
         ViewCompat.setTooltipText(
             bootButton,
-            getString(if (active) R.string.tooltip_boat_mode_on else R.string.tooltip_boat_mode),
+            getString(
+                when {
+                    active -> R.string.tooltip_boat_mode_on
+                    usable -> R.string.tooltip_boat_mode
+                    else -> R.string.tooltip_w2k2_not_configured
+                },
+            ),
         )
     }
 
@@ -710,22 +721,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** The download button always stays enabled, whether or not the W2K-2 has actually been seen
-     * yet -- asked for explicitly, reversing this function's own earlier "disabled until a real
-     * scan confirms it" behavior: that background scan (HotspotDetector's cheap local check, then
-     * android_entry.discover_w2k2_only() over the network) ran again on every onCreate()/onResume(),
-     * which in practice meant a fresh "Geen Actisense W2K-2 gevonden" log line every time the app
-     * so much as came back to the foreground -- confusing repetition, not useful information.
-     * runDownload() already does the exact same single-attempt, no-retry check (HotspotDetector, then
-     * discover_w2k2() as syncFromW2k2()'s own first step) the instant the button is actually
-     * pressed, and already reports a clean "not found" outcome on its own -- nothing here needs to
-     * duplicate that ahead of time. Like updatePublishButtonEnabled(), never overrides downloadButton
-     * while a download is already in progress (it deliberately stays enabled then, to double as
-     * the cancel button). */
+    /** The download button needs the Actisense W2K-2's own login (its username and password, the same as on the device's web
+     * page -- not a cloud account): without it the button is disabled and the log says why, once, when it just became unusable
+     * -- the same as the publish button without a publish destination (see updatePublishButtonEnabled(), whose doc comment
+     * explains why a log line and not only a tooltip). Whether the W2K-2 has actually been seen is not checked ahead of time
+     * (asked for explicitly: that scan ran again on every onResume(), a fresh "no W2K-2 found" line each time the app came
+     * back to the foreground); runDownload() does the same single attempt the instant the button is pressed. Never overrides
+     * downloadButton while a download is already in progress (it stays enabled then, to double as the cancel button). */
     private fun updateSyncButtonAvailability() {
         if (SyncState.inProgress) return
-        downloadButton.isEnabled = true
-        ViewCompat.setTooltipText(downloadButton, getString(R.string.tooltip_sync))
+        val configured = settingsStore.isW2k2ConfigComplete
+        val wasEnabled = downloadButton.isEnabled
+        downloadButton.isEnabled = configured
+        if (!configured && wasEnabled) {
+            handleLogLine("[info] " + getString(R.string.log_w2k2_not_configured))
+        }
+        ViewCompat.setTooltipText(
+            downloadButton,
+            getString(if (configured) R.string.tooltip_sync else R.string.tooltip_w2k2_not_configured),
+        )
     }
 
     /** Found in practice, still not fully understood at the OS level: right after this Activity's
@@ -797,20 +811,12 @@ class MainActivity : AppCompatActivity() {
                 { autoStartSyncWithSettingsRetry(attemptsLeft - 1) }, 300L
             )
         } else {
-            // Just calls runDownload() rather than duplicating its own isW2k2ConfigComplete check
-            // and log_fill_w2k2_credentials line here too (asked for explicitly, "1x is toch
-            // genoeg?") -- runDownload() already starts with the exact same check, and produces the
-            // exact same message, for a manual tap on the download button. Retries above exist
-            // purely for the settings-store-still-loading race (see this function's own doc
-            // comment); once those are exhausted, settings are either genuinely complete (handled
-            // by runDownload() itself) or genuinely incomplete (also handled by runDownload() itself) --
-            // either way, runDownload() is the single source of truth for what to do about it. Note
-            // this deliberately does NOT replace the branch above (settings complete, hotspot
-            // reachable): that one's own cheap HotspotDetector precheck before ever calling
-            // runDownload() is a real, separate optimisation (asked for explicitly, see its own
-            // comment) to avoid a "Hotspot controleren..." cycle on every single launch away from
-            // the boat -- only this settings-incomplete branch was pure duplication.
-            runDownload()
+            // Retries above exist purely for the settings-store-still-loading race (see this
+            // function's own doc comment); once they are exhausted the W2K-2 login is genuinely
+            // missing. Nothing to do and nothing more to say (asked for explicitly, "1x is toch
+            // genoeg?"): updateSyncButtonAvailability() has already disabled the download button
+            // and logged why, so this does not call runDownload() for a second, near-identical
+            // "fill in the login" line.
         }
     }
 
@@ -2584,6 +2590,10 @@ class MainActivity : AppCompatActivity() {
         // immediately, without waiting for a sync to finish.
         updatePublishButtonEnabled()
         updateSyncButtonAvailability()
+        // Without the W2K-2 login every round of the boat mode would fail, so it is switched off (the service logs that).
+        if (BootModeStateStore(this).isActive && !settingsStore.isW2k2ConfigComplete) {
+            sendBootAction(BootModeService.ACTION_STOP)
+        }
         updateBootButton()
         // The lines onCreate() made itself (e.g. "no publish destination configured") were logged while no Activity was
         // the active one yet, so nothing showed them: with no sync running the block below does not touch the log either,

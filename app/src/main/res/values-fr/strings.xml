@@ -1,6 +1,7 @@
 <resources>
     <!-- Toolbar tooltips -->
     <string name="tooltip_sync">Télécharger</string>
+    <string name="tooltip_w2k2_not_configured">Renseignez d\'abord l\'identifiant de l\'Actisense W2K-2</string>
     <string name="tooltip_publish">Publier</string>
     <string name="tooltip_publish_not_configured">Aucun hôte configuré</string>
     <string name="tooltip_build_local">Assembler le journal</string>
@@ -14,7 +15,7 @@
 
     <!-- Sync flow -->
     <string name="log_hotspot_precheck_skipped">Aucun réseau privé détecté (vérification rapide) -- téléchargement automatique ignoré.</string>
-    <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe W2K-2 dans les Paramètres.</string>
+    <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe de l\'Actisense W2K-2 dans les Paramètres.</string>
     <string name="status_checking_hotspot">Vérification du réseau...</string>
     <string name="status_hotspot_off">Aucun réseau privé détecté (ou le W2K-2 n\'y est pas connecté) -- activez votre point d\'accès, ou rejoignez le même réseau que le W2K-2, pour télécharger.</string>
     <string name="status_listing_files">Récupération de la liste des fichiers (sous-réseau %1$s0/24)...</string>
@@ -24,6 +25,7 @@
     <string name="log_no_logbook_to_view">Aucun journal à consulter pour l\'instant -- assemblez-en un d\'abord.</string>
     <string name="log_no_ebl_files_to_build">Aucun fichier .ebl sur cet appareil pour l\'instant -- rien à assembler.</string>
     <string name="log_publish_not_configured">Aucune destination de publication configurée -- bouton de publication désactivé.</string>
+    <string name="log_w2k2_not_configured">Nom d\'utilisateur et mot de passe de l\'Actisense W2K-2 non renseignés (voir Paramètres) -- boutons de téléchargement et du mode bateau désactivés.</string>
     <string name="log_fill_publish_settings">Renseignez d\'abord les paramètres de publication (WordPress) dans les Paramètres.</string>
     <string name="log_ebl_files_location">Les fichiers .ebl se trouvent dans : %1$s</string>
     <string name="status_downloading">Téléchargement : %1$d/%2$d (%3$s)</string>
@@ -93,9 +95,9 @@
 
     <!-- Settings screen -->
     <string name="settings_activity_title">Paramètres</string>
-    <string name="section_w2k2_boat">W2K-2 et bateau</string>
-    <string name="label_w2k2_user">Nom d\'utilisateur W2K-2</string>
-    <string name="label_w2k2_password">Mot de passe W2K-2</string>
+    <string name="section_w2k2_boat">Actisense W2K-2 et bateau</string>
+    <string name="label_w2k2_user">Nom d\'utilisateur de l\'Actisense W2K-2 (de l\'appareil lui-même)</string>
+    <string name="label_w2k2_password">Mot de passe de l\'Actisense W2K-2 (de l\'appareil lui-même)</string>
     <string name="label_boat_name">Nom du bateau</string>
     <string name="label_mmsi">MMSI</string>
     <string name="label_call_sign">Indicatif d\'appel</string>
@@ -117,7 +119,7 @@
     <string name="button_help">Aide et mode d\'emploi</string>
     <string name="help_activity_title">Aide</string>
     <string name="dialog_help_title">Bienvenue</string>
-    <string name="dialog_help_message">Un court guide explique comment se connecter au W2K-2 et à quoi servent les boutons. Ouvrir maintenant ? Vous le retrouverez toujours dans les réglages.</string>
+    <string name="dialog_help_message">Un court guide explique comment se connecter à l\'Actisense W2K-2 et à quoi servent les boutons. Ouvrir maintenant ? Vous le retrouverez toujours dans les réglages.</string>
     <string name="dialog_help_read">Lire le guide</string>
     <string name="dialog_help_later">Plus tard</string>
     <string name="section_cache">Vider le cache</string>
