@@ -26,7 +26,7 @@
     <string name="log_fill_w2k2_credentials">Fill in the Actisense W2K-2 username and password via Settings first.</string>
     <string name="status_checking_hotspot">Checking network...</string>
     <string name="status_hotspot_off">No private network detected (or the W2K-2 isn\'t on it) -- turn on your hotspot, or join the same network as the W2K-2, to download.</string>
-    <string name="status_listing_files">Fetching file list (subnet %1$s0/24)...</string>
+    <string name="status_listing_files">Fetching file list (subnet %1$s1-254)...</string>
     <string name="log_sync_done_at">Done: %1$s</string>
     <string name="notif_sync_done_at">Done %1$s</string>
     <string name="error_unexpected_sync">Unexpected error during download: %1$s</string>
@@ -34,6 +34,7 @@
     <string name="log_no_ebl_files_to_build">No .ebl files on this device yet -- nothing to assemble.</string>
     <string name="log_publish_not_configured">No publish destination configured -- publish button disabled.</string>
     <string name="log_w2k2_not_configured">Actisense W2K-2 username and password not filled in (see Settings) -- download and boat mode buttons disabled.</string>
+    <string name="log_local_network_denied">Access to the local network was not allowed, so the W2K-2 cannot be reached. Allow it in the phone\'s settings: Apps &gt; My Sailing Logbook &gt; Permissions &gt; Nearby devices.</string>
     <string name="log_fill_publish_settings">Fill in the publish settings (WordPress) via Settings first.</string>
     <string name="log_ebl_files_location">The .ebl files are stored in: %1$s</string>
     <string name="status_downloading">Downloading: %1$d/%2$d (%3$s)</string>

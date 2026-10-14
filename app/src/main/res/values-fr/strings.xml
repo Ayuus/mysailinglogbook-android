@@ -18,7 +18,7 @@
     <string name="log_fill_w2k2_credentials">Renseignez d\'abord le nom d\'utilisateur et le mot de passe de l\'Actisense W2K-2 dans les Paramètres.</string>
     <string name="status_checking_hotspot">Vérification du réseau...</string>
     <string name="status_hotspot_off">Aucun réseau privé détecté (ou le W2K-2 n\'y est pas connecté) -- activez votre point d\'accès, ou rejoignez le même réseau que le W2K-2, pour télécharger.</string>
-    <string name="status_listing_files">Récupération de la liste des fichiers (sous-réseau %1$s0/24)...</string>
+    <string name="status_listing_files">Récupération de la liste des fichiers (sous-réseau %1$s1-254)...</string>
     <string name="log_sync_done_at">Terminé : %1$s</string>
     <string name="notif_sync_done_at">Terminé %1$s</string>
     <string name="error_unexpected_sync">Erreur inattendue pendant le téléchargement : %1$s</string>
@@ -26,6 +26,7 @@
     <string name="log_no_ebl_files_to_build">Aucun fichier .ebl sur cet appareil pour l\'instant -- rien à assembler.</string>
     <string name="log_publish_not_configured">Aucune destination de publication configurée -- bouton de publication désactivé.</string>
     <string name="log_w2k2_not_configured">Nom d\'utilisateur et mot de passe de l\'Actisense W2K-2 non renseignés (voir Paramètres) -- boutons de téléchargement et du mode bateau désactivés.</string>
+    <string name="log_local_network_denied">L\'accès au réseau local n\'a pas été autorisé, le W2K-2 est donc inaccessible. Autorisez-le dans les réglages du téléphone : Applications &gt; My Sailing Logbook &gt; Autorisations &gt; Appareils à proximité.</string>
     <string name="log_fill_publish_settings">Renseignez d\'abord les paramètres de publication (WordPress) dans les Paramètres.</string>
     <string name="log_ebl_files_location">Les fichiers .ebl se trouvent dans : %1$s</string>
     <string name="status_downloading">Téléchargement : %1$d/%2$d (%3$s)</string>

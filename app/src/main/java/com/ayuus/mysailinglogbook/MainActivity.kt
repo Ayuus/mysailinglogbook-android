@@ -94,8 +94,32 @@ class MainActivity : AppCompatActivity() {
     // just starved).
     private var manualRunWakeLock: PowerManager.WakeLock? = null
 
+    // True while the system's notification dialog is open (shown right at the first start): a second permission dialog on
+    // top of it would cancel it, so the local network one (see ensureLocalNetworkPermission()) waits for it.
+    private var notificationPermissionPending = false
+
     private val notificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* no-op either way */ }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            notificationPermissionPending = false
+            if (afterLocalNetworkPermission != null) localNetworkPermissionLauncher.launch(LocalNetworkPermission.NAME)
+        }
+
+    // What to carry on with once the local network permission has been answered (see ensureLocalNetworkPermission()).
+    private var afterLocalNetworkPermission: (() -> Unit)? = null
+
+    private val localNetworkPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val carryOn = afterLocalNetworkPermission
+            afterLocalNetworkPermission = null
+            if (granted) {
+                carryOn?.invoke()
+            } else {
+                // Said in the log like every other "cannot start" case, brought over a logbook that may be showing.
+                showingLocalLogbook = false
+                setLogExpanded(true)
+                handleLogLine("[info] " + getString(R.string.log_local_network_denied))
+            }
+        }
 
     // The system's own folder picker (Storage Access Framework): surfaces internal storage (from Android 11 on not its
     // top-level folders themselves, such as Download, but anything inside them), any
@@ -566,6 +590,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startBootMode() {
+        if (!ensureLocalNetworkPermission { startBootMode() }) return
         sendBootAction(BootModeService.ACTION_START)
         askBatteryOptimisationExemptionOnce()
     }
@@ -871,6 +896,7 @@ class MainActivity : AppCompatActivity() {
             handleLogLine("[info] " + getString(R.string.log_fill_w2k2_credentials))
             return
         }
+        if (!ensureLocalNetworkPermission { runDownload() }) return
 
         SyncState.inProgress = true
         SyncState.runInitiator = RunInitiator.DOWNLOAD
@@ -2545,11 +2571,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** The W2K-2 is a device on the local network, which Android 17 blocks until the user allows it (see
+     * LocalNetworkPermission). True when nothing needs asking; otherwise the system dialog is shown, [carryOn] runs if it is
+     * allowed and the log says so if it is not, and false is returned so the caller stops for now. */
+    private fun ensureLocalNetworkPermission(carryOn: () -> Unit): Boolean {
+        if (LocalNetworkPermission.isGranted(this)) return true
+        afterLocalNetworkPermission = carryOn
+        if (!notificationPermissionPending) localNetworkPermissionLauncher.launch(LocalNetworkPermission.NAME)
+        return false
+    }
+
     private fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val granted = ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             if (!granted) {
+                notificationPermissionPending = true
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }

@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- From Android 17 an app that targets it (this one does, targetSdk 37) is blocked from every device on the local network
+         unless the user has allowed this runtime permission (group "Nearby devices"): the W2K-2 on the boat's network is
+         exactly that. Older Android versions ignore it. See LocalNetworkPermission. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <!-- Required from API 33 to show the sync-in-progress notification. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Required to run SyncNotificationService as a foreground service, so its notification's

@@ -36,7 +36,13 @@ class W2kBootExecutor(
             var result = Probe(found = false, hasNewFiles = false)
             try {
                 val subnet = HotspotDetector.detectSubnetPrefix()
-                if (subnet != null && settings.isW2k2ConfigComplete) result = probe(subnet)
+                if (!LocalNetworkPermission.isGranted(context)) {
+                    // Allowed when the mode was started but taken away since: every connection would time out and read as
+                    // "no W2K-2 here", so say what is wrong instead.
+                    AppLog.post(context, "[info] " + context.getString(R.string.log_local_network_denied))
+                } else if (subnet != null && settings.isW2k2ConfigComplete) {
+                    result = probe(subnet)
+                }
             } catch (e: Exception) {
                 AppLog.post(context, "[warning] $e")
             }

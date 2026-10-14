@@ -18,7 +18,7 @@
     <string name="log_fill_w2k2_credentials">Tragen Sie zuerst den Benutzernamen und das Passwort des Actisense W2K-2 in den Einstellungen ein.</string>
     <string name="status_checking_hotspot">Netzwerk wird geprüft...</string>
     <string name="status_hotspot_off">Kein privates Netzwerk gefunden (oder der W2K-2 ist nicht darauf) -- schalte deinen Hotspot ein oder verbinde dich mit demselben Netzwerk wie der W2K-2, um herunterzuladen.</string>
-    <string name="status_listing_files">Dateiliste wird abgerufen (Subnetz %1$s0/24)...</string>
+    <string name="status_listing_files">Dateiliste wird abgerufen (Subnetz %1$s1-254)...</string>
     <string name="log_sync_done_at">Fertig: %1$s</string>
     <string name="notif_sync_done_at">Fertig %1$s</string>
     <string name="error_unexpected_sync">Unerwarteter Fehler während des Downloads: %1$s</string>
@@ -26,6 +26,7 @@
     <string name="log_no_ebl_files_to_build">Noch keine .ebl-Dateien auf diesem Gerät -- nichts zusammenzustellen.</string>
     <string name="log_publish_not_configured">Kein Veröffentlichungsziel eingerichtet -- Veröffentlichen-Schaltfläche deaktiviert.</string>
     <string name="log_w2k2_not_configured">Benutzername und Passwort des Actisense W2K-2 nicht eingetragen (siehe Einstellungen) -- Schaltflächen Herunterladen und Bootsmodus deaktiviert.</string>
+    <string name="log_local_network_denied">Der Zugriff auf das lokale Netzwerk wurde nicht erlaubt, daher ist das W2K-2 nicht erreichbar. Erlauben Sie ihn in den Telefoneinstellungen: Apps &gt; My Sailing Logbook &gt; Berechtigungen &gt; Geräte in der Nähe.</string>
     <string name="log_fill_publish_settings">Trage zuerst die Veröffentlichungseinstellungen (WordPress) in den Einstellungen ein.</string>
     <string name="log_ebl_files_location">Die .ebl-Dateien befinden sich in: %1$s</string>
     <string name="status_downloading">Wird heruntergeladen: %1$d/%2$d (%3$s)</string>
