@@ -48,8 +48,8 @@ android {
         applicationId = "com.ayuus.mysailinglogbook"
         minSdk = 24
         targetSdk = 37
-        versionCode = 19
-        versionName = "1.1.15"
+        versionCode = 20
+        versionName = "1.1.16"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -66,11 +66,22 @@ android {
             // with fictional data -- without touching the real app's logbook; also debuggable, so `adb shell run-as` can
             // reach its files.
             applicationIdSuffix = ".debug"
+            // `gradlew assembleDebug -PminifyDebug` builds this app minified like the release, to try R8 and its keep rules on a
+            // device without touching the real app (the release is signed with the release key and replaces it).
+            if (project.hasProperty("minifyDebug")) {
+                isDebuggable = false // R8 neither renames nor optimizes a debuggable build, which would prove nothing
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            }
         }
         release {
-            optimization {
-                enable = false
-            }
+            // R8: removes the code nothing uses (Play Console flagged the unused, deprecated edge-to-edge calls of Material's
+            // BottomSheetDialog/SheetDialog, which this app never opens) and renames the rest (Play wants at least 25% of the
+            // DEX obfuscated). The rules in proguard-rules.pro keep what Python calls by name.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // A no-op in practice, checked directly (the built AAB has no
             // BUNDLE-METADATA/com.android.tools.build.debugsymbols/ entry despite this): every
             // .so here (libpython/libchaquopy_java/...) is a pre-built third-party binary

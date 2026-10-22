@@ -47,6 +47,18 @@ overwrite it). Strings that only exist on Android stay here. `--check` reports d
 The defaults and constants both apps share (`app_settings.py`, `app_constants.py`) are written into
 `SharedConstants.kt` the same way: `python -m nmea2log.export_android_constants <path to SharedConstants.kt>`.
 
+## The release build is minified (R8)
+
+The release is built with R8 (`isMinifyEnabled` and `isShrinkResources` in `app/build.gradle.kts`): unused code is removed and the rest
+renamed. Python (Chaquopy) calls the methods of the objects the app hands over **by name**, which R8 cannot see, so
+`app/proguard-rules.pro` keeps `SyncController`, `ImportProgressCallback` and `BootProbeListener` and every class that implements them, with
+all their members: a method added to one of them is kept as well. **A new interface (or class) that is handed to Python must be added to
+`proguard-rules.pro`**: forgetting it breaks nothing at build time and fails at run time.
+
+To try R8 on a device without touching the real app: `gradlew assembleDebug -PminifyDebug` builds the `.debug` app minified and not
+debuggable. Check a download and the assemble that follows it, a boat mode round and the help; the log of such a run shows whether Python
+could still call the app. The release's `mapping.txt` is in the AAB (Play Console uses it for readable crash reports).
+
 ## Design choices worth knowing before changing this code
 
 **`autoStartSyncWithSettingsRetry()`'s own "vul W2K-2-gegevens in" line is not a startup nag --
