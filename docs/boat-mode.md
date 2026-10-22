@@ -80,7 +80,7 @@ All in Settings, under "Boat mode":
 ## What a round actually does
 
 A round is the exact same work a manual download does -- find the W2K-2, download new `.ebl` files,
-decode and assemble the logbook -- through the same `nmea2log.android_entry.sync_from_w2k2()` call and
+decode and assemble the logbook -- through the same `nmea2log.app_entry.sync_from_w2k2()` call and
 the same log lines, notification progress text (`Downloading: x/y (...)`, `Assembling logbook: x/y`,
 `Assembling trips: x/4`) and string resources a manual download uses (see `W2kBootExecutor.kt`). It is
 not a separate, differently-worded implementation. What *is* boat-mode-specific is the framing around

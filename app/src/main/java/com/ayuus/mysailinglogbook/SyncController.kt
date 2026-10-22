@@ -1,7 +1,7 @@
 package com.ayuus.mysailinglogbook
 
 /**
- * Passed into android_entry.sync_from_w2k2() via Chaquopy -- Python calls these methods on this
+ * Passed into app_entry.sync_from_w2k2() via Chaquopy -- Python calls these methods on this
  * object like normal Python methods (see MainActivity.syncFromW2k2()).
  *
  * report() is called after each file actually downloaded, so the UI can show real "current/total"
@@ -59,7 +59,7 @@ interface SyncController {
      *
      * tripCount/downloadedCount are -1 for Python's None (not applicable -- a failed run, or
      * build_from_local_files()'s own result, which never sets a downloaded count at all) rather
-     * than a nullable Int, matching how android_entry.py's own _report_result() sends them. */
+     * than a nullable Int, matching how app_entry.py's own _report_result() sends them. */
     fun onResult(
         ok: Boolean,
         error: String?,

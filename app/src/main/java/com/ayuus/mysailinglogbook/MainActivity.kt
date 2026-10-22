@@ -288,7 +288,7 @@ class MainActivity : AppCompatActivity() {
         // cancelSyncStayInApp()).
 
         // Shows the exact same "[info]"/"[ok]"/"[skip]"/"[warning]" lines the desktop CLI prints
-        // (see log.py's set_log_sink(), wired up in android_entry.py) -- the only progress/status
+        // (see log.py's set_log_sink(), wired up in app_entry.py) -- the only progress/status
         // surface left in the app itself (asked for explicitly: a separate one-line statusView
         // banner used to sit above this, but it kept ending up saying much the same thing as
         // whatever the log already showed right below it).
@@ -804,7 +804,7 @@ class MainActivity : AppCompatActivity() {
             // asked for explicitly: always trying (and usually failing, away from the boat) on
             // every single app launch used to mean a visible "Hotspot controleren..." cycle each
             // time, for no benefit when there was never any real chance of finding it. A real full
-            // download (see runDownload()) still does its own, more thorough discover_w2k2() scan, which can
+            // download (see runDownload()) still does its own, more thorough scan (connect_to_w2k2()), which can
             // still come back "not found" (the hotspot's on, but the W2K-2 itself never actually
             // joined it) -- that outcome (and this cheap check's own, right below) is always a
             // quiet log line + notification rather than a popup, auto-started or manual alike.
@@ -944,7 +944,7 @@ class MainActivity : AppCompatActivity() {
                 // This specific check is pure Kotlin (HotspotDetector, no Python/Chaquopy call
                 // involved at all), unlike the "No W2K-2 found on <subnet>" case a few lines
                 // further down in this same Thread -- that one already gets a log line for free,
-                // from discover_w2k2()'s own log() calls in Python. This one didn't have an
+                // from the Python side (its "No W2K-2 found on <subnet>" result). This one didn't have an
                 // equivalent until now, so it's added explicitly here to match.
                 handleLogLine("[info] $message")
                 withActiveActivity {
@@ -1214,15 +1214,15 @@ class MainActivity : AppCompatActivity() {
         return result
     }
 
-    /** Runs android_entry.sync_from_w2k2() via Chaquopy -- one Python call does discovery,
-     * download, and the decode/build/write pipeline (see android_entry.py for why this isn't
+    /** Runs app_entry.sync_from_w2k2() via Chaquopy -- one Python call does discovery,
+     * download, and the decode/build/write pipeline (see app_entry.py for why this isn't
      * split into several separate Chaquopy calls). Must be called off the main thread: Python
      * startup plus decoding real multi-MB .ebl files easily takes several seconds (found in
      * practice during spike 3 -- ANR otherwise). */
     private fun syncFromW2k2(subnetPrefix: String): SyncResult {
         PythonStarter.ensureStarted(this)
         val py = Python.getInstance()
-        val androidEntry = py.getModule("nmea2log.android_entry")
+        val androidEntry = py.getModule("nmea2log.app_entry")
 
         val downloadDir = eblDownloadDir()
         val syncStartedAt = System.currentTimeMillis()
@@ -1233,7 +1233,7 @@ class MainActivity : AppCompatActivity() {
         // return value afterward -- see SyncController.onResult()'s own doc comment for why.
         var capturedResult: SyncResult? = null
 
-        // Called by Python between files (android_entry.py): report() lets the status text and
+        // Called by Python between files (app_entry.py): report() lets the status text and
         // notification show real "current/total" progress instead of one static message for
         // however long a sync takes (a first-ever sync fetches the whole historical archive,
         // easily several GB, found in practice); isCancelled() lets a sync stop cleanly once
@@ -1327,7 +1327,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         // onResult() is always called, unconditionally, right before sync_from_w2k2() returns
-        // (see android_entry.py's own _report_result()) -- this being null would mean that call
+        // (see app_entry.py's own _report_result()) -- this being null would mean that call
         // never happened at all, which callAttr() above returning normally already rules out.
         return capturedResult ?: SyncResult(
             ok = false, cancelled = false, error = getString(R.string.error_no_result),
@@ -2047,7 +2047,7 @@ class MainActivity : AppCompatActivity() {
 
     /** importButton's own handler (see importFolderLauncher): stages every .ebl file found under
      * the picked tree (see stageForImport() above), then hands the staged paths to nmea2log's
-     * shared import_ebl.import_staged_ebl_files() (via android_entry's JSON-wrapped
+     * shared import_ebl.import_staged_ebl_files() (via app_entry's JSON-wrapped
      * import_staged_ebl_files_json() -- see its own doc comment for why a JSON string, not the
      * raw dict, crosses the Chaquopy boundary here) -- that module owns the actual placement
      * (by year, preserving the source's own EBLnnnnnn structure), duplicate-skip and reformatted-
@@ -2271,7 +2271,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
                     }
-                    val resultJson = Python.getInstance().getModule("nmea2log.android_entry").callAttr(
+                    val resultJson = Python.getInstance().getModule("nmea2log.app_entry").callAttr(
                         "import_staged_ebl_files_json",
                         staged.map { it.absolutePath }.toTypedArray(),
                         actisenseDir.absolutePath,
@@ -2345,11 +2345,11 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-    /** Chaquopy call to android_entry.build_from_local_files() -- decode/build/write only, no
+    /** Chaquopy call to app_entry.build_from_local_files() -- decode/build/write only, no
      * discovery or download, over every .ebl file already present under eblDownloadDir(). */
     private fun buildFromLocalFiles(skipIfCurrent: Boolean = false): SyncResult {
         PythonStarter.ensureStarted(this)
-        val androidEntry = Python.getInstance().getModule("nmea2log.android_entry")
+        val androidEntry = Python.getInstance().getModule("nmea2log.app_entry")
 
         val downloadDir = eblDownloadDir()
         val outputHtmlPath = File(filesDir, SharedConstants.LOGBOOK_FILE_NAME)

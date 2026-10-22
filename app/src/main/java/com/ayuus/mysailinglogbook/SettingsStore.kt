@@ -71,7 +71,7 @@ class SettingsStore(context: Context) {
     // the real production values (not secret); user/password are never defaulted.
     // Minimum stationary duration (minutes) to count as a real port visit -- same threshold as
     // the desktop CLI's --min-stop-minutes, but a real app setting here instead of an ini value
-    // (there's no ini file on Android, see android_entry.py's run_pipeline docstring), asked for
+    // (there's no ini file on Android, see app_entry.py's run_pipeline docstring), asked for
     // explicitly. Stored as a Float (SharedPreferences has no Double getter/setter); Double at
     // the call site since that's what run_pipeline()'s own min_stop_minutes parameter expects.
     var minStopMinutes: Double

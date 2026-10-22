@@ -5,7 +5,7 @@ import com.chaquo.python.Python
 import org.json.JSONObject
 import java.io.File
 
-/** What android_entry.probe_w2k2() reports back, during its call (see there). */
+/** What app_entry.probe_w2k2() reports back, during its call (see there). */
 interface BootProbeListener {
     fun onProbeResult(found: Boolean, hasNewFiles: Boolean)
 }
@@ -159,7 +159,7 @@ class W2kBootExecutor(
 
     private fun entry() = run {
         PythonStarter.ensureStarted(context)
-        Python.getInstance().getModule("nmea2log.android_entry")
+        Python.getInstance().getModule("nmea2log.app_entry")
     }
 
     private class SyncOutcome(val ok: Boolean, val error: String?, val cancelled: Boolean, val downloadedCount: Int)

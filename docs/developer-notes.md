@@ -7,8 +7,8 @@ What to know before changing this code. The README is the user manual; this is t
 ```
 MainActivity (manual download + auto-start on launch)
   -> HotspotDetector           network detection: finds the phone's own private-network subnet (NetworkInterface enumeration)
-  -> android_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
-       -> w2k2_download.discover_w2k2()   scans that subnet for the W2K-2's HTTP API
+  -> app_entry.sync_from_w2k2()   [Chaquopy call into the real nmea2log package]
+       -> w2k2_download.connect_to_w2k2()   tries the W2K-2 used last time, else scans that subnet for the W2K-2's HTTP API
        -> w2k2_download.download_file()   downloads new/changed .ebl files
        -> run_pipeline()                  decode -> build_trips -> write_html_logbook()
   -> WebView shows the resulting logbook.html
@@ -19,7 +19,7 @@ The app calls these actions **download**, **assemble**, **publish** and **import
 sync or build (`SyncController`, `SyncState`, `sync_from_w2k2()`, `build_from_local_files()`, `HotspotDetector`): they are
 identifiers, not wording, and are not changed for the sake of it.
 
-- **`android_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
+- **`app_entry.py`** (in the nmea2log repo, not here) is the Chaquopy entry point. It mirrors
   what the desktop CLI's `_run()` does -- minus argument parsing and minus any upload, both of
   which are Kotlin's job on this platform -- and returns a plain `dict` a background thread can
   read, instead of relying on stderr text or an exit code the way the desktop CLI does.
@@ -27,7 +27,7 @@ identifiers, not wording, and are not changed for the sake of it.
   desktop (W2K-2 login, boat identity, WordPress publish settings) -- there is no config file on
   Android, values are entered once via `SettingsActivity`.
 - **`SyncController`** is the interface Kotlin implements and hands to
-  `android_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
+  `app_entry.sync_from_w2k2()` via Chaquopy, so Python can call back into it like a normal
   Python object: `report()` for per-file progress, `isCancelled()` to stop a download cleanly when the
   app closes, `onLogLine()` to mirror the desktop CLI's own `[info]`/`[ok]`/`[skip]`/`[warning]`
   messages verbatim in the UI, and `onDownloadComplete()` (see "The download notification is stopped as soon as downloading finishes" below).
@@ -73,7 +73,7 @@ unconditionally.
 mode's own search/probe) -- takes *any* interface with a private IPv4 address up, preferring an
 AP-named one if more than one is up at once but falling back to whatever matched otherwise. That's
 what makes phone-and-W2K-2-on-the-same-external-WiFi work exactly as well as the phone's own
-hotspot: neither this function nor the Python `discover_w2k2()` scan it feeds cares which one it
+hotspot: neither this function nor the Python `discover_w2k2_hosts()` scan it feeds cares which one it
 is, only that the phone is on *some* private subnet the W2K-2 might also be on.
 `isHotspotUp()` is the stricter one, and has exactly one caller: `shouldAutoStartBootMode()`. It
 only counts an AP-named interface (`ap_br_swlan0` on the test Samsung Galaxy S23; Android's docs
@@ -88,7 +88,7 @@ back".
 **There is no automatic reconnect or polling after a failed download.** When a download cannot find the W2K-2 (or fails), a
 dialog offers to assemble the logbook from what is already on the phone, or to close the app -- not an immediate retry,
 which out of range of the boat would just fail again and show the same dialog again. Finding the W2K-2 means
-scanning for the real device (`discover_w2k2()`), not just checking that the phone's own hotspot is on: the hotspot
+scanning for the real device (`connect_to_w2k2()`), not just checking that the phone's own hotspot is on: the hotspot
 commonly stays on while the W2K-2 itself drops off it (e.g. walking away from the boat). Boat mode does that scan on
 its own timer (its searches and rounds); a manual download does it once per tap.
 
@@ -123,7 +123,7 @@ closed. Reverse-geocoded into a place name the same way every trip's own depart/
 already is; falls back to plain coordinates when a lookup fails (see the geocoding paragraph below).
 
 **Geocoding, weather, and marine (wave/current) lookups are enabled by default on Android too**,
-same as the desktop CLI (see `android_entry.run_pipeline()`'s own doc comment) -- this changed
+same as the desktop CLI (see `app_entry.run_pipeline()`'s own doc comment) -- this changed
 since an earlier version of this README said otherwise. All three ride the phone's own internet
 connection, not the W2K-2's (which never needs internet at all); no settings toggle exists yet to
 turn them off for someone who'd rather save cellular data than see place names/weather/sea state

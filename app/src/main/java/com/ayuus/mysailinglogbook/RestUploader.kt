@@ -12,7 +12,7 @@ class RestUploadError(message: String, cause: Throwable? = null) : Exception(mes
  * nmea2log-remarks.php's /logbook route) by calling straight into upload.py's own
  * upload_via_rest() over Chaquopy, instead of reimplementing HTTP + Basic Auth here in Kotlin --
  * there's only one canonical implementation of this (Python's), same as every other part of the
- * download pipeline this app already shares with the desktop CLI via android_entry.py. A plain
+ * download pipeline this app already shares with the desktop CLI via app_entry.py. A plain
  * authenticated HTTP POST has nothing platform-specific about it worth duplicating.
  */
 object RestUploader {

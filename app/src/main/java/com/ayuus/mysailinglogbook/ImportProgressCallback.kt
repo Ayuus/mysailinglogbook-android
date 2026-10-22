@@ -1,6 +1,6 @@
 package com.ayuus.mysailinglogbook
 
-/** Chaquopy-visible callback for nmea2log.android_entry.import_staged_ebl_files_json(): called
+/** Chaquopy-visible callback for nmea2log.app_entry.import_staged_ebl_files_json(): called
  * once per file, right after (not before -- see import_ebl.py's own ImportProgressCallback doc
  * comment) its outcome is decided, during that same Python call -- the same "real work, then
  * report it, one file at a time" shape SyncController.report() already uses for a download, so
